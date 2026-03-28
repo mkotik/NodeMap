@@ -1,0 +1,1 @@
+- use scss, not module.scss. all scss should be scoped within the page so there are no naming conflicts.

@@ -72,13 +72,13 @@ function buildGraph(
   if (Object.keys(tree.nodes).length === 0)
     return { nodes: rfNodes, edges: rfEdges };
 
-  // Layout: walk each branch, position nodes
-  // Main branch goes straight down. Sub-branches offset to the right.
-  const positioned = new Set<string>();
+  // Layout constants
   const nodePositions: Record<string, { x: number; y: number }> = {};
   let globalNodeIndex = 0;
 
   const NODE_GAP = 60;
+  const NODE_WIDTH = 320;
+  const BRANCH_GAP = 80; // horizontal gap between branches
   const USER_NODE_HEIGHT = 50;
   const AI_NODE_BASE_HEIGHT = 120;
   const AI_CHARS_PER_LINE = 40;
@@ -92,16 +92,60 @@ function buildGraph(
     const displayText = text.length > 180 ? text.slice(0, 180) : text;
     const lines = Math.ceil(displayText.length / AI_CHARS_PER_LINE);
     let height = AI_NODE_BASE_HEIGHT + lines * AI_LINE_HEIGHT;
-    // Account for fork chips row
     const forks = getBranchesFromNode(tree, nodeId);
     if (forks.length > 0) height += 40;
     return height;
   }
 
+  // Phase 1: Compute the total horizontal width each branch subtree needs.
+  // A branch's width = max(NODE_WIDTH, sum of child subtree widths + gaps)
+  const branchWidths: Record<string, number> = {};
+
+  function computeSubtreeWidth(branchId: string): number {
+    if (branchWidths[branchId] !== undefined) return branchWidths[branchId];
+
+    const branch = tree.branches[branchId];
+    if (!branch) {
+      branchWidths[branchId] = NODE_WIDTH;
+      return NODE_WIDTH;
+    }
+
+    // Collect all child branches that fork from any node in this branch
+    const childBranchGroups: string[][] = [];
+    for (const nodeId of branch.nodeIds) {
+      const forks = getBranchesFromNode(tree, nodeId);
+      if (forks.length > 0) {
+        childBranchGroups.push(forks.map((b) => b.id));
+      }
+    }
+
+    // This branch's own column is NODE_WIDTH.
+    // Each fork point spawns child branches that sit to the right.
+    // We need width = own column + all child subtrees.
+    let totalChildWidth = 0;
+    for (const group of childBranchGroups) {
+      for (const childId of group) {
+        totalChildWidth += computeSubtreeWidth(childId) + BRANCH_GAP;
+      }
+    }
+
+    const width = NODE_WIDTH + totalChildWidth;
+    branchWidths[branchId] = width;
+    return width;
+  }
+
+  computeSubtreeWidth(tree.mainBranchId);
+
+  // Phase 2: Position nodes using computed widths.
+  // Each branch lays out its own nodes vertically, then positions
+  // child branches to the right, allocating space based on their widths.
+  const positioned = new Set<string>();
+
   function layoutBranch(branchId: string, startX: number, startY: number) {
     const branch = tree.branches[branchId];
     if (!branch) return;
 
+    // Lay out this branch's own nodes vertically
     let y = startY;
     for (const nodeId of branch.nodeIds) {
       if (positioned.has(nodeId)) continue;
@@ -110,26 +154,24 @@ function buildGraph(
       y += estimateNodeHeight(nodeId) + NODE_GAP;
     }
 
-    // Layout child branches that fork from nodes in this branch
+    // Position child branches to the right of this branch's column
+    let childX = startX + NODE_WIDTH + BRANCH_GAP;
+
     for (const nodeId of branch.nodeIds) {
       const childBranches = getBranchesFromNode(tree, nodeId);
-      let branchOffset = 1;
-      for (const childBranch of childBranches) {
-        if (childBranch.id === branchId) continue;
-        const forkY = (nodePositions[nodeId]?.y ?? 0) + 280;
-        const forkX = startX + branchOffset * 400;
-        layoutBranch(childBranch.id, forkX, forkY);
-        branchOffset++;
-      }
-    }
+      if (childBranches.length === 0) continue;
 
-    // Also check the fork point for child branches (for main branch nodes that are fork points)
-    if (branch.forkPointId && tree.nodes[branch.forkPointId]) {
-      // Already handled above since fork points are nodes in the parent branch
+      const forkNodePos = nodePositions[nodeId];
+      const forkNodeHeight = estimateNodeHeight(nodeId);
+      const forkY = (forkNodePos?.y ?? 0) + forkNodeHeight + NODE_GAP;
+
+      for (const childBranch of childBranches) {
+        layoutBranch(childBranch.id, childX, forkY);
+        childX += computeSubtreeWidth(childBranch.id) + BRANCH_GAP;
+      }
     }
   }
 
-  // Start with main branch at origin
   layoutBranch(tree.mainBranchId, 0, 0);
 
   // Build React Flow nodes

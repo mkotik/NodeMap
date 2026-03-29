@@ -76,6 +76,22 @@ function buildGraph(
   const nodePositions: Record<string, { x: number; y: number }> = {};
   let globalNodeIndex = 0;
 
+  const NODE_GAP = 60;
+  const USER_NODE_HEIGHT = 50;
+  const AI_NODE_BASE_HEIGHT = 120;
+  const AI_CHARS_PER_LINE = 40;
+  const AI_LINE_HEIGHT = 18;
+
+  function estimateNodeHeight(nodeId: string): number {
+    const treeNode = tree.nodes[nodeId];
+    if (!treeNode) return AI_NODE_BASE_HEIGHT;
+    if (treeNode.message.role === "user") return USER_NODE_HEIGHT;
+    const text = getMessageText(treeNode.message);
+    const displayText = text.length > 180 ? text.slice(0, 180) : text;
+    const lines = Math.ceil(displayText.length / AI_CHARS_PER_LINE);
+    return AI_NODE_BASE_HEIGHT + lines * AI_LINE_HEIGHT;
+  }
+
   function layoutBranch(branchId: string, startX: number, startY: number) {
     const branch = tree.branches[branchId];
     if (!branch) return;
@@ -84,10 +100,8 @@ function buildGraph(
     for (const nodeId of branch.nodeIds) {
       if (positioned.has(nodeId)) continue;
       positioned.add(nodeId);
-      const treeNode = tree.nodes[nodeId];
-      const isUser = treeNode?.message.role === "user";
-      nodePositions[nodeId] = { x: isUser ? startX + 40 : startX, y };
-      y += isUser ? 100 : 280;
+      nodePositions[nodeId] = { x: startX, y };
+      y += estimateNodeHeight(nodeId) + NODE_GAP;
     }
 
     // Layout child branches that fork from nodes in this branch

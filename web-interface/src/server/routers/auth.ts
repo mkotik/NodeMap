@@ -2,10 +2,10 @@ import { z } from "zod";
 import crypto from "crypto";
 import { TRPCError } from "@trpc/server";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
-import { prisma } from "@/lib/prisma";
-import { hashPassword, comparePassword } from "@/lib/password";
-import { signAccessToken, signRefreshToken, verifyRefreshToken } from "@/lib/jwt";
-import { verifyGoogleToken } from "@/lib/google";
+import { prisma } from "@/server/lib/prisma";
+import { hashPassword, comparePassword } from "@/server/lib/password";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "@/server/lib/jwt";
+import { verifyGoogleToken } from "@/server/lib/google";
 
 const REFRESH_MAX_AGE = 7 * 24 * 60 * 60;
 

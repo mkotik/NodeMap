@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { cookies, headers } from "next/headers";
-import { verifyAccessToken } from "@/lib/jwt";
+import { verifyAccessToken } from "@/server/lib/jwt";
 
 export async function createContext() {
   const headerStore = await headers();

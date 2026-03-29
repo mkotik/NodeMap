@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import "./Sidebar.scss";
 
 export default function Sidebar() {
-  const { setMessages } = useChatContext();
+  const { resetAll } = useChatContext();
   const { user, logout } = useAuth();
 
   return (
@@ -19,7 +19,7 @@ export default function Sidebar() {
         <button
           className="sidebar__new-chat"
           type="button"
-          onClick={() => setMessages([])}
+          onClick={resetAll}
         >
           <svg
             width="14"

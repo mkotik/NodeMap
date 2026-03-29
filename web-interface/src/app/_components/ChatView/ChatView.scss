@@ -190,6 +190,90 @@
   flex-direction: column;
   min-height: 0;
 
+  &__branch-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $space-3 $space-8;
+    background: $surface-container-low;
+  }
+
+  &__branch-indicator {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    @include type-label($label-md);
+    font-weight: $weight-semibold;
+
+    &--primary {
+      color: $primary;
+    }
+
+    &--secondary {
+      color: $secondary;
+    }
+
+    &--tertiary {
+      color: $tertiary;
+    }
+  }
+
+  &__back-btn {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    background: none;
+    border: none;
+    color: $on-surface-variant;
+    font-family: $font-body;
+    font-size: $body-sm;
+    font-weight: $weight-medium;
+    cursor: pointer;
+    padding: $space-2 $space-3;
+    border-radius: $radius-md;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container;
+      color: $on-surface;
+    }
+  }
+
+  &__label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $space-2;
+  }
+
+  &__branch-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: $radius-md;
+    background: transparent;
+    color: $outline;
+    cursor: pointer;
+    opacity: 0;
+    @include surface-transition;
+    transition:
+      opacity $transition-fast,
+      background-color $transition-default,
+      color $transition-default;
+  }
+
+  &__message:hover &__branch-action {
+    opacity: 1;
+  }
+
+  &__branch-action:hover {
+    background: $surface-container-high;
+    color: $primary;
+  }
+
   &__messages {
     flex: 1;
     overflow-y: auto;

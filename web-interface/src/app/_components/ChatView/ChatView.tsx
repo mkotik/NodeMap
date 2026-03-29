@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import type { UIMessage, ChatStatus } from "ai";
+import type { Branch } from "@/types/branch";
 import Markdown from "react-markdown";
 import "./ChatView.scss";
 
@@ -32,6 +33,11 @@ interface ChatViewProps {
   messages: UIMessage[];
   status: ChatStatus;
   onSend: (text: string) => void;
+  activeBranch: Branch;
+  isMainBranch: boolean;
+  onCreateBranch: (fromMessageId: string) => void;
+  onSwitchBranch: (branchId: string) => void;
+  onReturnToMain: () => void;
 }
 
 function getMessageText(msg: UIMessage): string {
@@ -48,7 +54,15 @@ function getLabel(role: string, index: number): string {
   return index === 0 ? "User Request" : "Follow Up";
 }
 
-export default function ChatView({ messages, status, onSend }: ChatViewProps) {
+export default function ChatView({
+  messages,
+  status,
+  onSend,
+  activeBranch,
+  isMainBranch,
+  onCreateBranch,
+  onReturnToMain,
+}: ChatViewProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isStreaming = status === "submitted" || status === "streaming";
@@ -165,6 +179,30 @@ export default function ChatView({ messages, status, onSend }: ChatViewProps) {
 
   return (
     <div className="chat-view-thread">
+      {!isMainBranch && (
+        <div className="chat-view-thread__branch-bar">
+          <div className={`chat-view-thread__branch-indicator chat-view-thread__branch-indicator--${activeBranch.color}`}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="6" y1="3" x2="6" y2="15" />
+              <circle cx="18" cy="6" r="3" />
+              <circle cx="6" cy="18" r="3" />
+              <path d="M18 9a9 9 0 0 1-9 9" />
+            </svg>
+            {activeBranch.label}
+          </div>
+          <button
+            className="chat-view-thread__back-btn"
+            type="button"
+            onClick={onReturnToMain}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Main Thread
+          </button>
+        </div>
+      )}
+
       <div className="chat-view-thread__messages">
         <div className="chat-view-thread__messages-inner">
           {messages.map((msg, i) => {
@@ -182,11 +220,28 @@ export default function ChatView({ messages, status, onSend }: ChatViewProps) {
                   />
                 </div>
                 <div className="chat-view-thread__message-body">
-                  <span
-                    className={`chat-view-thread__label chat-view-thread__label--${isAi ? "ai" : "user"}`}
-                  >
-                    {getLabel(msg.role, i)}
-                  </span>
+                  <div className="chat-view-thread__label-row">
+                    <span
+                      className={`chat-view-thread__label chat-view-thread__label--${isAi ? "ai" : "user"}`}
+                    >
+                      {getLabel(msg.role, i)}
+                    </span>
+                    {!isStreaming && (
+                      <button
+                        className="chat-view-thread__branch-action"
+                        type="button"
+                        onClick={() => onCreateBranch(msg.id)}
+                        title="Create branch from this point"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="6" y1="3" x2="6" y2="15" />
+                          <circle cx="18" cy="6" r="3" />
+                          <circle cx="6" cy="18" r="3" />
+                          <path d="M18 9a9 9 0 0 1-9 9" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                   <div
                     className={`chat-view-thread__bubble chat-view-thread__bubble--${isAi ? "ai" : "user"}`}
                   >

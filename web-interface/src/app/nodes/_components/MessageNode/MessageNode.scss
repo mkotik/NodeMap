@@ -6,7 +6,7 @@
   background: $surface-container;
   border-radius: $radius-md;
   padding: $space-5 $space-6;
-  cursor: grab;
+  cursor: default;
   @include surface-transition;
 
   &:hover {
@@ -19,6 +19,10 @@
     &:hover {
       background: $surface-container;
     }
+  }
+
+  &--active {
+    box-shadow: 0 0 24px rgba($primary, 0.08);
   }
 
   &__handle {
@@ -47,12 +51,23 @@
       box-shadow: 0 0 8px rgba($primary, 0.5);
     }
 
+    &--secondary {
+      background: $secondary;
+      box-shadow: 0 0 8px rgba($secondary, 0.5);
+    }
+
+    &--tertiary {
+      background: $tertiary;
+      box-shadow: 0 0 8px rgba($tertiary, 0.5);
+    }
+
     &--muted {
       background: $outline;
     }
   }
 
   &__label {
+    flex: 1;
     @include type-label($label-sm);
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -66,6 +81,34 @@
     }
   }
 
+  &__branch-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: $radius-sm;
+    background: transparent;
+    color: $outline;
+    cursor: pointer;
+    opacity: 0;
+    @include surface-transition;
+    transition:
+      opacity $transition-fast,
+      background-color $transition-default,
+      color $transition-default;
+  }
+
+  &:hover &__branch-btn {
+    opacity: 1;
+  }
+
+  &__branch-btn:hover {
+    background: $surface-container-highest;
+    color: $primary;
+  }
+
   &__content {
     p {
       @include type-body-ai;
@@ -73,6 +116,74 @@
       font-size: $body-sm;
       line-height: $leading-normal;
       color: $on-surface-variant;
+    }
+  }
+
+  &__forks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    margin-top: $space-3;
+    padding-top: $space-3;
+  }
+
+  &__fork-chip {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+    padding: $space-1 $space-3;
+    border: none;
+    border-radius: $radius-full;
+    font-family: $font-body;
+    font-size: $label-sm;
+    font-weight: $weight-medium;
+    cursor: pointer;
+    @include surface-transition;
+
+    &--primary {
+      background: rgba($primary, 0.1);
+      color: $primary;
+
+      &:hover {
+        background: rgba($primary, 0.2);
+      }
+    }
+
+    &--secondary {
+      background: rgba($secondary, 0.1);
+      color: $secondary;
+
+      &:hover {
+        background: rgba($secondary, 0.2);
+      }
+    }
+
+    &--tertiary {
+      background: rgba($tertiary, 0.1);
+      color: $tertiary;
+
+      &:hover {
+        background: rgba($tertiary, 0.2);
+      }
+    }
+  }
+
+  &__fork-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: $radius-full;
+    flex-shrink: 0;
+
+    &--primary {
+      background: $primary;
+    }
+
+    &--secondary {
+      background: $secondary;
+    }
+
+    &--tertiary {
+      background: $tertiary;
     }
   }
 }

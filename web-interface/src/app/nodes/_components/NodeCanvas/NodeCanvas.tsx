@@ -14,19 +14,34 @@ import {
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import type { UIMessage } from "ai";
+import type { ConversationTree, BranchColor } from "@/types/branch";
+import { getBranchesFromNode } from "@/lib/tree";
 import MessageNode from "../MessageNode/MessageNode";
 import "./NodeCanvas.scss";
 
 interface NodeCanvasProps {
-  messages: UIMessage[];
+  tree: ConversationTree;
+  onCreateBranch: (nodeId: string) => void;
+  onSwitchBranch: (branchId: string) => void;
 }
 
 const nodeTypes: NodeTypes = {
   messageNode: MessageNode,
 };
 
-function getMessageText(msg: UIMessage): string {
+const BRANCH_COLOR_MAP: Record<BranchColor, string> = {
+  primary: "#69f6b8",
+  secondary: "#699cff",
+  tertiary: "#ac8aff",
+};
+
+const BRANCH_COLOR_DIM_MAP: Record<BranchColor, string> = {
+  primary: "#3a8a62",
+  secondary: "#3a5e99",
+  tertiary: "#6b5299",
+};
+
+function getMessageText(msg: { parts: Array<{ type: string; text?: string }> }): string {
   return msg.parts
     .filter((part): part is { type: "text"; text: string } => part.type === "text")
     .map((part) => part.text)
@@ -38,43 +53,135 @@ function getLabel(role: string, index: number): string {
   return index === 0 ? "User Request" : "Follow Up";
 }
 
-function buildGraph(messages: UIMessage[]): { nodes: Node[]; edges: Edge[] } {
-  const nodes: Node[] = messages.map((msg, i) => ({
-    id: msg.id,
-    type: "messageNode",
-    draggable: false,
-    position: { x: 0, y: i * 280 },
-    data: {
-      role: msg.role,
-      label: getLabel(msg.role, i),
-      content: getMessageText(msg),
-      isFirst: i === 0,
-      isLast: i === messages.length - 1,
-    },
-  }));
+function buildGraph(
+  tree: ConversationTree,
+  onCreateBranch: (nodeId: string) => void,
+  onSwitchBranch: (branchId: string) => void,
+): { nodes: Node[]; edges: Edge[] } {
+  const rfNodes: Node[] = [];
+  const rfEdges: Edge[] = [];
 
-  const edges: Edge[] = messages.slice(1).map((msg, i) => ({
-    id: `e-${messages[i].id}-${msg.id}`,
-    source: messages[i].id,
-    target: msg.id,
-    type: "smoothstep",
-    animated: true,
-    style: { stroke: "#69f6b8", strokeWidth: 1.5 },
-  }));
+  if (Object.keys(tree.nodes).length === 0) return { nodes: rfNodes, edges: rfEdges };
 
-  return { nodes, edges };
+  // Layout: walk each branch, position nodes
+  // Main branch goes straight down. Sub-branches offset to the right.
+  const positioned = new Set<string>();
+  const nodePositions: Record<string, { x: number; y: number }> = {};
+  let globalNodeIndex = 0;
+
+  function layoutBranch(branchId: string, startX: number, startY: number) {
+    const branch = tree.branches[branchId];
+    if (!branch) return;
+
+    let y = startY;
+    for (const nodeId of branch.nodeIds) {
+      if (positioned.has(nodeId)) continue;
+      positioned.add(nodeId);
+      nodePositions[nodeId] = { x: startX, y };
+      y += 280;
+    }
+
+    // Layout child branches that fork from nodes in this branch
+    for (const nodeId of branch.nodeIds) {
+      const childBranches = getBranchesFromNode(tree, nodeId);
+      let branchOffset = 1;
+      for (const childBranch of childBranches) {
+        if (childBranch.id === branchId) continue;
+        const forkY = (nodePositions[nodeId]?.y ?? 0) + 280;
+        const forkX = startX + branchOffset * 400;
+        layoutBranch(childBranch.id, forkX, forkY);
+        branchOffset++;
+      }
+    }
+
+    // Also check the fork point for child branches (for main branch nodes that are fork points)
+    if (branch.forkPointId && tree.nodes[branch.forkPointId]) {
+      // Already handled above since fork points are nodes in the parent branch
+    }
+  }
+
+  // Start with main branch at origin
+  layoutBranch(tree.mainBranchId, 0, 0);
+
+  // Build React Flow nodes
+  for (const [nodeId, treeNode] of Object.entries(tree.nodes)) {
+    const pos = nodePositions[nodeId] ?? { x: 0, y: globalNodeIndex * 280 };
+    const branch = tree.branches[treeNode.branchId];
+    const isActive = treeNode.branchId === tree.activeBranchId;
+    const forkBranches = getBranchesFromNode(tree, nodeId);
+
+    rfNodes.push({
+      id: nodeId,
+      type: "messageNode",
+      draggable: false,
+      position: pos,
+      data: {
+        role: treeNode.message.role,
+        label: getLabel(treeNode.message.role, globalNodeIndex),
+        content: getMessageText(treeNode.message),
+        isFirst: treeNode.parentId === null,
+        isLast: treeNode.childIds.length === 0,
+        branchColor: branch?.color ?? "primary",
+        isActiveBranch: isActive,
+        hasBranches: forkBranches.length > 0,
+        onCreateBranch: () => onCreateBranch(nodeId),
+        onSwitchBranch,
+        forkBranches: forkBranches.map((b) => ({ id: b.id, label: b.label, color: b.color })),
+      },
+    });
+    globalNodeIndex++;
+  }
+
+  // Build edges from parent→child relationships
+  for (const [nodeId, treeNode] of Object.entries(tree.nodes)) {
+    for (const childId of treeNode.childIds) {
+      const childNode = tree.nodes[childId];
+      if (!childNode) continue;
+      const childBranch = tree.branches[childNode.branchId];
+      const color = childBranch?.color ?? "primary";
+      const isActive =
+        childNode.branchId === tree.activeBranchId ||
+        treeNode.branchId === tree.activeBranchId;
+
+      rfEdges.push({
+        id: `e-${nodeId}-${childId}`,
+        source: nodeId,
+        target: childId,
+        type: "smoothstep",
+        animated: isActive,
+        style: {
+          stroke: isActive
+            ? BRANCH_COLOR_MAP[color]
+            : BRANCH_COLOR_DIM_MAP[color],
+          strokeWidth: isActive ? 1.5 : 1,
+        },
+      });
+    }
+  }
+
+  return { nodes: rfNodes, edges: rfEdges };
 }
 
-export default function NodeCanvas({ messages }: NodeCanvasProps) {
-  const graph = useMemo(() => buildGraph(messages), [messages]);
+export default function NodeCanvas({ tree, onCreateBranch, onSwitchBranch }: NodeCanvasProps) {
+  const graph = useMemo(
+    () => buildGraph(tree, onCreateBranch, onSwitchBranch),
+    [tree, onCreateBranch, onSwitchBranch],
+  );
   const [nodes, , onNodesChange] = useNodesState(graph.nodes);
   const [edges, , onEdgesChange] = useEdgesState(graph.edges);
 
-  const onInit = useCallback((instance: { fitView: () => void }) => {
-    setTimeout(() => instance.fitView(), 50);
-  }, []);
+  const nodeCount = Object.keys(tree.nodes).length;
 
-  if (messages.length === 0) {
+  const onInit = useCallback(
+    (instance: { fitView: (options?: { padding?: number; maxZoom?: number }) => void }) => {
+      setTimeout(() => {
+        instance.fitView({ padding: 0.3, maxZoom: 1 });
+      }, 50);
+    },
+    [],
+  );
+
+  if (nodeCount === 0) {
     return (
       <div className="node-canvas node-canvas--empty">
         <div className="node-canvas__empty-state">
@@ -93,7 +200,6 @@ export default function NodeCanvas({ messages }: NodeCanvasProps) {
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         onInit={onInit}
-        fitView
         minZoom={0.1}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}

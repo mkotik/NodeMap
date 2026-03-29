@@ -89,7 +89,11 @@ function buildGraph(
     const text = getMessageText(treeNode.message);
     const displayText = text.length > 180 ? text.slice(0, 180) : text;
     const lines = Math.ceil(displayText.length / AI_CHARS_PER_LINE);
-    return AI_NODE_BASE_HEIGHT + lines * AI_LINE_HEIGHT;
+    let height = AI_NODE_BASE_HEIGHT + lines * AI_LINE_HEIGHT;
+    // Account for fork chips row
+    const forks = getBranchesFromNode(tree, nodeId);
+    if (forks.length > 0) height += 40;
+    return height;
   }
 
   function layoutBranch(branchId: string, startX: number, startY: number) {

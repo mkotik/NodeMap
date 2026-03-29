@@ -35,6 +35,7 @@ export default function MessageNode({ data }: { data: MessageNodeData }) {
         <Handle
           type="target"
           position={Position.Top}
+          isConnectable={false}
           className="msg-node__handle"
         />
       )}
@@ -105,6 +106,7 @@ export default function MessageNode({ data }: { data: MessageNodeData }) {
       <Handle
         type="source"
         position={Position.Bottom}
+        isConnectable={false}
         className="msg-node__handle"
       />
     </div>

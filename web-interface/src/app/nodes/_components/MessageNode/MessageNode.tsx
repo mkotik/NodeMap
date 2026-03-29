@@ -2,6 +2,7 @@
 
 import { Handle, Position } from "@xyflow/react";
 import type { BranchColor } from "@/types/branch";
+import Markdown from "react-markdown";
 import "./MessageNode.scss";
 
 interface ForkBranch {
@@ -75,11 +76,11 @@ export default function MessageNode({ data }: { data: MessageNodeData }) {
       </div>
 
       <div className="msg-node__content">
-        <p>
+        <Markdown>
           {data.content.length > 180
             ? data.content.slice(0, 180) + "..."
             : data.content}
-        </p>
+        </Markdown>
       </div>
 
       {data.forkBranches.length > 0 && (

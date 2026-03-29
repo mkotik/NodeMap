@@ -1,0 +1,40 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+// Section 5.2 — Branching buttons
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  padding: $space-2 $space-4;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-size: $body-md;
+  font-weight: $weight-medium;
+  cursor: pointer;
+  border: none;
+  @include surface-transition;
+}
+
+// Primary — "Generate New Path"
+.primary {
+  background: $primary-container;
+  color: $on-primary-container;
+
+  &:hover {
+    background: rgba($primary, 0.2);
+  }
+}
+
+// Ghost — "Minor Edit"
+.ghost {
+  background: transparent;
+  color: $primary;
+  border: 1px solid rgba($outline, 0.2);
+
+  &:hover {
+    background: rgba($primary, 0.08);
+    border-color: rgba($primary, 0.3);
+  }
+}

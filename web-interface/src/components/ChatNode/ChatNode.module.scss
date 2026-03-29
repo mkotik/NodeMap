@@ -1,0 +1,22 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+// Section 5.1 — No borders, background stacking, md radius
+.node {
+  background: $surface-container-low;
+  border-radius: $radius-md;
+  padding: $space-6;
+  @include surface-transition;
+
+  &:hover {
+    background: $surface-container-highest;
+  }
+}
+
+.ai {
+  @include type-body-ai;
+}
+
+.user {
+  @include type-body-user;
+}

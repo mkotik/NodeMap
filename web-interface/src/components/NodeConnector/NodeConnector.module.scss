@@ -1,0 +1,48 @@
+@use "../../styles/tokens" as *;
+
+// Section 5.3 — Curved SVG paths connecting nodes
+.connector {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.path {
+  fill: none;
+  stroke: $outline;
+  stroke-width: $connector-width;
+  transition: stroke $transition-default;
+}
+
+// Branch colors
+.primary.active {
+  stroke: $primary;
+}
+
+.secondary.active {
+  stroke: $secondary;
+}
+
+.tertiary.active {
+  stroke: $tertiary;
+}
+
+// Animated gradient stroke for active paths
+.active {
+  stroke-width: 1px;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}

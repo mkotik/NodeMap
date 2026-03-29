@@ -1,0 +1,38 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+// Section 5.4 — Minimalist, bottom-border-only input
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.label {
+  @include type-label;
+}
+
+.input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba($outline-variant, 0.15);
+  padding: $space-2 0;
+  font-family: $font-body;
+  font-size: $body-md;
+  color: $on-surface;
+  outline: none;
+  transition:
+    border-color $transition-default,
+    background-color $transition-default,
+    box-shadow $transition-default;
+
+  &:focus {
+    border-bottom-color: $primary;
+    background: $surface-container-lowest;
+    box-shadow: 0 1px 0 0 $primary;
+  }
+
+  &::placeholder {
+    color: $outline;
+  }
+}

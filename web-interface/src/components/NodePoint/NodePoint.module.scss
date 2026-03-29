@@ -1,0 +1,41 @@
+@use "../../styles/tokens" as *;
+
+// Section 5.5 — 8px circle at branch start/end
+.point {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  transition:
+    background-color $transition-default,
+    box-shadow $transition-default;
+}
+
+// Inactive states — dimmed
+.primary {
+  background: $primary-dim;
+}
+
+.secondary {
+  background: $secondary-dim;
+}
+
+.tertiary {
+  background: $tertiary-dim;
+}
+
+// Active states — full color + glow
+.primary.active {
+  background: $primary;
+  box-shadow: $shadow-node-glow-primary;
+}
+
+.secondary.active {
+  background: $secondary;
+  box-shadow: $shadow-node-glow-secondary;
+}
+
+.tertiary.active {
+  background: $tertiary;
+  box-shadow: $shadow-node-glow-tertiary;
+}

@@ -1,0 +1,126 @@
+// =============================================================================
+// Design Tokens — "The Living Logic"
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Surface & Foundation ("Deep Space" palette)
+// -----------------------------------------------------------------------------
+$surface-container-lowest: #030812;
+$surface: #060e20;
+$surface-container-low: #091328;
+$surface-container: #0f1930;
+$surface-container-high: #141f38;
+$surface-container-highest: #1a2548;
+
+// -----------------------------------------------------------------------------
+// On-Surface (text & icon colors on dark backgrounds)
+// -----------------------------------------------------------------------------
+$on-surface: #dee5ff;
+$on-surface-variant: #b0b8d1;
+
+// -----------------------------------------------------------------------------
+// Branch Accents (light sources, not flat UI)
+// -----------------------------------------------------------------------------
+
+// Primary Path — Emerald Green
+$primary: #69f6b8;
+$primary-dim: #3a8a62;
+$primary-container: #0f2e1f;
+$on-primary-container: #b0ffd9;
+
+// Alternative Path A — Electric Blue
+$secondary: #699cff;
+$secondary-dim: #3a5e99;
+$secondary-container: #0f1f3a;
+$on-secondary-container: #b0cfff;
+
+// Alternative Path B — Violet
+$tertiary: #ac8aff;
+$tertiary-dim: #6b5299;
+$tertiary-container: #1f0f3a;
+$on-tertiary-container: #d4c0ff;
+
+// -----------------------------------------------------------------------------
+// Outlines & Dividers
+// -----------------------------------------------------------------------------
+$outline: #6d758c;
+$outline-variant: #4a5168;
+
+// -----------------------------------------------------------------------------
+// Typography
+// -----------------------------------------------------------------------------
+
+// Font families (applied via CSS custom properties from next/font)
+$font-display: var(--font-manrope);
+$font-body: var(--font-inter);
+
+// Type scale
+$display-lg: 3.5rem; // 56px
+$display-md: 2.75rem; // 44px
+$display-sm: 2.25rem; // 36px
+$headline-lg: 2rem; // 32px
+$headline-md: 1.75rem; // 28px
+$headline-sm: 1.5rem; // 24px
+$body-lg: 1rem; // 16px — AI response
+$body-md: 0.875rem; // 14px — User input
+$body-sm: 0.75rem; // 12px
+$label-lg: 0.875rem; // 14px
+$label-md: 0.75rem; // 12px
+$label-sm: 0.6875rem; // 11px
+
+// Line heights
+$leading-tight: 1.2;
+$leading-normal: 1.5;
+$leading-relaxed: 1.75;
+
+// Font weights
+$weight-regular: 400;
+$weight-medium: 500;
+$weight-semibold: 600;
+$weight-bold: 700;
+
+// Letter spacing
+$tracking-tight: -0.02em;
+$tracking-normal: 0;
+$tracking-wide: 0.02em;
+
+// -----------------------------------------------------------------------------
+// Spacing (base unit: 0.25rem / 4px)
+// -----------------------------------------------------------------------------
+$space-1: 0.25rem; // 4px
+$space-2: 0.5rem; // 8px
+$space-3: 0.75rem; // 12px
+$space-4: 1rem; // 16px
+$space-5: 1.25rem; // 20px
+$space-6: 1.5rem; // 24px
+$space-8: 2rem; // 32px
+$space-10: 2.5rem; // 40px
+$space-12: 3rem; // 48px
+$space-16: 4rem; // 64px — structural whitespace
+
+// -----------------------------------------------------------------------------
+// Radii
+// -----------------------------------------------------------------------------
+$radius-sm: 0.25rem; // 4px
+$radius-md: 0.375rem; // 6px — chat nodes
+$radius-lg: 0.75rem; // 12px
+$radius-xl: 1rem; // 16px
+$radius-full: 9999px;
+
+// -----------------------------------------------------------------------------
+// Transitions
+// -----------------------------------------------------------------------------
+$transition-default: 300ms ease-in-out;
+$transition-fast: 150ms ease-in-out;
+
+// -----------------------------------------------------------------------------
+// Elevation (ambient glows, not drop shadows)
+// -----------------------------------------------------------------------------
+$shadow-ambient: 0 0 48px rgba($on-surface, 0.06);
+$shadow-node-glow-primary: 0 0 12px $primary;
+$shadow-node-glow-secondary: 0 0 12px $secondary;
+$shadow-node-glow-tertiary: 0 0 12px $tertiary;
+
+// Branch connector
+$connector-width: 0.5px;
+$connector-curve: cubic-bezier(0.4, 0, 0.2, 1);

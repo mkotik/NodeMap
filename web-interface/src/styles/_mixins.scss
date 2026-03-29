@@ -1,0 +1,99 @@
+@use "tokens" as *;
+
+// =============================================================================
+// Mixins — "The Living Logic"
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Glass & Gradient — floating panels (sidebars, inspectors)
+// -----------------------------------------------------------------------------
+@mixin glass-panel {
+  background: rgba($surface-container, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+// -----------------------------------------------------------------------------
+// Ambient Shadow — for floating modals
+// -----------------------------------------------------------------------------
+@mixin ambient-shadow {
+  box-shadow: $shadow-ambient;
+}
+
+// -----------------------------------------------------------------------------
+// Ghost Border — accessibility fallback divider
+// "Felt, not seen"
+// -----------------------------------------------------------------------------
+@mixin ghost-border($side: bottom) {
+  @if $side == all {
+    border: 1px solid rgba($outline-variant, 0.15);
+  } @else {
+    border-#{$side}: 1px solid rgba($outline-variant, 0.15);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Surface Transition — smooth 300ms color shifts
+// -----------------------------------------------------------------------------
+@mixin surface-transition {
+  transition:
+    background-color $transition-default,
+    box-shadow $transition-default;
+}
+
+// -----------------------------------------------------------------------------
+// Typography helpers
+// -----------------------------------------------------------------------------
+@mixin type-display($size: $display-md) {
+  font-family: $font-display;
+  font-size: $size;
+  font-weight: $weight-bold;
+  line-height: $leading-tight;
+  letter-spacing: $tracking-tight;
+  color: $on-surface;
+}
+
+@mixin type-headline($size: $headline-md) {
+  font-family: $font-display;
+  font-size: $size;
+  font-weight: $weight-semibold;
+  line-height: $leading-tight;
+  letter-spacing: $tracking-tight;
+  color: $on-surface;
+}
+
+@mixin type-body-ai {
+  font-family: $font-body;
+  font-size: $body-lg;
+  font-weight: $weight-regular;
+  line-height: $leading-relaxed;
+  color: $on-surface;
+}
+
+@mixin type-body-user {
+  font-family: $font-body;
+  font-size: $body-md;
+  font-weight: $weight-regular;
+  line-height: $leading-normal;
+  color: $on-surface;
+}
+
+@mixin type-label($size: $label-sm) {
+  font-family: $font-body;
+  font-size: $size;
+  font-weight: $weight-medium;
+  line-height: $leading-normal;
+  letter-spacing: $tracking-wide;
+  color: $outline;
+}
+
+// -----------------------------------------------------------------------------
+// Node Point glow (8px circle at branch start/end)
+// -----------------------------------------------------------------------------
+@mixin node-point-glow($color: $primary) {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  background: $color;
+  box-shadow: 0 0 12px $color;
+}

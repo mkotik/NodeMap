@@ -77,6 +77,9 @@
   }
 
   &__breadcrumb {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-1;
     font-family: $font-body;
     font-size: $body-sm;
     font-weight: $weight-medium;

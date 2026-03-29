@@ -63,6 +63,9 @@ export default function TopNav() {
               className="topnav__breadcrumb topnav__breadcrumb--primary"
             >
               Main Thread
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
             </Link>
           ) : (
             <span className="topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--primary">

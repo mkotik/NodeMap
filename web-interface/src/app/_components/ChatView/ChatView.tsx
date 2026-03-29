@@ -80,7 +80,7 @@ export default function ChatView({
     } else {
       inputRef.current?.focus();
     }
-  }, [isEmpty]);
+  }, [isEmpty, messages.length, _activeBranch.id]);
 
   function handleSubmit() {
     const trimmed = input.trim();

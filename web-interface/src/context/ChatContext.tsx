@@ -22,6 +22,7 @@ import {
   addNodeToBranch,
   getBranchMessageChain,
   createBranch as treeFnCreateBranch,
+  deleteBranch,
 } from "@/lib/tree";
 
 interface ChatContextValue {
@@ -40,6 +41,7 @@ interface ChatContextValue {
   switchBranch: (branchId: BranchId) => void;
   returnToMain: () => void;
   resetAll: () => void;
+  cleanupEmptyActiveBranch: () => void;
 
   // For legacy compat
   setMessages: (messages: UIMessage[]) => void;
@@ -96,6 +98,28 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [messages]);
 
   // -------------------------------------------------------------------
+  // Auto-delete the active branch if it has no messages and isn't main.
+  // Used when navigating away from the chat view of an empty branch.
+  // -------------------------------------------------------------------
+  const cleanupEmptyActiveBranch = useCallback(() => {
+    const current = treeRef.current;
+    const branch = current.branches[current.activeBranchId];
+    if (
+      !branch ||
+      current.activeBranchId === current.mainBranchId ||
+      branch.nodeIds.length > 0
+    ) {
+      return;
+    }
+
+    const next = structuredClone(current);
+    deleteBranch(next, next.activeBranchId);
+    next.activeBranchId = next.mainBranchId;
+    setTree(next);
+    switchChatToBranch(next, next.mainBranchId);
+  }, [switchChatToBranch]);
+
+  // -------------------------------------------------------------------
   // Create a branch from a specific node
   // -------------------------------------------------------------------
   const handleCreateBranch = useCallback(
@@ -104,6 +128,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       const prev = treeRef.current;
       const next = structuredClone(prev);
+
+      // Auto-delete the branch we're leaving if it's empty
+      const leaving = next.branches[next.activeBranchId];
+      if (leaving && next.activeBranchId !== next.mainBranchId && leaving.nodeIds.length === 0) {
+        deleteBranch(next, next.activeBranchId);
+      }
+
       const { branchId } = treeFnCreateBranch(next, forkFromNodeId);
       if (!branchId) return;
 
@@ -125,6 +156,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       if (!prev.branches[branchId]) return;
 
       const next = structuredClone(prev);
+
+      // Auto-delete the branch we're leaving if it's empty
+      const leaving = next.branches[next.activeBranchId];
+      if (leaving && next.activeBranchId !== next.mainBranchId && leaving.nodeIds.length === 0) {
+        deleteBranch(next, next.activeBranchId);
+      }
+
       next.activeBranchId = branchId;
       setTree(next);
       switchChatToBranch(next, branchId);
@@ -164,6 +202,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         switchBranch: handleSwitchBranch,
         returnToMain: handleReturnToMain,
         resetAll: handleResetAll,
+        cleanupEmptyActiveBranch,
         setMessages,
       }}
     >

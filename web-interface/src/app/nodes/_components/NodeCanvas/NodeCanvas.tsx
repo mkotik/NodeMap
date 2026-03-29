@@ -66,6 +66,13 @@ function buildGraph(
   if (Object.keys(tree.nodes).length === 0)
     return { nodes: rfNodes, edges: rfEdges };
 
+  // Helper: only return branches that have messages (hide empty/unused branches)
+  function getNonEmptyForks(nodeId: string) {
+    return getBranchesFromNode(tree, nodeId).filter(
+      (b) => b.nodeIds.length > 0,
+    );
+  }
+
   // Layout constants
   const nodePositions: Record<string, { x: number; y: number }> = {};
   let globalNodeIndex = 0;
@@ -86,7 +93,7 @@ function buildGraph(
     const displayText = text.length > 180 ? text.slice(0, 180) : text;
     const lines = Math.ceil(displayText.length / AI_CHARS_PER_LINE);
     let height = AI_NODE_BASE_HEIGHT + lines * AI_LINE_HEIGHT;
-    const forks = getBranchesFromNode(tree, nodeId);
+    const forks = getNonEmptyForks(nodeId);
     if (forks.length > 0) height += 40;
     return height;
   }
@@ -107,7 +114,7 @@ function buildGraph(
     // Collect all child branches that fork from any node in this branch
     const childBranchGroups: string[][] = [];
     for (const nodeId of branch.nodeIds) {
-      const forks = getBranchesFromNode(tree, nodeId);
+      const forks = getNonEmptyForks(nodeId);
       if (forks.length > 0) {
         childBranchGroups.push(forks.map((b) => b.id));
       }
@@ -152,7 +159,7 @@ function buildGraph(
     let childX = startX + NODE_WIDTH + BRANCH_GAP;
 
     for (const nodeId of branch.nodeIds) {
-      const childBranches = getBranchesFromNode(tree, nodeId);
+      const childBranches = getNonEmptyForks(nodeId);
       if (childBranches.length === 0) continue;
 
       const forkNodePos = nodePositions[nodeId];
@@ -187,7 +194,7 @@ function buildGraph(
         },
       });
     } else {
-      const forkBranches = getBranchesFromNode(tree, nodeId);
+      const forkBranches = getNonEmptyForks(nodeId);
       rfNodes.push({
         id: nodeId,
         type: "messageNode",

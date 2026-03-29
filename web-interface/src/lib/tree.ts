@@ -175,6 +175,29 @@ export function isForkPoint(tree: ConversationTree, nodeId: NodeId): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Delete a branch and its nodes from the tree (mutates)
+// ---------------------------------------------------------------------------
+export function deleteBranch(
+  tree: ConversationTree,
+  branchId: BranchId,
+): void {
+  const branch = tree.branches[branchId];
+  if (!branch || branchId === tree.mainBranchId) return;
+
+  for (const nodeId of branch.nodeIds) {
+    const node = tree.nodes[nodeId];
+    if (node?.parentId && tree.nodes[node.parentId]) {
+      tree.nodes[node.parentId].childIds = tree.nodes[
+        node.parentId
+      ].childIds.filter((id) => id !== nodeId);
+    }
+    delete tree.nodes[nodeId];
+  }
+
+  delete tree.branches[branchId];
+}
+
+// ---------------------------------------------------------------------------
 // Reset the tree completely
 // ---------------------------------------------------------------------------
 export function resetTree(): ConversationTree {

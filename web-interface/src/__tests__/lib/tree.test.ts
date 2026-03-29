@@ -5,6 +5,7 @@ import {
   addNodeToBranch,
   getBranchMessageChain,
   createBranch,
+  deleteBranch,
   getAncestorChain,
   getBranchesFromNode,
   isForkPoint,
@@ -220,6 +221,48 @@ describe("tree utilities", () => {
       createBranch(tree, "m2");
 
       expect(getBranchesFromNode(tree, "m2")).toHaveLength(2);
+    });
+  });
+
+  describe("deleteBranch", () => {
+    it("removes an empty branch from the tree", () => {
+      const tree = treeFromMessages([
+        makeMessage("m1", "user", "a"),
+        makeMessage("m2", "assistant", "b"),
+      ]);
+      const { branchId } = createBranch(tree, "m2");
+      expect(tree.branches[branchId]).toBeDefined();
+
+      deleteBranch(tree, branchId);
+      expect(tree.branches[branchId]).toBeUndefined();
+      expect(Object.keys(tree.branches)).toHaveLength(1);
+    });
+
+    it("removes branch nodes and cleans up parent childIds", () => {
+      const tree = treeFromMessages([
+        makeMessage("m1", "user", "a"),
+        makeMessage("m2", "assistant", "b"),
+      ]);
+      const { branchId } = createBranch(tree, "m2");
+      addNodeToBranch(tree, makeMessage("b1", "user", "branch"), branchId);
+
+      expect(tree.nodes["m2"].childIds).toContain("b1");
+
+      deleteBranch(tree, branchId);
+      expect(tree.nodes["b1"]).toBeUndefined();
+      expect(tree.nodes["m2"].childIds).not.toContain("b1");
+    });
+
+    it("does not delete the main branch", () => {
+      const tree = createEmptyTree();
+      deleteBranch(tree, tree.mainBranchId);
+      expect(tree.branches[tree.mainBranchId]).toBeDefined();
+    });
+
+    it("does nothing for nonexistent branch", () => {
+      const tree = createEmptyTree();
+      deleteBranch(tree, "nonexistent");
+      expect(Object.keys(tree.branches)).toHaveLength(1);
     });
   });
 

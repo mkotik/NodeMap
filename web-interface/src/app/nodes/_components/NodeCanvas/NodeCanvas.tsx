@@ -114,6 +114,8 @@ export default function NodeCanvas({ messages }: NodeCanvasProps) {
           }
           maskColor="rgba(6, 14, 32, 0.85)"
           bgColor="#091328"
+          pannable
+          zoomable
         />
       </ReactFlow>
     </div>

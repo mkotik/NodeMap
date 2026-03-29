@@ -1,1 +1,2 @@
 - use scss, not module.scss. all scss should be scoped within the page so there are no naming conflicts.
+- Always read @DESIGN.md for design context and specifications.

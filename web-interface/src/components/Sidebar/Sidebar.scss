@@ -1,0 +1,136 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: $space-6;
+  z-index: 10;
+  @include glass-panel;
+
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    margin-bottom: $space-6;
+  }
+
+  &__logo {
+    font-family: $font-display;
+    font-size: $headline-sm;
+    font-weight: $weight-bold;
+    color: $primary;
+    letter-spacing: $tracking-tight;
+  }
+
+  &__tagline {
+    @include type-label($label-sm);
+    color: $on-surface-variant;
+  }
+
+  &__new-chat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+    width: 100%;
+    padding: $space-3 $space-4;
+    background: $primary;
+    color: $surface;
+    border: none;
+    border-radius: $radius-lg;
+    font-family: $font-body;
+    font-size: $body-md;
+    font-weight: $weight-semibold;
+    cursor: pointer;
+    margin-bottom: $space-8;
+    @include surface-transition;
+
+    &:hover {
+      background: $primary-dim;
+      box-shadow: $shadow-node-glow-primary;
+    }
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+  }
+
+  &__nav-item {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3 $space-4;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: $body-md;
+    font-weight: $weight-medium;
+    color: $on-surface-variant;
+    text-decoration: none;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-high;
+      color: $on-surface;
+    }
+
+    &--active {
+      background: rgba($primary, 0.1);
+      color: $primary;
+
+      svg {
+        color: $primary;
+      }
+    }
+  }
+
+  &__bottom {
+    padding-top: $space-6;
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-full;
+    background: $primary-dim;
+    color: $on-surface;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: $font-body;
+    font-size: $body-sm;
+    font-weight: $weight-semibold;
+  }
+
+  &__user-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__user-name {
+    font-family: $font-body;
+    font-size: $body-md;
+    font-weight: $weight-medium;
+    color: $on-surface;
+  }
+
+  &__user-role {
+    @include type-label($label-sm);
+    color: $on-surface-variant;
+  }
+}

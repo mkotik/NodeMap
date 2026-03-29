@@ -1,0 +1,79 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-4 $space-8;
+  background: $surface;
+  @include ghost-border(bottom);
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $space-8;
+  }
+
+  &__brand {
+    font-family: $font-display;
+    font-size: $body-lg;
+    font-weight: $weight-bold;
+    color: $primary;
+  }
+
+  &__tabs {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__tab {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-4;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: $body-sm;
+    font-weight: $weight-medium;
+    color: $on-surface-variant;
+    text-decoration: none;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-low;
+      color: $on-surface;
+    }
+
+    &--active {
+      color: $on-surface;
+    }
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+  }
+
+  &__icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: $radius-md;
+    background: transparent;
+    color: $on-surface-variant;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-low;
+      color: $on-surface;
+    }
+  }
+}

@@ -1,0 +1,10 @@
+// Polyfill Web Streams API for jsdom (used by ai SDK)
+const { TransformStream, ReadableStream, WritableStream } =
+  require("node:stream/web") as typeof import("node:stream/web");
+Object.assign(globalThis, { TransformStream, ReadableStream, WritableStream });
+
+// Auth env vars
+process.env.JWT_ACCESS_SECRET = "test-access-secret";
+process.env.JWT_REFRESH_SECRET = "test-refresh-secret";
+process.env.ACCESS_TOKEN_EXPIRY = "15m";
+process.env.REFRESH_TOKEN_EXPIRY = "7d";

@@ -1,9 +1,17 @@
 import { render, screen } from "@testing-library/react";
+import { ChatProvider } from "@/context/ChatContext";
+import { AuthProvider } from "@/context/AuthContext";
 import Home from "@/app/page";
 
 describe("Home", () => {
   it("renders without crashing", () => {
-    render(<Home />);
-    expect(screen.getByText("hi")).toBeInTheDocument();
+    render(
+      <AuthProvider>
+        <ChatProvider>
+          <Home />
+        </ChatProvider>
+      </AuthProvider>,
+    );
+    expect(screen.getByText("Initiate Thought")).toBeInTheDocument();
   });
 });

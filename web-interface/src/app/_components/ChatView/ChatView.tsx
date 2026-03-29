@@ -65,12 +65,22 @@ export default function ChatView({
 }: ChatViewProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const isStreaming = status === "submitted" || status === "streaming";
   const isEmpty = messages.length === 0;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (isEmpty) {
+      textareaRef.current?.focus();
+    } else {
+      inputRef.current?.focus();
+    }
+  }, [isEmpty]);
 
   function handleSubmit() {
     const trimmed = input.trim();
@@ -140,6 +150,7 @@ export default function ChatView({
 
         <div className="chat-view__input-container">
           <textarea
+            ref={textareaRef}
             className="chat-view__textarea"
             placeholder="Inject a new thought branch..."
             rows={3}
@@ -332,6 +343,7 @@ export default function ChatView({
         <div className="chat-view-thread__input-container">
           <div className="chat-view-thread__node-dot chat-view-thread__node-dot--primary" />
           <input
+            ref={inputRef}
             className="chat-view-thread__input"
             type="text"
             placeholder="Inject a new thought branch..."

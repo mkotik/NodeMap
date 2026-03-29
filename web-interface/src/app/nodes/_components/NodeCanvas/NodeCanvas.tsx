@@ -42,6 +42,7 @@ function buildGraph(messages: UIMessage[]): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = messages.map((msg, i) => ({
     id: msg.id,
     type: "messageNode",
+    draggable: false,
     position: { x: 0, y: i * 280 },
     data: {
       role: msg.role,

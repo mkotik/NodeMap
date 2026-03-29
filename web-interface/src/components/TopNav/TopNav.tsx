@@ -4,7 +4,7 @@ export default function TopNav() {
   return (
     <header className="topnav">
       <div className="topnav__left">
-        <span className="topnav__brand">Living Logic</span>
+        <span className="topnav__brand">NodeMap.io</span>
         <nav className="topnav__tabs">
           <a href="#" className="topnav__tab">
             <svg
@@ -60,11 +60,7 @@ export default function TopNav() {
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
         </button>
-        <button
-          className="topnav__icon-btn"
-          type="button"
-          aria-label="Share"
-        >
+        <button className="topnav__icon-btn" type="button" aria-label="Share">
           <svg
             width="18"
             height="18"
@@ -85,12 +81,7 @@ export default function TopNav() {
           type="button"
           aria-label="More options"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="12" cy="5" r="1.5" />
             <circle cx="12" cy="12" r="1.5" />
             <circle cx="12" cy="19" r="1.5" />

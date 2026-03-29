@@ -1,10 +1,10 @@
 # Design System Document
 
-## 1. Overview & Creative North Star: "The Living Logic"
+## 1. Overview & Creative North Star: "NodeMap.io"
 
 This design system is built to facilitate the visualization of complex, non-linear thought. We move away from the "static document" feel of traditional chat apps toward an environment that feels like a digital nervous system.
 
-**The Creative North Star: The Living Logic.**
+**The Creative North Star: NodeMap.io.**
 This system rejects the rigid, boxy constraints of traditional SaaS. Instead, it embraces a high-end editorial feel where content is suspended in a deep, atmospheric void. We achieve this through "Organic Minimalism"—combining the precision of a high-tech IDE (like Vercel or Linear) with the fluid, curving growth of natural systems. By using intentional asymmetry and depth, we ensure the UI feels like a premium tool for thinkers, not just another chat interface.
 
 ---

@@ -5,7 +5,7 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar__top">
         <div className="sidebar__brand">
-          <span className="sidebar__logo">Living Logic</span>
+          <span className="sidebar__logo">NodeMap.io</span>
           <span className="sidebar__tagline">Digital Nervous System</span>
         </div>
 

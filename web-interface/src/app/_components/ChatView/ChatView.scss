@@ -1,7 +1,190 @@
 @use "../../../styles/tokens" as *;
 @use "../../../styles/mixins" as *;
 
-.thread {
+.chat-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $space-8;
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+
+  &__hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: $space-10;
+  }
+
+  &__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: $radius-xl;
+    background: $surface-container;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $space-6;
+  }
+
+  &__title {
+    @include type-display($display-sm);
+    margin-bottom: $space-3;
+  }
+
+  &__subtitle {
+    @include type-label($label-lg);
+    color: $on-surface-variant;
+  }
+
+  &__input-container {
+    width: 100%;
+    background: $surface-container-low;
+    border-radius: $radius-lg;
+    padding: $space-5;
+    margin-bottom: $space-6;
+  }
+
+  &__textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: $font-body;
+    font-size: $body-lg;
+    color: $on-surface;
+    line-height: $leading-normal;
+
+    &::placeholder {
+      color: $outline;
+    }
+  }
+
+  &__input-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: $space-4;
+  }
+
+  &__toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+  }
+
+  &__toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: $radius-md;
+    background: transparent;
+    color: $outline;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container;
+      color: $on-surface-variant;
+    }
+  }
+
+  &__branch-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: $primary;
+    color: $surface;
+    border: none;
+    border-radius: $radius-full;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $primary-dim;
+      box-shadow: $shadow-node-glow-primary;
+    }
+  }
+
+  &__suggestions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-4;
+  }
+
+  &__suggestion-card {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-3;
+    padding: $space-5;
+    background: $surface-container-low;
+    border: none;
+    border-radius: $radius-lg;
+    text-align: left;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container;
+    }
+  }
+
+  &__suggestion-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-full;
+    flex-shrink: 0;
+    margin-top: 6px;
+
+    &--primary {
+      background: $primary;
+      box-shadow: 0 0 8px rgba($primary, 0.4);
+    }
+
+    &--secondary {
+      background: $secondary;
+      box-shadow: 0 0 8px rgba($secondary, 0.4);
+    }
+
+    &--tertiary {
+      background: $tertiary;
+      box-shadow: 0 0 8px rgba($tertiary, 0.4);
+    }
+  }
+
+  &__suggestion-text {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+  }
+
+  &__suggestion-title {
+    font-family: $font-body;
+    font-size: $body-md;
+    font-weight: $weight-medium;
+    color: $on-surface;
+  }
+
+  &__suggestion-desc {
+    @include type-label($label-sm);
+    color: $on-surface-variant;
+  }
+}
+
+// Active conversation
+.chat-view-thread {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -21,13 +204,11 @@
     gap: $space-6;
   }
 
-  // --- Message row ---
   &__message {
     display: flex;
     gap: $space-4;
   }
 
-  // --- Node dot column ---
   &__node {
     display: flex;
     flex-direction: column;
@@ -52,7 +233,6 @@
     }
   }
 
-  // --- Message body ---
   &__message-body {
     flex: 1;
     min-width: 0;
@@ -92,7 +272,6 @@
     }
   }
 
-  // --- Bottom input bar ---
   &__input-bar {
     padding: $space-4 $space-8 $space-4;
     display: flex;
@@ -157,10 +336,9 @@
 
   &__typing {
     color: $on-surface-variant;
-    animation: thread-pulse 1.5s ease-in-out infinite;
+    animation: chat-view-pulse 1.5s ease-in-out infinite;
   }
 
-  // --- Markdown rendering for AI responses ---
   &__markdown {
     @include type-body-ai;
 
@@ -297,7 +475,7 @@
   }
 }
 
-@keyframes thread-pulse {
+@keyframes chat-view-pulse {
   0%,
   100% {
     opacity: 0.4;

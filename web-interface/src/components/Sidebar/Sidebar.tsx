@@ -1,6 +1,13 @@
+"use client";
+
+import { useChatContext } from "@/context/ChatContext";
+import { useAuth } from "@/context/AuthContext";
 import "./Sidebar.scss";
 
 export default function Sidebar() {
+  const { setMessages } = useChatContext();
+  const { user, logout } = useAuth();
+
   return (
     <aside className="sidebar">
       <div className="sidebar__top">
@@ -9,7 +16,11 @@ export default function Sidebar() {
           <span className="sidebar__tagline">Digital Nervous System</span>
         </div>
 
-        <button className="sidebar__new-chat" type="button">
+        <button
+          className="sidebar__new-chat"
+          type="button"
+          onClick={() => setMessages([])}
+        >
           <svg
             width="14"
             height="14"
@@ -61,13 +72,68 @@ export default function Sidebar() {
       </div>
 
       <div className="sidebar__bottom">
-        <div className="sidebar__user">
-          <div className="sidebar__avatar">A</div>
-          <div className="sidebar__user-info">
-            <span className="sidebar__user-name">Alex Chen</span>
-            <span className="sidebar__user-role">Senior Architect</span>
+        {user ? (
+          <div className="sidebar__user">
+            <div className="sidebar__avatar">
+              {user.firstName.charAt(0).toUpperCase()}
+            </div>
+            <div className="sidebar__user-info">
+              <span className="sidebar__user-name">{user.firstName} {user.lastName}</span>
+              <span className="sidebar__user-role">{user.role}</span>
+            </div>
+            <button
+              className="sidebar__logout"
+              type="button"
+              onClick={() => logout()}
+              aria-label="Sign out"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
           </div>
-        </div>
+        ) : (
+          <a href="/auth/login" className="sidebar__sign-in">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            Sign In
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="sidebar__sign-in-arrow"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </a>
+        )}
       </div>
     </aside>
   );

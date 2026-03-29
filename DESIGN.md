@@ -90,3 +90,25 @@ We do not "drop" shadows; we create "ambient glows."
 - **Don't** use 100% black (`#000000`) for anything other than `surface_container_lowest`. The "deep slate" feel must be maintained.
 - **Don't** use standard "Material Design" shadows. They are too heavy and break the minimalist, tech-focused aesthetic.
 - **Don't** use more than three branch colors in a single view to avoid visual cognitive load. Stick to the hierarchy: Primary (Green) for the main path, Secondary (Blue/Violet) for alternatives.
+
+## Component Rules
+
+- Do NOT create new component files unless explicitly asked
+- Modify existing components in place
+- If you think a new component is needed, ask first before creating it
+
+## Stack
+
+- Next.js App Router
+- PostgreSQL (via prisma / pg — whatever you're using)
+- JWT auth with access/refresh tokens
+
+## API
+
+- All API routes live in app/api/
+- Do not create separate backend files
+
+## General
+
+- Do not install new packages without asking
+- Do not refactor working code unless asked

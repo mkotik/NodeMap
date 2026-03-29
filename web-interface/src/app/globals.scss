@@ -76,7 +76,8 @@ textarea {
 
 .app-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .app-main {
@@ -84,10 +85,13 @@ textarea {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .app-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }

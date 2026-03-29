@@ -1,0 +1,179 @@
+@use "../../../styles/tokens" as *;
+
+.auth-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+  padding: $space-6;
+
+  &__card {
+    width: 100%;
+    max-width: 400px;
+    padding: $space-10;
+    background: $surface-container-low;
+    border-radius: $radius-lg;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: $space-8;
+  }
+
+  &__logo {
+    font-family: $font-display;
+    font-size: $headline-md;
+    font-weight: $weight-bold;
+    color: $primary;
+    letter-spacing: $tracking-tight;
+    margin: 0 0 $space-3;
+  }
+
+  &__title {
+    font-family: $font-display;
+    font-size: $body-lg;
+    font-weight: $weight-medium;
+    color: $on-surface-variant;
+    margin: 0;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+  }
+
+  &__name-row {
+    display: flex;
+    gap: $space-4;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    gap: $space-1;
+  }
+
+  &__label {
+    font-family: $font-body;
+    font-size: $label-md;
+    font-weight: $weight-medium;
+    color: $on-surface-variant;
+    letter-spacing: $tracking-wide;
+    text-transform: uppercase;
+  }
+
+  &__input {
+    width: 100%;
+    background: $surface-container;
+    border: 1px solid rgba($outline-variant, 0.15);
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-family: $font-body;
+    font-size: $body-lg;
+    color: $on-surface;
+    outline: none;
+    transition:
+      border-color $transition-default,
+      box-shadow $transition-default,
+      background $transition-default;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 1px $primary;
+      background: $surface-container-high;
+    }
+  }
+
+  &__error {
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: #ff6b6b;
+    margin: 0;
+    padding: $space-2 $space-3;
+    background: rgba(#ff6b6b, 0.08);
+    border-radius: $radius-sm;
+  }
+
+  &__submit {
+    width: 100%;
+    padding: $space-3 $space-4;
+    margin-top: $space-2;
+    background: $primary-container;
+    color: $on-primary-container;
+    border: none;
+    border-radius: $radius-lg;
+    font-family: $font-body;
+    font-size: $body-md;
+    font-weight: $weight-semibold;
+    cursor: pointer;
+    transition:
+      background $transition-default,
+      box-shadow $transition-default;
+
+    &:hover:not(:disabled) {
+      background: $primary-dim;
+      box-shadow: $shadow-node-glow-primary;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    margin: $space-6 0;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba($outline-variant, 0.15);
+    }
+
+    span {
+      font-family: $font-body;
+      font-size: $label-sm;
+      color: $outline;
+      text-transform: uppercase;
+      letter-spacing: $tracking-wide;
+    }
+  }
+
+  &__google-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  &__toggle {
+    text-align: center;
+    margin-top: $space-6;
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface-variant;
+  }
+
+  &__toggle-btn {
+    background: none;
+    border: none;
+    color: $primary;
+    font-family: $font-body;
+    font-size: $body-sm;
+    font-weight: $weight-medium;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover {
+      color: $primary-dim;
+    }
+  }
+}

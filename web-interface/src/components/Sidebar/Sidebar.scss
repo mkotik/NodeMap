@@ -133,4 +133,47 @@
     @include type-label($label-sm);
     color: $on-surface-variant;
   }
+
+  &__sign-in {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3 $space-4;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: $body-md;
+    font-weight: $weight-medium;
+    color: $on-surface-variant;
+    text-decoration: none;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-high;
+      color: $on-surface;
+    }
+
+    &-arrow {
+      margin-left: auto;
+    }
+  }
+
+  &__logout {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: $on-surface-variant;
+    cursor: pointer;
+    padding: $space-2;
+    border-radius: $radius-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    @include surface-transition;
+
+    &:hover {
+      color: $on-surface;
+      background: $surface-container-high;
+    }
+  }
 }

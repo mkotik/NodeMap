@@ -56,26 +56,15 @@ export default function TopNav() {
             </span>
           </nav>
         ) : !isEmpty ? (
-          <nav className="topnav__tabs">
-            <Link
-              href="/"
-              className={`topnav__tab ${isThread ? "topnav__tab--active" : ""}`}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
+          isNodes ? (
+            <Link href="/" className="topnav__breadcrumb topnav__breadcrumb--primary">
               Main Thread
             </Link>
-          </nav>
+          ) : (
+            <span className="topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--primary">
+              Main Thread
+            </span>
+          )
         ) : null}
       </div>
       <div className="topnav__right">

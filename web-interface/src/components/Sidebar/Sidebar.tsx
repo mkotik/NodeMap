@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useChatContext } from "@/context/ChatContext";
 import { useAuth } from "@/context/AuthContext";
 import "./Sidebar.scss";
@@ -7,6 +8,7 @@ import "./Sidebar.scss";
 export default function Sidebar() {
   const { resetAll } = useChatContext();
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   return (
     <aside className="sidebar">
@@ -16,7 +18,7 @@ export default function Sidebar() {
           <span className="sidebar__tagline">Digital Nervous System</span>
         </div>
 
-        <button className="sidebar__new-chat" type="button" onClick={resetAll}>
+        <button className="sidebar__new-chat" type="button" onClick={() => { resetAll(); router.push("/"); }}>
           <svg
             width="14"
             height="14"

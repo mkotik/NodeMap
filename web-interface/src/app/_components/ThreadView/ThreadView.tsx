@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import type { UIMessage, ChatStatus } from "ai";
+import Markdown from "react-markdown";
 import "./ThreadView.scss";
 
 interface ThreadViewProps {
@@ -73,7 +74,11 @@ export default function ThreadView({ messages, status, onSend }: ThreadViewProps
                     className={`thread__bubble thread__bubble--${isAi ? "ai" : "user"}`}
                   >
                     {text ? (
-                      <p>{text}</p>
+                      isAi ? (
+                        <div className="thread__markdown"><Markdown>{text}</Markdown></div>
+                      ) : (
+                        <p>{text}</p>
+                      )
                     ) : isAi && isStreaming ? (
                       <p className="thread__typing">Thinking...</p>
                     ) : null}

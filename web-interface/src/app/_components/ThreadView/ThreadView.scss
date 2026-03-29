@@ -159,6 +159,142 @@
     color: $on-surface-variant;
     animation: thread-pulse 1.5s ease-in-out infinite;
   }
+
+  // --- Markdown rendering for AI responses ---
+  &__markdown {
+    @include type-body-ai;
+
+    > *:first-child {
+      margin-top: 0;
+    }
+
+    > *:last-child {
+      margin-bottom: 0;
+    }
+
+    p {
+      margin: 0 0 $space-4;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    strong {
+      font-weight: $weight-semibold;
+      color: $on-surface;
+    }
+
+    em {
+      font-style: italic;
+      color: $primary;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: $font-display;
+      font-weight: $weight-semibold;
+      color: $on-surface;
+      letter-spacing: $tracking-tight;
+      margin: $space-6 0 $space-3;
+    }
+
+    h1 {
+      font-size: $headline-lg;
+    }
+
+    h2 {
+      font-size: $headline-md;
+    }
+
+    h3 {
+      font-size: $headline-sm;
+    }
+
+    h4 {
+      font-size: $body-lg;
+    }
+
+    ul,
+    ol {
+      margin: $space-3 0;
+      padding-left: $space-6;
+      display: flex;
+      flex-direction: column;
+      gap: $space-2;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: $space-5;
+
+      li {
+        position: relative;
+        padding-left: $space-4;
+
+        &::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0.6em;
+          width: 6px;
+          height: 6px;
+          border-radius: $radius-full;
+          background: $primary;
+          box-shadow: 0 0 6px rgba($primary, 0.4);
+        }
+      }
+    }
+
+    ol {
+      li {
+        &::marker {
+          color: $primary;
+          font-weight: $weight-semibold;
+        }
+      }
+    }
+
+    code {
+      font-family: "SF Mono", "Fira Code", "Fira Mono", monospace;
+      font-size: 0.875em;
+      background: $surface-container-high;
+      padding: 0.15em 0.4em;
+      border-radius: $radius-sm;
+      color: $primary;
+    }
+
+    pre {
+      margin: $space-4 0;
+      background: $surface-container-high;
+      border-radius: $radius-md;
+      padding: $space-4 $space-5;
+      overflow-x: auto;
+
+      code {
+        background: none;
+        padding: 0;
+        font-size: $body-sm;
+        color: $on-surface;
+      }
+    }
+
+    blockquote {
+      margin: $space-4 0;
+      padding-left: $space-5;
+      border-left: 2px solid $primary-dim;
+      color: $on-surface-variant;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: rgba($outline-variant, 0.15);
+      margin: $space-6 0;
+    }
+  }
 }
 
 @keyframes thread-pulse {

@@ -1,11 +1,22 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import "./TopNav.scss";
 
 export default function TopNav() {
+  const pathname = usePathname();
+  const isNodes = pathname === "/nodes";
+  const isThread = pathname === "/";
+
   return (
     <header className="topnav">
       <div className="topnav__left">
         <nav className="topnav__tabs">
-          <a href="#" className="topnav__tab">
+          <Link
+            href="/nodes"
+            className={`topnav__tab ${isNodes ? "topnav__tab--active" : ""}`}
+          >
             <svg
               width="16"
               height="16"
@@ -21,8 +32,11 @@ export default function TopNav() {
               <rect x="14" y="14" width="7" height="7" rx="1" />
             </svg>
             Nodes
-          </a>
-          <a href="#" className="topnav__tab topnav__tab--active">
+          </Link>
+          <Link
+            href="/"
+            className={`topnav__tab ${isThread ? "topnav__tab--active" : ""}`}
+          >
             <svg
               width="16"
               height="16"
@@ -36,7 +50,7 @@ export default function TopNav() {
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
             Main Thread
-          </a>
+          </Link>
         </nav>
       </div>
       <div className="topnav__right">

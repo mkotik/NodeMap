@@ -1,0 +1,78 @@
+@use "../../../../styles/tokens" as *;
+@use "../../../../styles/mixins" as *;
+
+.msg-node {
+  width: 320px;
+  background: $surface-container;
+  border-radius: $radius-md;
+  padding: $space-5 $space-6;
+  cursor: grab;
+  @include surface-transition;
+
+  &:hover {
+    background: $surface-container-high;
+  }
+
+  &--user {
+    background: $surface-container-low;
+
+    &:hover {
+      background: $surface-container;
+    }
+  }
+
+  &__handle {
+    width: 8px !important;
+    height: 8px !important;
+    background: $primary !important;
+    border: none !important;
+    box-shadow: 0 0 8px rgba($primary, 0.5);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    margin-bottom: $space-3;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-full;
+    flex-shrink: 0;
+
+    &--primary {
+      background: $primary;
+      box-shadow: 0 0 8px rgba($primary, 0.5);
+    }
+
+    &--muted {
+      background: $outline;
+    }
+  }
+
+  &__label {
+    @include type-label($label-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+
+    &--user {
+      color: $on-surface-variant;
+    }
+
+    &--ai {
+      color: $primary;
+    }
+  }
+
+  &__content {
+    p {
+      @include type-body-ai;
+      margin: 0;
+      font-size: $body-sm;
+      line-height: $leading-normal;
+      color: $on-surface-variant;
+    }
+  }
+}

@@ -1,0 +1,83 @@
+@use "../../../../styles/tokens" as *;
+@use "../../../../styles/mixins" as *;
+
+.node-canvas {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+
+  &--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__empty-state {
+    text-align: center;
+
+    p {
+      @include type-body-ai;
+      color: $on-surface-variant;
+    }
+  }
+
+  // Override React Flow styles to match design system
+  .react-flow {
+    background: $surface;
+  }
+
+  .react-flow__edge-path {
+    stroke: $primary-dim;
+    stroke-width: 1.5;
+  }
+
+  .react-flow__edge.animated .react-flow__edge-path {
+    stroke: $primary;
+  }
+
+  // Controls styling
+  &__controls {
+    // stylelint-disable-next-line
+    &.react-flow__controls {
+      background: $surface-container;
+      border: none;
+      border-radius: $radius-lg;
+      box-shadow: $shadow-ambient;
+      overflow: hidden;
+
+      button {
+        background: $surface-container;
+        border: none;
+        border-bottom: 1px solid rgba($outline-variant, 0.15);
+        color: $on-surface-variant;
+        width: 36px;
+        height: 36px;
+
+        &:hover {
+          background: $surface-container-high;
+          color: $on-surface;
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        svg {
+          fill: currentColor;
+        }
+      }
+    }
+  }
+
+  // Minimap styling
+  &__minimap {
+    // stylelint-disable-next-line
+    &.react-flow__minimap {
+      background: $surface-container-low;
+      border: none;
+      border-radius: $radius-lg;
+      box-shadow: $shadow-ambient;
+      overflow: hidden;
+    }
+  }
+}

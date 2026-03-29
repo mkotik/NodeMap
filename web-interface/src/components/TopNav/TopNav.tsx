@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
@@ -10,6 +11,10 @@ export default function TopNav() {
   const router = useRouter();
   const { activeBranch, isMainBranch, returnToMain, messages } =
     useChatContext();
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- standard hydration guard
+  useEffect(() => setMounted(true), []);
+
   const isAuth = pathname.startsWith("/auth");
   const isNodes = pathname === "/nodes";
   const isThread = pathname === "/";
@@ -20,7 +25,7 @@ export default function TopNav() {
   return (
     <header className="topnav">
       <div className="topnav__left">
-        {!isAuth && (
+        {mounted && !isAuth && (
           <>
             {!isEmpty && (
               <Link

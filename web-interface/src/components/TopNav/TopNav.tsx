@@ -1,12 +1,13 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
 import "./TopNav.scss";
 
 export default function TopNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { activeBranch, isMainBranch, returnToMain, messages } =
     useChatContext();
   const isNodes = pathname === "/nodes";
@@ -58,15 +59,16 @@ export default function TopNav() {
           </nav>
         ) : !isEmpty ? (
           isNodes ? (
-            <Link
-              href="/"
+            <button
+              type="button"
               className="topnav__breadcrumb topnav__breadcrumb--primary"
+              onClick={() => { returnToMain(); router.push("/"); }}
             >
               Main Thread
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6" />
               </svg>
-            </Link>
+            </button>
           ) : (
             <span className="topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--primary">
               Main Thread

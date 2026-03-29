@@ -100,7 +100,9 @@ We do not "drop" shadows; we create "ambient glows."
 ## Stack
 
 - Next.js App Router
-- PostgreSQL (via prisma / pg — whatever you're using)
+- tRPC (client in `src/lib/trpc.ts`, server in `src/server/trpc.ts`, routers in `src/server/routers/`)
+- Prisma ORM (schema in `prisma/`, client in `src/server/lib/prisma.ts`)
+- PostgreSQL (via `@prisma/adapter-pg`)
 - JWT auth with access/refresh tokens
 
 ## API

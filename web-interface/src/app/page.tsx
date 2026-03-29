@@ -134,18 +134,18 @@ export default function Home() {
               </svg>
             </button>
           </div>
-          <button className="new-chat__branch-btn" type="button">
-            Branch
+          <button className="new-chat__branch-btn" type="button" aria-label="Submit">
             <svg
-              width="14"
-              height="14"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="3"
+              strokeWidth="2.5"
               strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <path d="M12 5v14M5 12h14" />
+              <path d="M5 12h14M13 5l7 7-7 7" />
             </svg>
           </button>
         </div>

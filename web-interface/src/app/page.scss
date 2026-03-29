@@ -100,15 +100,14 @@
   &__branch-btn {
     display: flex;
     align-items: center;
-    gap: $space-2;
-    padding: $space-2 $space-5;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
     background: $primary;
     color: $surface;
     border: none;
-    border-radius: $radius-md;
-    font-family: $font-body;
-    font-size: $body-md;
-    font-weight: $weight-semibold;
+    border-radius: $radius-full;
     cursor: pointer;
     @include surface-transition;
 

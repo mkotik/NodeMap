@@ -4,7 +4,6 @@ export default function TopNav() {
   return (
     <header className="topnav">
       <div className="topnav__left">
-        <span className="topnav__brand">NodeMap.io</span>
         <nav className="topnav__tabs">
           <a href="#" className="topnav__tab">
             <svg

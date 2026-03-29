@@ -96,7 +96,7 @@ export function getAncestorChain(
   let current: NodeId | null = nodeId;
 
   while (current) {
-    const node = tree.nodes[current];
+    const node: TreeNode | undefined = tree.nodes[current];
     if (!node) break;
     chain.unshift(node.message);
     current = node.parentId;
@@ -164,18 +164,13 @@ export function getBranchesFromNode(
   tree: ConversationTree,
   nodeId: NodeId,
 ): Branch[] {
-  return Object.values(tree.branches).filter(
-    (b) => b.forkPointId === nodeId,
-  );
+  return Object.values(tree.branches).filter((b) => b.forkPointId === nodeId);
 }
 
 // ---------------------------------------------------------------------------
 // Check if a node is a fork point (has branches coming off it)
 // ---------------------------------------------------------------------------
-export function isForkPoint(
-  tree: ConversationTree,
-  nodeId: NodeId,
-): boolean {
+export function isForkPoint(tree: ConversationTree, nodeId: NodeId): boolean {
   return getBranchesFromNode(tree, nodeId).length > 0;
 }
 

@@ -22,7 +22,6 @@ import {
   addNodeToBranch,
   getBranchMessageChain,
   createBranch as treeFnCreateBranch,
-  resetTree,
 } from "@/lib/tree";
 
 interface ChatContextValue {
@@ -58,12 +57,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const isMainBranch = tree.activeBranchId === tree.mainBranchId;
 
   // -------------------------------------------------------------------
-  // Sync: any time useChat messages change, add missing ones to the tree
+  // Sync: any time useChat messages change, add missing ones to the tree.
+  // This is a valid sync from an external system (useChat), so we suppress
+  // the set-state-in-effect lint rule here.
   // -------------------------------------------------------------------
   useEffect(() => {
     if (isSwitchingRef.current) return;
 
     let hasNew = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTree((prev) => {
       const next = structuredClone(prev);
       for (const msg of messages) {

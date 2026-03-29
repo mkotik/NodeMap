@@ -23,9 +23,7 @@ test.describe("Authentication", () => {
     await page.goto("/");
     await page.click(".sidebar__sign-in");
     await expect(page).toHaveURL(/\/auth\/login/);
-    await expect(page.locator(".auth-login__logo")).toContainText(
-      "NodeMap.io",
-    );
+    await expect(page.locator(".auth-login__logo")).toContainText("NodeMap.io");
   });
 
   test("should show login form by default", async ({ page }) => {

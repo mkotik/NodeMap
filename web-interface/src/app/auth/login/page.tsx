@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, type FormEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type FormEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import "./login.scss";
@@ -25,9 +31,7 @@ export default function LoginPage() {
         await loginWithGoogle(response.credential);
         router.push("/");
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Google sign-in failed.",
-        );
+        setError(err instanceof Error ? err.message : "Google sign-in failed.");
       }
     },
     [loginWithGoogle, router],
@@ -43,7 +47,10 @@ export default function LoginPage() {
         accounts: {
           id: {
             initialize: (config: Record<string, unknown>) => void;
-            renderButton: (el: HTMLElement, config: Record<string, unknown>) => void;
+            renderButton: (
+              el: HTMLElement,
+              config: Record<string, unknown>,
+            ) => void;
           };
         };
       };
@@ -64,7 +71,9 @@ export default function LoginPage() {
       }
     };
     document.head.appendChild(script);
-    return () => { script.remove(); };
+    return () => {
+      script.remove();
+    };
   }, [handleCredentialResponse]);
 
   async function handleSubmit(e: FormEvent) {

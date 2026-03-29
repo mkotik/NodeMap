@@ -1,0 +1,25 @@
+@use "../../../../styles/tokens" as *;
+
+.user-node {
+  max-width: 240px;
+  padding: $space-3 $space-4;
+  border-radius: $radius-md;
+  background: rgba($surface-container-low, 0.6);
+
+  &__handle {
+    width: 4px !important;
+    height: 4px !important;
+    background: $outline !important;
+    border: none !important;
+    opacity: 0.5;
+  }
+
+  &__text {
+    font-family: $font-body;
+    font-size: $label-sm;
+    line-height: 1.4;
+    color: $outline;
+    margin: 0;
+    font-style: italic;
+  }
+}

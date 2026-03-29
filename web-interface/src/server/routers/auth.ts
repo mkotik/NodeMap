@@ -4,7 +4,11 @@ import { TRPCError } from "@trpc/server";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { prisma } from "@/server/lib/prisma";
 import { hashPassword, comparePassword } from "@/server/lib/password";
-import { signAccessToken, signRefreshToken, verifyRefreshToken } from "@/server/lib/jwt";
+import {
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+} from "@/server/lib/jwt";
 import { verifyGoogleToken } from "@/server/lib/google";
 
 const REFRESH_MAX_AGE = 7 * 24 * 60 * 60;
@@ -20,7 +24,11 @@ function parseExpiry(expiry: string): Date {
 async function issueTokens(
   userId: string,
   email: string,
-  setCookie: (name: string, value: string, opts: Record<string, unknown>) => void,
+  setCookie: (
+    name: string,
+    value: string,
+    opts: Record<string, unknown>,
+  ) => void,
 ) {
   const tokenId = crypto.randomUUID();
   const accessToken = signAccessToken({ userId, email });
@@ -46,8 +54,22 @@ async function issueTokens(
   return accessToken;
 }
 
-function pick(user: { id: string; firstName: string; lastName: string; email: string; role: string; avatarUrl: string | null }) {
-  return { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role, avatarUrl: user.avatarUrl };
+function pick(user: {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  avatarUrl: string | null;
+}) {
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+    avatarUrl: user.avatarUrl,
+  };
 }
 
 export const authRouter = router({
@@ -61,17 +83,31 @@ export const authRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const existing = await prisma.user.findUnique({ where: { email: input.email } });
+      const existing = await prisma.user.findUnique({
+        where: { email: input.email },
+      });
       if (existing) {
-        throw new TRPCError({ code: "CONFLICT", message: "Email already registered" });
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Email already registered",
+        });
       }
 
       const passwordHash = await hashPassword(input.password);
       const user = await prisma.user.create({
-        data: { firstName: input.firstName, lastName: input.lastName, email: input.email, passwordHash },
+        data: {
+          firstName: input.firstName,
+          lastName: input.lastName,
+          email: input.email,
+          passwordHash,
+        },
       });
 
-      const accessToken = await issueTokens(user.id, user.email, ctx.cookies.set.bind(ctx.cookies));
+      const accessToken = await issueTokens(
+        user.id,
+        user.email,
+        ctx.cookies.set.bind(ctx.cookies),
+      );
       return { accessToken, user: pick(user) };
     }),
 
@@ -83,17 +119,29 @@ export const authRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const user = await prisma.user.findUnique({ where: { email: input.email } });
+      const user = await prisma.user.findUnique({
+        where: { email: input.email },
+      });
       if (!user || !user.passwordHash) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid email or password",
+        });
       }
 
       const valid = await comparePassword(input.password, user.passwordHash);
       if (!valid) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid email or password",
+        });
       }
 
-      const accessToken = await issueTokens(user.id, user.email, ctx.cookies.set.bind(ctx.cookies));
+      const accessToken = await issueTokens(
+        user.id,
+        user.email,
+        ctx.cookies.set.bind(ctx.cookies),
+      );
       return { accessToken, user: pick(user) };
     }),
 
@@ -102,14 +150,21 @@ export const authRouter = router({
     .mutation(async ({ input, ctx }) => {
       const googleUser = await verifyGoogleToken(input.idToken);
 
-      let user = await prisma.user.findUnique({ where: { googleId: googleUser.googleId } });
+      let user = await prisma.user.findUnique({
+        where: { googleId: googleUser.googleId },
+      });
 
       if (!user) {
-        user = await prisma.user.findUnique({ where: { email: googleUser.email } });
+        user = await prisma.user.findUnique({
+          where: { email: googleUser.email },
+        });
         if (user) {
           user = await prisma.user.update({
             where: { id: user.id },
-            data: { googleId: googleUser.googleId, avatarUrl: googleUser.avatarUrl },
+            data: {
+              googleId: googleUser.googleId,
+              avatarUrl: googleUser.avatarUrl,
+            },
           });
         } else {
           user = await prisma.user.create({
@@ -124,43 +179,65 @@ export const authRouter = router({
         }
       }
 
-      const accessToken = await issueTokens(user.id, user.email, ctx.cookies.set.bind(ctx.cookies));
+      const accessToken = await issueTokens(
+        user.id,
+        user.email,
+        ctx.cookies.set.bind(ctx.cookies),
+      );
       return { accessToken, user: pick(user) };
     }),
 
   refresh: publicProcedure.mutation(async ({ ctx }) => {
     const token = ctx.cookies.get("refreshToken")?.value;
     if (!token) {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "No refresh token" });
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "No refresh token",
+      });
     }
 
     let payload;
     try {
       payload = verifyRefreshToken(token);
     } catch {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid refresh token" });
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Invalid refresh token",
+      });
     }
 
     const stored = await prisma.refreshToken.findUnique({ where: { token } });
     if (!stored || stored.expiresAt < new Date()) {
-      if (stored) await prisma.refreshToken.delete({ where: { id: stored.id } });
+      if (stored)
+        await prisma.refreshToken.delete({ where: { id: stored.id } });
       ctx.cookies.delete("refreshToken");
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Refresh token expired" });
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Refresh token expired",
+      });
     }
 
     await prisma.refreshToken.delete({ where: { id: stored.id } });
 
-    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+    });
     if (!user) {
       throw new TRPCError({ code: "UNAUTHORIZED", message: "User not found" });
     }
 
-    const accessToken = await issueTokens(user.id, user.email, ctx.cookies.set.bind(ctx.cookies));
+    const accessToken = await issueTokens(
+      user.id,
+      user.email,
+      ctx.cookies.set.bind(ctx.cookies),
+    );
     return { accessToken, user: pick(user) };
   }),
 
   me: protectedProcedure.query(async ({ ctx }) => {
-    const user = await prisma.user.findUnique({ where: { id: ctx.user.userId } });
+    const user = await prisma.user.findUnique({
+      where: { id: ctx.user.userId },
+    });
     if (!user) {
       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
     }

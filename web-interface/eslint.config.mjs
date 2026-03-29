@@ -31,6 +31,8 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
+    "prisma/generated/**",
+    "jest.env.ts",
   ]),
 ]);
 

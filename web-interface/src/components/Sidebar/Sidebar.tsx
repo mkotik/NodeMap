@@ -16,11 +16,7 @@ export default function Sidebar() {
           <span className="sidebar__tagline">Digital Nervous System</span>
         </div>
 
-        <button
-          className="sidebar__new-chat"
-          type="button"
-          onClick={resetAll}
-        >
+        <button className="sidebar__new-chat" type="button" onClick={resetAll}>
           <svg
             width="14"
             height="14"
@@ -78,7 +74,9 @@ export default function Sidebar() {
               {user.firstName.charAt(0).toUpperCase()}
             </div>
             <div className="sidebar__user-info">
-              <span className="sidebar__user-name">{user.firstName} {user.lastName}</span>
+              <span className="sidebar__user-name">
+                {user.firstName} {user.lastName}
+              </span>
               <span className="sidebar__user-role">{user.role}</span>
             </div>
             <button

@@ -24,7 +24,12 @@ interface AuthContextValue {
   accessToken: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
+  register: (
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string,
+  ) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -54,8 +59,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(
-    async (firstName: string, lastName: string, email: string, password: string) => {
-      const res = await trpc.auth.register.mutate({ firstName, lastName, email, password });
+    async (
+      firstName: string,
+      lastName: string,
+      email: string,
+      password: string,
+    ) => {
+      const res = await trpc.auth.register.mutate({
+        firstName,
+        lastName,
+        email,
+        password,
+      });
       setUser(res.user);
       setAccessToken(res.accessToken);
     },

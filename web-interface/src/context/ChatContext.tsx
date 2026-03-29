@@ -52,9 +52,26 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [tree, setTree] = useState<ConversationTree>(createEmptyTree);
 
   const isSwitchingRef = useRef(false);
+  const treeRef = useRef(tree);
+  useEffect(() => {
+    treeRef.current = tree;
+  }, [tree]);
 
   const activeBranch = tree.branches[tree.activeBranchId];
   const isMainBranch = tree.activeBranchId === tree.mainBranchId;
+
+  // Helper: switch useChat messages to a branch and guard the sync effect
+  const switchChatToBranch = useCallback(
+    (nextTree: ConversationTree, branchId: BranchId) => {
+      const chain = getBranchMessageChain(nextTree, branchId);
+      isSwitchingRef.current = true;
+      setMessages(chain);
+      setTimeout(() => {
+        isSwitchingRef.current = false;
+      }, 0);
+    },
+    [setMessages],
+  );
 
   // -------------------------------------------------------------------
   // Sync: any time useChat messages change, add missing ones to the tree.
@@ -65,7 +82,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (isSwitchingRef.current) return;
 
     let hasNew = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- valid sync from useChat (external system)
     setTree((prev) => {
       const next = structuredClone(prev);
       for (const msg of messages) {
@@ -85,27 +102,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     (forkFromNodeId: NodeId) => {
       if (status === "streaming" || status === "submitted") return;
 
-      setTree((prev) => {
-        const next = structuredClone(prev);
-        const { branchId } = treeFnCreateBranch(next, forkFromNodeId);
-        if (!branchId) return prev;
+      const prev = treeRef.current;
+      const next = structuredClone(prev);
+      const { branchId } = treeFnCreateBranch(next, forkFromNodeId);
+      if (!branchId) return;
 
-        // Switch to the new branch
-        next.activeBranchId = branchId;
-
-        // Load the ancestor chain for this branch into useChat
-        const chain = getBranchMessageChain(next, branchId);
-        isSwitchingRef.current = true;
-        setMessages(chain);
-
-        setTimeout(() => {
-          isSwitchingRef.current = false;
-        }, 0);
-
-        return next;
-      });
+      next.activeBranchId = branchId;
+      setTree(next);
+      switchChatToBranch(next, branchId);
     },
-    [status, setMessages],
+    [status, switchChatToBranch],
   );
 
   // -------------------------------------------------------------------
@@ -115,32 +121,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     (branchId: BranchId) => {
       if (status === "streaming" || status === "submitted") return;
 
-      setTree((prev) => {
-        if (!prev.branches[branchId]) return prev;
+      const prev = treeRef.current;
+      if (!prev.branches[branchId]) return;
 
-        const next = structuredClone(prev);
-        next.activeBranchId = branchId;
-
-        const chain = getBranchMessageChain(next, branchId);
-        isSwitchingRef.current = true;
-        setMessages(chain);
-
-        setTimeout(() => {
-          isSwitchingRef.current = false;
-        }, 0);
-
-        return next;
-      });
+      const next = structuredClone(prev);
+      next.activeBranchId = branchId;
+      setTree(next);
+      switchChatToBranch(next, branchId);
     },
-    [status, setMessages],
+    [status, switchChatToBranch],
   );
 
   // -------------------------------------------------------------------
   // Return to main thread
   // -------------------------------------------------------------------
   const handleReturnToMain = useCallback(() => {
-    handleSwitchBranch(tree.mainBranchId);
-  }, [tree.mainBranchId, handleSwitchBranch]);
+    handleSwitchBranch(treeRef.current.mainBranchId);
+  }, [handleSwitchBranch]);
 
   // -------------------------------------------------------------------
   // Reset everything (New Chat)
@@ -149,7 +146,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setTree(createEmptyTree());
     isSwitchingRef.current = true;
     setMessages([]);
-
     setTimeout(() => {
       isSwitchingRef.current = false;
     }, 0);

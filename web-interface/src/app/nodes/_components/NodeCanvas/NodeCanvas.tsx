@@ -217,10 +217,7 @@ export default function NodeCanvas({
 
   const nodeCount = Object.keys(tree.nodes).length;
 
-  const fitViewOptions = useMemo(
-    () => ({ padding: 0.3, maxZoom: 1 }),
-    [],
-  );
+  const fitViewOptions = useMemo(() => ({ padding: 0.3, maxZoom: 1 }), []);
 
   if (nodeCount === 0) {
     return (

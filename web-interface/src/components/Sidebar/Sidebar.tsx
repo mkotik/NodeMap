@@ -18,7 +18,14 @@ export default function Sidebar() {
           <span className="sidebar__tagline">Digital Nervous System</span>
         </div>
 
-        <button className="sidebar__new-chat" type="button" onClick={() => { resetAll(); router.push("/"); }}>
+        <button
+          className="sidebar__new-chat"
+          type="button"
+          onClick={() => {
+            resetAll();
+            router.push("/");
+          }}
+        >
           <svg
             width="14"
             height="14"

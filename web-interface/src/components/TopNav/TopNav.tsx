@@ -7,7 +7,8 @@ import "./TopNav.scss";
 
 export default function TopNav() {
   const pathname = usePathname();
-  const { activeBranch, isMainBranch, returnToMain, messages } = useChatContext();
+  const { activeBranch, isMainBranch, returnToMain, messages } =
+    useChatContext();
   const isNodes = pathname === "/nodes";
   const isThread = pathname === "/";
   const onBranch = !isMainBranch && isThread;
@@ -57,7 +58,10 @@ export default function TopNav() {
           </nav>
         ) : !isEmpty ? (
           isNodes ? (
-            <Link href="/" className="topnav__breadcrumb topnav__breadcrumb--primary">
+            <Link
+              href="/"
+              className="topnav__breadcrumb topnav__breadcrumb--primary"
+            >
               Main Thread
             </Link>
           ) : (

@@ -18,6 +18,7 @@ import type { ConversationTree, BranchColor } from "@/types/branch";
 import { getBranchesFromNode } from "@/lib/tree";
 import MessageNode from "../MessageNode/MessageNode";
 import UserNode from "../UserNode/UserNode";
+import ContinueNode from "../ContinueNode/ContinueNode";
 import "./NodeCanvas.scss";
 
 interface NodeCanvasProps {
@@ -29,6 +30,7 @@ interface NodeCanvasProps {
 const nodeTypes: NodeTypes = {
   messageNode: MessageNode,
   userNode: UserNode,
+  continueNode: ContinueNode,
 };
 
 const BRANCH_COLOR_MAP: Record<BranchColor, string> = {
@@ -184,21 +186,63 @@ function buildGraph(
       if (!childNode) continue;
       const childBranch = tree.branches[childNode.branchId];
       const color = childBranch?.color ?? "primary";
-      const isActive =
-        childNode.branchId === tree.activeBranchId ||
-        treeNode.branchId === tree.activeBranchId;
 
       rfEdges.push({
         id: `e-${nodeId}-${childId}`,
         source: nodeId,
         target: childId,
         type: "smoothstep",
-        animated: isActive,
+        animated: true,
         style: {
-          stroke: isActive
-            ? BRANCH_COLOR_MAP[color]
-            : BRANCH_COLOR_DIM_MAP[color],
-          strokeWidth: isActive ? 1.5 : 1,
+          stroke: BRANCH_COLOR_MAP[color],
+          strokeWidth: 1.5,
+        },
+      });
+    }
+  }
+
+  // Add "Continue" placeholder nodes at the end of each branch
+  {
+    for (const branch of Object.values(tree.branches)) {
+      if (branch.nodeIds.length === 0) continue;
+      const lastNodeId = branch.nodeIds[branch.nodeIds.length - 1];
+      const lastNode = tree.nodes[lastNodeId];
+      if (!lastNode) continue;
+
+      const lastPos = nodePositions[lastNodeId];
+      if (!lastPos) continue;
+
+      const lastHeight = estimateNodeHeight(lastNodeId);
+      const continueId = `continue-${branch.id}`;
+      const label =
+        branch.id === tree.mainBranchId
+          ? "Continue main thread"
+          : `Continue ${branch.label}`;
+
+      rfNodes.push({
+        id: continueId,
+        type: "continueNode",
+        draggable: false,
+        position: {
+          x: lastPos.x,
+          y: lastPos.y + lastHeight + NODE_GAP,
+        },
+        data: {
+          label,
+          color: branch.color,
+          onContinue: () => onSwitchBranch(branch.id),
+        },
+      });
+
+      rfEdges.push({
+        id: `e-${lastNodeId}-${continueId}`,
+        source: lastNodeId,
+        target: continueId,
+        type: "smoothstep",
+        animated: true,
+        style: {
+          stroke: BRANCH_COLOR_MAP[branch.color],
+          strokeWidth: 1.5,
         },
       });
     }

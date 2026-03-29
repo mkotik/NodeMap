@@ -1,0 +1,78 @@
+@use "../../../../styles/tokens" as *;
+@use "../../../../styles/mixins" as *;
+
+.continue-node {
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  padding: $space-3 $space-5;
+  border-radius: $radius-full;
+  box-sizing: border-box;
+  cursor: pointer;
+  @include surface-transition;
+
+  &--primary {
+    background: rgba($primary, 0.08);
+    color: $primary;
+
+    &:hover {
+      background: rgba($primary, 0.16);
+    }
+  }
+
+  &--secondary {
+    background: rgba($secondary, 0.08);
+    color: $secondary;
+
+    &:hover {
+      background: rgba($secondary, 0.16);
+    }
+  }
+
+  &--tertiary {
+    background: rgba($tertiary, 0.08);
+    color: $tertiary;
+
+    &:hover {
+      background: rgba($tertiary, 0.16);
+    }
+  }
+
+  &__handle {
+    width: 4px !important;
+    height: 4px !important;
+    background: $outline !important;
+    border: none !important;
+    opacity: 0.5;
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: $radius-full;
+    flex-shrink: 0;
+
+    &--primary {
+      background: $primary;
+    }
+
+    &--secondary {
+      background: $secondary;
+    }
+
+    &--tertiary {
+      background: $tertiary;
+    }
+  }
+
+  &__label {
+    font-family: $font-body;
+    font-size: $label-sm;
+    font-weight: $weight-medium;
+    white-space: nowrap;
+  }
+}

@@ -1,17 +1,31 @@
 "use client";
 
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
-import type { Message } from "../../page";
+import type { UIMessage, ChatStatus } from "ai";
 import "./ThreadView.scss";
 
 interface ThreadViewProps {
-  messages: Message[];
-  onSubmit: (text: string) => void;
+  messages: UIMessage[];
+  status: ChatStatus;
+  onSend: (text: string) => void;
 }
 
-export default function ThreadView({ messages, onSubmit }: ThreadViewProps) {
+function getMessageText(msg: UIMessage): string {
+  return msg.parts
+    .filter((part): part is { type: "text"; text: string } => part.type === "text")
+    .map((part) => part.text)
+    .join("");
+}
+
+function getLabel(role: string, index: number): string {
+  if (role === "assistant") return "Neural Logic";
+  return index === 0 ? "User Request" : "Follow Up";
+}
+
+export default function ThreadView({ messages, status, onSend }: ThreadViewProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isStreaming = status === "submitted" || status === "streaming";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -19,8 +33,8 @@ export default function ThreadView({ messages, onSubmit }: ThreadViewProps) {
 
   function handleSubmit() {
     const trimmed = input.trim();
-    if (!trimmed) return;
-    onSubmit(trimmed);
+    if (!trimmed || isStreaming) return;
+    onSend(trimmed);
     setInput("");
   }
 
@@ -35,21 +49,39 @@ export default function ThreadView({ messages, onSubmit }: ThreadViewProps) {
     <div className="thread">
       <div className="thread__messages">
         <div className="thread__messages-inner">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`thread__message thread__message--${msg.role}`}>
-              <div className="thread__node">
-                <div className={`thread__node-dot thread__node-dot--${msg.role === "ai" ? "primary" : "muted"}`} />
-              </div>
-              <div className="thread__message-body">
-                <span className={`thread__label thread__label--${msg.role}`}>
-                  {msg.label}
-                </span>
-                <div className={`thread__bubble thread__bubble--${msg.role}`}>
-                  <p>{msg.content}</p>
+          {messages.map((msg, i) => {
+            const isAi = msg.role === "assistant";
+            const text = getMessageText(msg);
+
+            return (
+              <div
+                key={msg.id}
+                className={`thread__message thread__message--${isAi ? "ai" : "user"}`}
+              >
+                <div className="thread__node">
+                  <div
+                    className={`thread__node-dot thread__node-dot--${isAi ? "primary" : "muted"}`}
+                  />
+                </div>
+                <div className="thread__message-body">
+                  <span
+                    className={`thread__label thread__label--${isAi ? "ai" : "user"}`}
+                  >
+                    {getLabel(msg.role, i)}
+                  </span>
+                  <div
+                    className={`thread__bubble thread__bubble--${isAi ? "ai" : "user"}`}
+                  >
+                    {text ? (
+                      <p>{text}</p>
+                    ) : isAi && isStreaming ? (
+                      <p className="thread__typing">Thinking...</p>
+                    ) : null}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -70,6 +102,7 @@ export default function ThreadView({ messages, onSubmit }: ThreadViewProps) {
             type="button"
             aria-label="Submit"
             onClick={handleSubmit}
+            disabled={isStreaming}
           >
             <svg
               width="18"

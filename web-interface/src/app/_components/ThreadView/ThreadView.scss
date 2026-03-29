@@ -154,4 +154,20 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
+
+  &__typing {
+    color: $on-surface-variant;
+    animation: thread-pulse 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes thread-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }

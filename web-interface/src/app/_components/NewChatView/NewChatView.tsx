@@ -27,16 +27,16 @@ const suggestions = [
 ];
 
 interface NewChatViewProps {
-  onSubmit: (text: string) => void;
+  onSend: (text: string) => void;
 }
 
-export default function NewChatView({ onSubmit }: NewChatViewProps) {
+export default function NewChatView({ onSend }: NewChatViewProps) {
   const [input, setInput] = useState("");
 
   function handleSubmit() {
     const trimmed = input.trim();
     if (!trimmed) return;
-    onSubmit(trimmed);
+    onSend(trimmed);
     setInput("");
   }
 
@@ -116,7 +116,7 @@ export default function NewChatView({ onSubmit }: NewChatViewProps) {
             key={suggestion.title}
             className="new-chat__suggestion-card"
             type="button"
-            onClick={() => onSubmit(suggestion.title)}
+            onClick={() => onSend(suggestion.title)}
           >
             <div className={`new-chat__suggestion-dot new-chat__suggestion-dot--${suggestion.color}`} />
             <div className="new-chat__suggestion-text">

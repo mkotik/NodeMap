@@ -19,6 +19,9 @@
     "qa": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:e2e"
   },
   "dependencies": {
+    "@ai-sdk/react": "^3.0.143",
+    "@openrouter/ai-sdk-provider": "^2.3.3",
+    "ai": "^6.0.141",
     "next": "16.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",

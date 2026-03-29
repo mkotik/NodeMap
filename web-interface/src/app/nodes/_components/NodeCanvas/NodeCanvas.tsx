@@ -39,12 +39,6 @@ const BRANCH_COLOR_MAP: Record<BranchColor, string> = {
   tertiary: "#ac8aff",
 };
 
-const BRANCH_COLOR_DIM_MAP: Record<BranchColor, string> = {
-  primary: "#3a8a62",
-  secondary: "#3a5e99",
-  tertiary: "#6b5299",
-};
-
 function getMessageText(msg: {
   parts: Array<{ type: string; text?: string }>;
 }): string {

@@ -10,6 +10,7 @@ export default function TopNav() {
   const router = useRouter();
   const { activeBranch, isMainBranch, returnToMain, messages } =
     useChatContext();
+  const isAuth = pathname.startsWith("/auth");
   const isNodes = pathname === "/nodes";
   const isThread = pathname === "/";
   const onBranch = !isMainBranch && isThread;
@@ -19,62 +20,78 @@ export default function TopNav() {
   return (
     <header className="topnav">
       <div className="topnav__left">
-        {!isEmpty && (
-          <Link
-            href="/nodes"
-            className="topnav__node-link"
-            aria-label="Node View"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
-            </svg>
-          </Link>
+        {!isAuth && (
+          <>
+            {!isEmpty && (
+              <Link
+                href="/nodes"
+                className="topnav__node-link"
+                aria-label="Node View"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+              </Link>
+            )}
+            {onBranch ? (
+              <nav className="topnav__breadcrumbs">
+                <button
+                  className="topnav__breadcrumb"
+                  type="button"
+                  onClick={returnToMain}
+                >
+                  Main Thread
+                </button>
+                <span className="topnav__breadcrumb-sep">/</span>
+                <span
+                  className={`topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--${activeBranch.color}`}
+                >
+                  {activeBranch.label}
+                </span>
+              </nav>
+            ) : !isEmpty ? (
+              isNodes ? (
+                <button
+                  type="button"
+                  className="topnav__breadcrumb topnav__breadcrumb--primary"
+                  onClick={() => {
+                    returnToMain();
+                    router.push("/");
+                  }}
+                >
+                  Main Thread
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              ) : (
+                <span className="topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--primary">
+                  Main Thread
+                </span>
+              )
+            ) : null}
+          </>
         )}
-        {onBranch ? (
-          <nav className="topnav__breadcrumbs">
-            <button
-              className="topnav__breadcrumb"
-              type="button"
-              onClick={returnToMain}
-            >
-              Main Thread
-            </button>
-            <span className="topnav__breadcrumb-sep">/</span>
-            <span
-              className={`topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--${activeBranch.color}`}
-            >
-              {activeBranch.label}
-            </span>
-          </nav>
-        ) : !isEmpty ? (
-          isNodes ? (
-            <button
-              type="button"
-              className="topnav__breadcrumb topnav__breadcrumb--primary"
-              onClick={() => { returnToMain(); router.push("/"); }}
-            >
-              Main Thread
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-          ) : (
-            <span className="topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--primary">
-              Main Thread
-            </span>
-          )
-        ) : null}
       </div>
       <div className="topnav__right">
         <button className="topnav__icon-btn" type="button" aria-label="Share">

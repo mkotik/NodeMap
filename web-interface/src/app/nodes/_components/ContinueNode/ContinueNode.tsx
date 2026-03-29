@@ -16,7 +16,12 @@ export default function ContinueNode({ data }: { data: ContinueNodeData }) {
       className={`continue-node continue-node--${data.color}`}
       onClick={data.onContinue}
     >
-      <Handle type="target" position={Position.Top} isConnectable={false} className="continue-node__handle" />
+      <Handle
+        type="target"
+        position={Position.Top}
+        isConnectable={false}
+        className="continue-node__handle"
+      />
       <div className={`continue-node__dot continue-node__dot--${data.color}`} />
       <span className="continue-node__label">{data.label}</span>
       <svg

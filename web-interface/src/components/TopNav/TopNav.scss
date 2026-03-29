@@ -12,7 +12,24 @@
   &__left {
     display: flex;
     align-items: center;
-    gap: $space-8;
+    gap: $space-4;
+  }
+
+  &__node-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-md;
+    color: $on-surface-variant;
+    text-decoration: none;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-low;
+      color: $primary;
+    }
   }
 
   &__brand {
@@ -48,6 +65,90 @@
     }
 
     &--active {
+      color: $on-surface;
+    }
+  }
+
+  // Breadcrumbs (shown when on a branch)
+  &__breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__breadcrumb {
+    font-family: $font-body;
+    font-size: $body-sm;
+    font-weight: $weight-medium;
+    color: $on-surface-variant;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      color: $on-surface;
+    }
+
+    &--active {
+      cursor: default;
+      font-weight: $weight-semibold;
+
+      &:hover {
+        color: $on-surface-variant;
+      }
+    }
+
+    &--primary {
+      color: $primary;
+
+      &:hover {
+        color: $primary;
+      }
+    }
+
+    &--secondary {
+      color: $secondary;
+
+      &:hover {
+        color: $secondary;
+      }
+    }
+
+    &--tertiary {
+      color: $tertiary;
+
+      &:hover {
+        color: $tertiary;
+      }
+    }
+  }
+
+  &__breadcrumb-sep {
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $outline;
+  }
+
+  &__return-btn {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    background: none;
+    border: none;
+    color: $on-surface-variant;
+    font-family: $font-body;
+    font-size: $body-sm;
+    font-weight: $weight-medium;
+    cursor: pointer;
+    padding: $space-2 $space-3;
+    border-radius: $radius-md;
+    margin-right: $space-2;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-low;
       color: $on-surface;
     }
   }

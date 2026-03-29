@@ -58,10 +58,10 @@ export default function ChatView({
   messages,
   status,
   onSend,
-  activeBranch,
-  isMainBranch,
+  activeBranch: _activeBranch,
+  isMainBranch: _isMainBranch,
   onCreateBranch,
-  onReturnToMain,
+  onReturnToMain: _onReturnToMain,
 }: ChatViewProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -257,50 +257,6 @@ export default function ChatView({
 
   return (
     <div className="chat-view-thread">
-      {!isMainBranch && (
-        <div className="chat-view-thread__branch-bar">
-          <div
-            className={`chat-view-thread__branch-indicator chat-view-thread__branch-indicator--${activeBranch.color}`}
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="6" y1="3" x2="6" y2="15" />
-              <circle cx="18" cy="6" r="3" />
-              <circle cx="6" cy="18" r="3" />
-              <path d="M18 9a9 9 0 0 1-9 9" />
-            </svg>
-            {activeBranch.label}
-          </div>
-          <button
-            className="chat-view-thread__back-btn"
-            type="button"
-            onClick={onReturnToMain}
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            Main Thread
-          </button>
-        </div>
-      )}
-
       <div className="chat-view-thread__messages">
         <div className="chat-view-thread__messages-inner">
           {messages.map((msg, i) => {

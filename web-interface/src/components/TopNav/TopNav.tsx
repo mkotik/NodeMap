@@ -2,77 +2,99 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { useChatContext } from "@/context/ChatContext";
 import "./TopNav.scss";
 
 export default function TopNav() {
   const pathname = usePathname();
+  const { activeBranch, isMainBranch, returnToMain } = useChatContext();
   const isNodes = pathname === "/nodes";
   const isThread = pathname === "/";
+  const onBranch = !isMainBranch && isThread;
 
   return (
     <header className="topnav">
       <div className="topnav__left">
-        <nav className="topnav__tabs">
-          <Link
-            href="/nodes"
-            className={`topnav__tab ${isNodes ? "topnav__tab--active" : ""}`}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
-            </svg>
-            Nodes
-          </Link>
-          <Link
-            href="/"
-            className={`topnav__tab ${isThread ? "topnav__tab--active" : ""}`}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            Main Thread
-          </Link>
-        </nav>
-      </div>
-      <div className="topnav__right">
-        <button
-          className="topnav__icon-btn"
-          type="button"
-          aria-label="Notifications"
+        <Link
+          href="/nodes"
+          className="topnav__node-link"
+          aria-label="Node View"
         >
           <svg
-            width="18"
-            height="18"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
-            strokeLinejoin="round"
           >
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
           </svg>
-        </button>
+        </Link>
+        {onBranch ? (
+          <nav className="topnav__breadcrumbs">
+            <button
+              className="topnav__breadcrumb"
+              type="button"
+              onClick={returnToMain}
+            >
+              Main Thread
+            </button>
+            <span className="topnav__breadcrumb-sep">/</span>
+            <span
+              className={`topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--${activeBranch.color}`}
+            >
+              {activeBranch.label}
+            </span>
+          </nav>
+        ) : (
+          <nav className="topnav__tabs">
+            {/* <Link
+              href="/nodes"
+              className={`topnav__tab ${isNodes ? "topnav__tab--active" : ""}`}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+              Nodes
+            </Link> */}
+            <Link
+              href="/"
+              className={`topnav__tab ${isThread ? "topnav__tab--active" : ""}`}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              Main Thread
+            </Link>
+          </nav>
+        )}
+      </div>
+      <div className="topnav__right">
         <button className="topnav__icon-btn" type="button" aria-label="Share">
           <svg
             width="18"

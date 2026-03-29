@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -217,14 +217,8 @@ export default function NodeCanvas({
 
   const nodeCount = Object.keys(tree.nodes).length;
 
-  const onInit = useCallback(
-    (instance: {
-      fitView: (options?: { padding?: number; maxZoom?: number }) => void;
-    }) => {
-      setTimeout(() => {
-        instance.fitView({ padding: 0.3, maxZoom: 1 });
-      }, 50);
-    },
+  const fitViewOptions = useMemo(
+    () => ({ padding: 0.3, maxZoom: 1 }),
     [],
   );
 
@@ -246,7 +240,8 @@ export default function NodeCanvas({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
-        onInit={onInit}
+        fitView
+        fitViewOptions={fitViewOptions}
         minZoom={0.1}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}

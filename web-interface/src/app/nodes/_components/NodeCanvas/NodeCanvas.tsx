@@ -265,7 +265,19 @@ export default function NodeCanvas({
 
   const nodeCount = Object.keys(tree.nodes).length;
 
-  const fitViewOptions = useMemo(() => ({ padding: 0.3, maxZoom: 1 }), []);
+  const fitViewOptions = useMemo(() => {
+    const activeBranch = tree.branches[tree.activeBranchId];
+    if (!activeBranch || activeBranch.nodeIds.length === 0) {
+      return { padding: 0.3, maxZoom: 1 };
+    }
+    // Focus on the last few nodes of the active branch + the continue node
+    const recentIds = activeBranch.nodeIds.slice(-4);
+    const focusNodes = [
+      ...recentIds.map((id) => ({ id })),
+      { id: `continue-${activeBranch.id}` },
+    ];
+    return { padding: 0.3, maxZoom: 1, nodes: focusNodes };
+  }, [tree.activeBranchId, tree.branches]);
 
   if (nodeCount === 0) {
     return (

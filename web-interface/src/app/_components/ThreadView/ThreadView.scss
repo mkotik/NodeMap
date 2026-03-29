@@ -1,0 +1,157 @@
+@use "../../../styles/tokens" as *;
+@use "../../../styles/mixins" as *;
+
+.thread {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  &__messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: $space-8 $space-8 $space-4;
+  }
+
+  &__messages-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+  }
+
+  // --- Message row ---
+  &__message {
+    display: flex;
+    gap: $space-4;
+  }
+
+  // --- Node dot column ---
+  &__node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: $space-8;
+    flex-shrink: 0;
+  }
+
+  &__node-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-full;
+    flex-shrink: 0;
+
+    &--primary {
+      background: $primary;
+      box-shadow: 0 0 8px rgba($primary, 0.5);
+    }
+
+    &--muted {
+      background: $outline;
+    }
+  }
+
+  // --- Message body ---
+  &__message-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__label {
+    display: block;
+    @include type-label($label-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: $space-2;
+
+    &--user {
+      color: $on-surface-variant;
+    }
+
+    &--ai {
+      color: $primary;
+    }
+  }
+
+  &__bubble {
+    border-radius: $radius-md;
+    padding: $space-5 $space-6;
+
+    &--user {
+      background: $surface-container-low;
+    }
+
+    &--ai {
+      background: $surface-container;
+    }
+
+    p {
+      @include type-body-ai;
+      margin: 0;
+    }
+  }
+
+  // --- Bottom input bar ---
+  &__input-bar {
+    padding: $space-4 $space-8 $space-4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__input-container {
+    max-width: 720px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    background: $surface-container-low;
+    border-radius: $radius-full;
+    padding: $space-3 $space-3 $space-3 $space-5;
+  }
+
+  &__input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: $font-body;
+    font-size: $body-md;
+    color: $on-surface;
+    line-height: $leading-normal;
+
+    &::placeholder {
+      color: $outline;
+    }
+  }
+
+  &__submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    flex-shrink: 0;
+    background: $primary;
+    color: $surface;
+    border: none;
+    border-radius: $radius-full;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $primary-dim;
+      box-shadow: $shadow-node-glow-primary;
+    }
+  }
+
+  &__hint {
+    @include type-label($label-sm);
+    color: $outline;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+}

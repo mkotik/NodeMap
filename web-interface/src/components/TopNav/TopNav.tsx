@@ -7,34 +7,38 @@ import "./TopNav.scss";
 
 export default function TopNav() {
   const pathname = usePathname();
-  const { activeBranch, isMainBranch, returnToMain } = useChatContext();
+  const { activeBranch, isMainBranch, returnToMain, messages } = useChatContext();
   const isNodes = pathname === "/nodes";
   const isThread = pathname === "/";
   const onBranch = !isMainBranch && isThread;
+  const hasMessages = messages.length > 0;
+  const isEmpty = isThread && isMainBranch && !hasMessages;
 
   return (
     <header className="topnav">
       <div className="topnav__left">
-        <Link
-          href="/nodes"
-          className="topnav__node-link"
-          aria-label="Node View"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
+        {!isEmpty && (
+          <Link
+            href="/nodes"
+            className="topnav__node-link"
+            aria-label="Node View"
           >
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
-            <rect x="14" y="14" width="7" height="7" rx="1" />
-          </svg>
-        </Link>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+          </Link>
+        )}
         {onBranch ? (
           <nav className="topnav__breadcrumbs">
             <button
@@ -51,28 +55,8 @@ export default function TopNav() {
               {activeBranch.label}
             </span>
           </nav>
-        ) : (
+        ) : !isEmpty ? (
           <nav className="topnav__tabs">
-            {/* <Link
-              href="/nodes"
-              className={`topnav__tab ${isNodes ? "topnav__tab--active" : ""}`}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-              </svg>
-              Nodes
-            </Link> */}
             <Link
               href="/"
               className={`topnav__tab ${isThread ? "topnav__tab--active" : ""}`}
@@ -92,7 +76,7 @@ export default function TopNav() {
               Main Thread
             </Link>
           </nav>
-        )}
+        ) : null}
       </div>
       <div className="topnav__right">
         <button className="topnav__icon-btn" type="button" aria-label="Share">

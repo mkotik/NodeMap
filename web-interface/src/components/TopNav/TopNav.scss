@@ -83,11 +83,14 @@
     color: $on-surface-variant;
     background: none;
     border: none;
-    padding: 0;
+    padding: $space-2 $space-3;
+    border-radius: $radius-md;
     cursor: pointer;
+    text-decoration: none;
     @include surface-transition;
 
     &:hover {
+      background: $surface-container-low;
       color: $on-surface;
     }
 
@@ -96,6 +99,7 @@
       font-weight: $weight-semibold;
 
       &:hover {
+        background: none;
         color: $on-surface-variant;
       }
     }

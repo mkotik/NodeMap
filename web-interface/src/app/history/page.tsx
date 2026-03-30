@@ -35,7 +35,7 @@ const PAGE_SIZE = 10;
 
 export default function HistoryPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const { loadConversation } = useChatContext();
+  const { loadConversation, completingChatIds, recoverChat } = useChatContext();
   const router = useRouter();
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -119,6 +119,13 @@ export default function HistoryPage() {
     window.addEventListener("chat-completed", handler);
     return () => window.removeEventListener("chat-completed", handler);
   }, [cursorStack, loadPage]);
+
+  // Auto-recover any "Untitled" chats visible on this page
+  useEffect(() => {
+    for (const c of conversations) {
+      if (c.title === "Untitled") recoverChat(c.id);
+    }
+  }, [conversations, recoverChat]);
 
   // Debounced search: reset to page 1 when search changes
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -310,7 +317,11 @@ export default function HistoryPage() {
                         <div className="history__card-body">
                           <div className="history__card-header">
                             <span className="history__card-title">
-                              {c.title}
+                              {completingChatIds.has(c.id) ? (
+                                <BeatLoader color="#69f6b8" size={4} />
+                              ) : (
+                                c.title
+                              )}
                             </span>
                             {c.preview && (
                               <span className="history__card-preview">

@@ -55,6 +55,7 @@ interface ChatContextValue {
   setConversationTitle: (title: string) => void;
   namingConversation: boolean;
   completingChatIds: Set<string>;
+  recoverChat: (id: string) => void;
   loadConversation: (id: string) => Promise<void>;
   recentChats: Array<{ id: string; title: string }>;
   refreshRecents: () => void;
@@ -174,6 +175,37 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     window.addEventListener("chat-completed", handler);
     return () => window.removeEventListener("chat-completed", handler);
   }, [refreshRecents]);
+
+  // --- Recover incomplete chats (missing LLM response / untitled) ---
+  const recoveringRef = useRef(new Set<string>());
+
+  const recoverChat = useCallback((id: string) => {
+    if (recoveringRef.current.has(id)) return;
+    recoveringRef.current.add(id);
+    setCompletingChatIds((prev) => new Set(prev).add(id));
+
+    const token = getAccessToken();
+    fetch("/api/chat/recover", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ conversationId: id }),
+    })
+      .then((res) => {
+        if (res.ok) window.dispatchEvent(new Event("chat-completed"));
+      })
+      .catch(console.error)
+      .finally(() => recoveringRef.current.delete(id));
+  }, []);
+
+  // Auto-recover any "Untitled" chats that appear in recents
+  useEffect(() => {
+    for (const c of recentChats) {
+      if (c.title === "Untitled") recoverChat(c.id);
+    }
+  }, [recentChats, recoverChat]);
 
   // --- Auto-save (debounced persistence to DB) ---
   const skipNextSaveRef = useRef(false);
@@ -445,6 +477,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setConversationTitle,
         namingConversation,
         completingChatIds,
+        recoverChat,
         loadConversation,
         recentChats,
         refreshRecents,

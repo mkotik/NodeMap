@@ -136,10 +136,10 @@ export function useBranchOps({
         return;
 
       const next = structuredClone(current);
-      const wasActive = next.activeBranchId === branchId;
       deleteBranch(next, branchId);
 
-      if (wasActive) {
+      // Active branch may have been deleted as a sub-branch
+      if (!next.branches[next.activeBranchId]) {
         next.activeBranchId = next.mainBranchId;
         setTree(next);
         switchChatToBranch(next, next.mainBranchId);

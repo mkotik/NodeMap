@@ -53,6 +53,21 @@ export default function Sidebar() {
     (b) => b.id !== tree.mainBranchId && b.nodeIds.length > 0,
   );
 
+  // Collect all descendant sub-branches of a given branch
+  function getDescendantBranches(branchId: string) {
+    const descendants: typeof branches = [];
+    function collect(parentId: string) {
+      for (const b of Object.values(tree.branches)) {
+        if (b.parentBranchId === parentId && b.id !== tree.mainBranchId) {
+          descendants.push(b);
+          collect(b.id);
+        }
+      }
+    }
+    collect(branchId);
+    return descendants;
+  }
+
   // Show a pending entry when the user has sent a message but the chat
   // hasn't appeared in recents yet (save still in-flight).
   const hasMessages = Object.keys(tree.nodes).length > 0;
@@ -129,7 +144,13 @@ export default function Sidebar() {
   async function handleBranchDelete(branchId: string) {
     setActionLoading(true);
     try {
-      const wasActive = tree.activeBranchId === branchId;
+      // Check if active branch is the target or a descendant of it
+      let wasActive = false;
+      let checkId: string | null = tree.activeBranchId;
+      while (checkId) {
+        if (checkId === branchId) { wasActive = true; break; }
+        checkId = tree.branches[checkId]?.parentBranchId ?? null;
+      }
       deleteBranchById(branchId);
       if (conversationId) {
         await trpc.conversation.deleteBranch.mutate({
@@ -603,39 +624,59 @@ export default function Sidebar() {
 
                                         {/* Branch delete confirmation */}
                                         {menu.type === "branchConfirmDelete" &&
-                                          menu.branchId === b.id && (
-                                            <div className="sidebar__recent-dropdown">
-                                              <span className="sidebar__recent-dropdown-label">
-                                                Delete this branch?
-                                              </span>
-                                              <button
-                                                type="button"
-                                                className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
-                                                onClick={() =>
-                                                  handleBranchDelete(b.id)
-                                                }
-                                                disabled={actionLoading}
-                                              >
-                                                {actionLoading ? (
-                                                  <BeatLoader
-                                                    color="#ff716c"
-                                                    size={3}
-                                                  />
-                                                ) : (
-                                                  "Yes, delete"
+                                          menu.branchId === b.id &&
+                                          (() => {
+                                            const descendants =
+                                              getDescendantBranches(b.id);
+                                            return (
+                                              <div className="sidebar__recent-dropdown">
+                                                <span className="sidebar__recent-dropdown-label">
+                                                  Delete this branch?
+                                                </span>
+                                                {descendants.length > 0 && (
+                                                  <div className="sidebar__recent-dropdown-label sidebar__recent-dropdown-label--warning">
+                                                    This will also delete{" "}
+                                                    {descendants.length} sub-branch
+                                                    {descendants.length > 1
+                                                      ? "es"
+                                                      : ""}
+                                                    :
+                                                    <ul className="sidebar__recent-dropdown-list">
+                                                      {descendants.map((d) => (
+                                                        <li key={d.id}>{d.label}</li>
+                                                      ))}
+                                                    </ul>
+                                                  </div>
                                                 )}
-                                              </button>
-                                              <button
-                                                type="button"
-                                                className="sidebar__recent-dropdown-item"
-                                                onClick={() =>
-                                                  setMenu({ type: "closed" })
-                                                }
-                                              >
-                                                Cancel
-                                              </button>
-                                            </div>
-                                          )}
+                                                <button
+                                                  type="button"
+                                                  className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
+                                                  onClick={() =>
+                                                    handleBranchDelete(b.id)
+                                                  }
+                                                  disabled={actionLoading}
+                                                >
+                                                  {actionLoading ? (
+                                                    <BeatLoader
+                                                      color="#ff716c"
+                                                      size={3}
+                                                    />
+                                                  ) : (
+                                                    "Yes, delete"
+                                                  )}
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  className="sidebar__recent-dropdown-item"
+                                                  onClick={() =>
+                                                    setMenu({ type: "closed" })
+                                                  }
+                                                >
+                                                  Cancel
+                                                </button>
+                                              </div>
+                                            );
+                                          })()}
                                       </div>
                                     )}
                                   </div>

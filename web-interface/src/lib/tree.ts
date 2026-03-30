@@ -193,17 +193,32 @@ export function deleteBranch(tree: ConversationTree, branchId: BranchId): void {
   const branch = tree.branches[branchId];
   if (!branch || branchId === tree.mainBranchId) return;
 
-  for (const nodeId of branch.nodeIds) {
-    const node = tree.nodes[nodeId];
-    if (node?.parentId && tree.nodes[node.parentId]) {
-      tree.nodes[node.parentId].childIds = tree.nodes[
-        node.parentId
-      ].childIds.filter((id) => id !== nodeId);
+  // Collect this branch and all descendant branches
+  const toDelete: BranchId[] = [];
+  function collectDescendants(id: BranchId) {
+    toDelete.push(id);
+    for (const b of Object.values(tree.branches)) {
+      if (b.parentBranchId === id) {
+        collectDescendants(b.id);
+      }
     }
-    delete tree.nodes[nodeId];
   }
+  collectDescendants(branchId);
 
-  delete tree.branches[branchId];
+  for (const id of toDelete) {
+    const b = tree.branches[id];
+    if (!b) continue;
+    for (const nodeId of b.nodeIds) {
+      const node = tree.nodes[nodeId];
+      if (node?.parentId && tree.nodes[node.parentId]) {
+        tree.nodes[node.parentId].childIds = tree.nodes[
+          node.parentId
+        ].childIds.filter((cid) => cid !== nodeId);
+      }
+      delete tree.nodes[nodeId];
+    }
+    delete tree.branches[id];
+  }
 }
 
 // ---------------------------------------------------------------------------

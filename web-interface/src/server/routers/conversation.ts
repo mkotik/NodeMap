@@ -237,11 +237,28 @@ export const conversationRouter = router({
         return { success: false };
       }
 
+      // Collect all descendant branches to cascade delete
+      const allBranches = await prisma.branch.findMany({
+        where: { conversationId: input.conversationId },
+        select: { id: true, parentBranchId: true },
+      });
+
+      const toDelete: string[] = [];
+      function collectDescendants(id: string) {
+        toDelete.push(id);
+        for (const b of allBranches) {
+          if (b.parentBranchId === id) {
+            collectDescendants(b.id);
+          }
+        }
+      }
+      collectDescendants(input.branchId);
+
       await prisma.message.deleteMany({
-        where: { branchId: input.branchId },
+        where: { branchId: { in: toDelete } },
       });
       await prisma.branch.deleteMany({
-        where: { id: input.branchId, conversationId: input.conversationId },
+        where: { id: { in: toDelete }, conversationId: input.conversationId },
       });
       return { success: true };
     }),

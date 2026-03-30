@@ -253,6 +253,30 @@ describe("tree utilities", () => {
       expect(tree.nodes["m2"].childIds).not.toContain("b1");
     });
 
+    it("cascades deletion to sub-branches", () => {
+      const tree = treeFromMessages([
+        makeMessage("m1", "user", "a"),
+        makeMessage("m2", "assistant", "b"),
+      ]);
+      // Create a branch off m2
+      const { branchId: parentBranch } = createBranch(tree, "m2");
+      addNodeToBranch(tree, makeMessage("b1", "user", "branch"), parentBranch);
+
+      // Create a sub-branch off b1
+      const { branchId: childBranch } = createBranch(tree, "b1");
+      addNodeToBranch(tree, makeMessage("c1", "user", "sub"), childBranch);
+
+      expect(Object.keys(tree.branches)).toHaveLength(3);
+
+      // Deleting the parent branch should also delete the child branch
+      deleteBranch(tree, parentBranch);
+      expect(tree.branches[parentBranch]).toBeUndefined();
+      expect(tree.branches[childBranch]).toBeUndefined();
+      expect(tree.nodes["b1"]).toBeUndefined();
+      expect(tree.nodes["c1"]).toBeUndefined();
+      expect(Object.keys(tree.branches)).toHaveLength(1);
+    });
+
     it("does not delete the main branch", () => {
       const tree = createEmptyTree();
       deleteBranch(tree, tree.mainBranchId);

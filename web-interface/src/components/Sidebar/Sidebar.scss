@@ -188,6 +188,10 @@
     opacity: 1;
   }
 
+  .sidebar__recents {
+    overflow-y: visible;
+  }
+
   &__recent-dropdown {
     position: absolute;
     top: 100%;
@@ -206,6 +210,21 @@
     font-family: $font-body;
     font-size: $label-sm;
     color: $outline;
+
+    &--warning {
+      color: #ff716c;
+      line-height: 1.4;
+    }
+  }
+
+  &__recent-dropdown-list {
+    margin: $space-1 0 0;
+    padding-left: $space-4;
+    list-style: disc;
+
+    li {
+      padding: $space-1 0;
+    }
   }
 
   &__recent-dropdown-item {

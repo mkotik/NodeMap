@@ -42,8 +42,10 @@ export const conversationRouter = router({
                 {
                   branches: {
                     some: {
+                      isMain: true,
                       messages: {
                         some: {
+                          role: "user",
                           content: { contains: search, mode: "insensitive" as const },
                         },
                       },

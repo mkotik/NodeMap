@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
 import { useAuth } from "@/context/AuthContext";
@@ -32,7 +32,6 @@ export default function Sidebar() {
   } = useChatContext();
   const { user, logout } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -49,7 +48,7 @@ export default function Sidebar() {
   // hasn't appeared in recents yet (save still in-flight).
   const hasMessages = Object.keys(tree.nodes).length > 0;
   const activeInRecents = recentChats.some((c) => c.id === conversationId);
-  const showPendingEntry = hasMessages && !activeInRecents && pathname === "/";
+  const showPendingEntry = hasMessages && !activeInRecents;
 
   // Close menu on outside click
   useEffect(() => {
@@ -91,7 +90,10 @@ export default function Sidebar() {
         id: chatId,
         pageLimit: 5,
       });
-      if (conversationId === chatId) resetAll();
+      if (conversationId === chatId) {
+        resetAll();
+        router.push("/");
+      }
       setMenu({ type: "closed" });
       refreshRecents();
     } catch {
@@ -224,7 +226,7 @@ export default function Sidebar() {
                     </div>
                   )}
                   {recentChats.map((c) => {
-                    const isActive = c.id === conversationId && pathname === "/";
+                    const isActive = c.id === conversationId;
                     const menuOpen =
                       menu.type !== "closed" &&
                       "chatId" in menu &&

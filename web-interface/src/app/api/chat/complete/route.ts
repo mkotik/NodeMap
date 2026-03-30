@@ -1,12 +1,8 @@
 import { generateText } from "ai";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { z } from "zod";
 import { verifyAccessToken } from "@/server/lib/jwt";
 import { prisma } from "@/server/lib/prisma";
-
-const openrouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+import { getOpenRouter } from "@/server/lib/openrouter";
 
 const RequestSchema = z.object({
   conversationId: z.string().nullable(),
@@ -62,6 +58,13 @@ export async function POST(req: Request) {
   }
 
   const input = parsed.data;
+  const openrouter = await getOpenRouter(userId);
+  if (!openrouter) {
+    return Response.json(
+      { error: "NO_API_KEY", message: "Add your OpenRouter API key in Settings." },
+      { status: 403 },
+    );
+  }
 
   // Generate LLM response (non-streaming)
   const { text: assistantText } = await generateText({

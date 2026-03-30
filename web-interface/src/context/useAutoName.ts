@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import type { ConversationTree, BranchId } from "@/types/branch";
 import { getAncestorChain, renameBranch } from "@/lib/tree";
 import { getMessageText } from "@/lib/messages";
+import { getAccessToken } from "@/lib/auth-token";
 
 interface UseAutoNameArgs {
   tree: ConversationTree;
@@ -69,7 +70,10 @@ export function useAutoName({
 
     fetch("/api/branch-name", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(getAccessToken() ? { Authorization: `Bearer ${getAccessToken()}` } : {}),
+      },
       body: JSON.stringify({ userMessage: userText, priorMessages }),
     })
       .then((res) => res.json())
@@ -117,7 +121,10 @@ export function useAutoName({
       setNamingConversation(true);
       fetch("/api/branch-name", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+        "Content-Type": "application/json",
+        ...(getAccessToken() ? { Authorization: `Bearer ${getAccessToken()}` } : {}),
+      },
         body: JSON.stringify({ userMessage: userText, priorMessages: [] }),
       })
         .then((res) => res.json())

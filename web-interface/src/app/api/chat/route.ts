@@ -1,10 +1,7 @@
 import { streamText, convertToModelMessages, type UIMessage } from "ai";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { z } from "zod";
-
-const openrouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+import { verifyAccessToken } from "@/server/lib/jwt";
+import { getOpenRouter } from "@/server/lib/openrouter";
 
 const ChatRequestSchema = z.object({
   messages: z.array(
@@ -19,6 +16,33 @@ const ChatRequestSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const auth = req.headers.get("authorization");
+  if (!auth?.startsWith("Bearer ")) {
+    return Response.json(
+      { error: "NO_API_KEY", message: "Sign in and add your OpenRouter API key in Settings to start chatting." },
+      { status: 403 },
+    );
+  }
+
+  let userId: string;
+  try {
+    const payload = verifyAccessToken(auth.slice(7));
+    userId = payload.userId;
+  } catch {
+    return Response.json(
+      { error: "NO_API_KEY", message: "Sign in and add your OpenRouter API key in Settings to start chatting." },
+      { status: 403 },
+    );
+  }
+
+  const openrouter = await getOpenRouter(userId);
+  if (!openrouter) {
+    return Response.json(
+      { error: "NO_API_KEY", message: "Add your OpenRouter API key in Settings to start chatting." },
+      { status: 403 },
+    );
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = ChatRequestSchema.safeParse(body);
   if (!parsed.success) {

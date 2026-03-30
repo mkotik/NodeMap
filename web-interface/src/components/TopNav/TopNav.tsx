@@ -24,7 +24,8 @@ export default function TopNav() {
   const onBranch = !isMainBranch && isThread;
   const hasMessages = messages.length > 0;
   const isEmpty = isThread && isMainBranch && !hasMessages;
-  const hideNav = isAuth || isHistory;
+  const isSettings = pathname === "/settings";
+  const hideNav = isAuth || isHistory || isSettings;
 
   return (
     <header className="topnav">

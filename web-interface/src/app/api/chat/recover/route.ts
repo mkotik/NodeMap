@@ -1,12 +1,8 @@
 import { generateText } from "ai";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { z } from "zod";
 import { verifyAccessToken } from "@/server/lib/jwt";
 import { prisma } from "@/server/lib/prisma";
-
-const openrouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+import { getOpenRouter } from "@/server/lib/openrouter";
 
 const RequestSchema = z.object({
   conversationId: z.string(),
@@ -62,6 +58,11 @@ export async function POST(req: Request) {
     role: m.role as "user" | "assistant",
     content: m.content,
   }));
+
+  const openrouter = await getOpenRouter(userId);
+  if (!openrouter) {
+    return Response.json({ id: conversation.id, recovered: false });
+  }
 
   // Generate LLM response if missing
   if (needsResponse) {

@@ -16,6 +16,7 @@ interface UseAutoSaveArgs {
   onSaveComplete?: () => void;
   skipNextSaveRef: MutableRefObject<boolean>;
   sessionRef: MutableRefObject<number>;
+  disabled?: boolean;
 }
 
 export interface UseAutoSaveReturn {
@@ -32,6 +33,7 @@ export function useAutoSave({
   onSaveComplete,
   skipNextSaveRef,
   sessionRef,
+  disabled,
 }: UseAutoSaveArgs): UseAutoSaveReturn {
   const onSaveCompleteRef = useRef(onSaveComplete);
   useEffect(() => {
@@ -124,7 +126,7 @@ export function useAutoSave({
   const lastFingerprintRef = useRef("");
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || disabled) return;
     const hasMessages = Object.keys(tree.nodes).length > 0;
     if (!hasMessages) return;
 
@@ -140,20 +142,14 @@ export function useAutoSave({
     if (fp === lastFingerprintRef.current && convIdRef.current) return;
     lastFingerprintRef.current = fp;
 
-    // First save (no conversation yet): save immediately
-    if (!convIdRef.current) {
-      saveNow();
-      return;
-    }
-
-    // Subsequent saves: debounce 2s
+    // Debounce all saves (2s) to allow error states like apiKeyMissing to settle
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(saveNow, 2000);
 
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [tree, user, conversationTitle, saveNow, skipNextSaveRef]);
+  }, [tree, user, conversationTitle, saveNow, skipNextSaveRef, disabled]);
 
   return { pendingSaveRef };
 }

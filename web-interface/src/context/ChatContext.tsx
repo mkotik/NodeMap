@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { useChat } from "@ai-sdk/react";
-import type { UIMessage, ChatStatus } from "ai";
+import { DefaultChatTransport, type UIMessage, type ChatStatus } from "ai";
 import type {
   ConversationTree,
   Branch,
@@ -70,7 +70,35 @@ interface ChatContextValue {
 const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const { messages, sendMessage, status, setMessages, stop } = useChat();
+  const [apiKeyMissing, setApiKeyMissing] = useState(false);
+  const { messages, sendMessage, status, setMessages, stop, error } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      headers: (): Record<string, string> => {
+        const token = getAccessToken();
+        return token ? { Authorization: `Bearer ${token}` } : {};
+      },
+    }),
+    onError: (err) => {
+      if (err.message?.includes("NO_API_KEY")) {
+        setApiKeyMissing(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `api-key-error-${Date.now()}`,
+            role: "assistant",
+            parts: [
+              {
+                type: "text",
+                text: "It looks like you haven't added an API key yet. Head over to [Settings](/settings) to add your OpenRouter API key, then try again.",
+              },
+            ],
+            createdAt: new Date(),
+          } as UIMessage,
+        ]);
+      }
+    },
+  });
   const [tree, setTree] = useState<ConversationTree>(createEmptyTree);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversationTitle, setConversationTitle] = useState("Untitled");
@@ -189,9 +217,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // --- Recover incomplete chats (missing LLM response / untitled) ---
   const recoveringRef = useRef(new Set<string>());
+  const recoverFailedRef = useRef(new Set<string>());
 
   const recoverChat = useCallback((id: string) => {
-    if (recoveringRef.current.has(id)) return;
+    if (recoveringRef.current.has(id) || recoverFailedRef.current.has(id)) return;
     recoveringRef.current.add(id);
     setCompletingChatIds((prev) => new Set(prev).add(id));
 
@@ -204,11 +233,29 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       },
       body: JSON.stringify({ conversationId: id }),
     })
-      .then((res) => {
-        if (res.ok) window.dispatchEvent(new Event("chat-completed"));
+      .then(async (res) => {
+        if (!res.ok) {
+          recoverFailedRef.current.add(id);
+          return;
+        }
+        const data = await res.json();
+        if (data.recovered) {
+          window.dispatchEvent(new Event("chat-completed"));
+        } else {
+          recoverFailedRef.current.add(id);
+        }
       })
-      .catch(console.error)
-      .finally(() => recoveringRef.current.delete(id));
+      .catch(() => {
+        recoverFailedRef.current.add(id);
+      })
+      .finally(() => {
+        recoveringRef.current.delete(id);
+        setCompletingChatIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      });
   }, []);
 
   // Auto-recover any "Untitled" chats that appear in recents
@@ -232,6 +279,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     onSaveComplete: refreshRecents,
     skipNextSaveRef,
     sessionRef,
+    disabled: apiKeyMissing,
   });
 
   // --- Branch operations (create, switch, return, cleanup) ---

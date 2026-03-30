@@ -1,10 +1,7 @@
 import { generateText } from "ai";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { z } from "zod";
-
-const openrouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+import { verifyAccessToken } from "@/server/lib/jwt";
+import { getOpenRouter } from "@/server/lib/openrouter";
 
 const BranchNameRequestSchema = z.object({
   userMessage: z.string().min(1).max(5000),
@@ -20,6 +17,18 @@ const BranchNameRequestSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  // Extract userId if authenticated
+  let userId: string | undefined;
+  const auth = req.headers.get("authorization");
+  if (auth?.startsWith("Bearer ")) {
+    try {
+      const payload = verifyAccessToken(auth.slice(7));
+      userId = payload.userId;
+    } catch {
+      // Continue with env key
+    }
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = BranchNameRequestSchema.safeParse(body);
   if (!parsed.success) {
@@ -34,6 +43,11 @@ export async function POST(req: Request) {
       "Recent conversation before the branch:\n" +
       priorMessages.map((m) => `${m.role}: ${m.text}`).join("\n") +
       "\n\n";
+  }
+
+  const openrouter = await getOpenRouter(userId);
+  if (!openrouter) {
+    return Response.json({ name: "" });
   }
 
   const { text } = await generateText({

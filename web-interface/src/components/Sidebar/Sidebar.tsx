@@ -40,6 +40,10 @@ export default function Sidebar() {
   const pathname = usePathname();
   const onChatPage = pathname === "/" || pathname === "/nodes";
 
+  useEffect(() => {
+    if (onChatPage) refreshRecents();
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [menu, setMenu] = useState<MenuState>({ type: "closed" });
@@ -243,7 +247,7 @@ export default function Sidebar() {
         </button>
 
         <nav className="sidebar__nav">
-          <Link href="/history" className="sidebar__nav-item">
+          <Link href="/history" className={`sidebar__nav-item${pathname === "/history" ? " sidebar__nav-item--active" : ""}`}>
             <svg
               width="18"
               height="18"
@@ -259,7 +263,7 @@ export default function Sidebar() {
             </svg>
             History
           </Link>
-          <a href="#" className="sidebar__nav-item">
+          <Link href="/settings" className={`sidebar__nav-item${pathname === "/settings" ? " sidebar__nav-item--active" : ""}`}>
             <svg
               width="18"
               height="18"
@@ -274,7 +278,7 @@ export default function Sidebar() {
               <circle cx="12" cy="12" r="3" />
             </svg>
             Settings
-          </a>
+          </Link>
         </nav>
 
         {/* Recents divider + section */}

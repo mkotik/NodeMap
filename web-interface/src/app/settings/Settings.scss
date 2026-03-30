@@ -1,0 +1,194 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.settings {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: $space-6 $space-8;
+
+  &--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40vh;
+  }
+
+  &__empty-text {
+    font-family: $font-body;
+    font-size: $body-md;
+    color: $on-surface-variant;
+  }
+
+  &__header {
+    margin-bottom: $space-8;
+  }
+
+  &__title {
+    font-family: $font-display;
+    font-size: $headline-sm;
+    font-weight: $weight-bold;
+    color: $on-surface;
+  }
+
+  &__section {
+    margin-bottom: $space-8;
+  }
+
+  &__section-title {
+    font-family: $font-body;
+    font-size: $body-lg;
+    font-weight: $weight-semibold;
+    color: $on-surface;
+    margin-bottom: $space-2;
+  }
+
+  &__section-desc {
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $outline;
+    line-height: 1.5;
+    margin-bottom: $space-6;
+  }
+
+  &__steps {
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface-variant;
+    line-height: 1.7;
+    padding-left: $space-6;
+    margin-bottom: $space-4;
+  }
+
+  &__link {
+    color: $primary;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__section-desc--muted {
+    font-size: $label-sm;
+    color: $outline;
+  }
+
+  &__loading {
+    padding: $space-4 0;
+  }
+
+  &__key-form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+  }
+
+  &__key-current {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3 $space-4;
+    background: $surface-container-low;
+    border-radius: $radius-md;
+  }
+
+  &__key-label {
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $outline;
+    white-space: nowrap;
+  }
+
+  &__key-masked {
+    flex: 1;
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface-variant;
+    letter-spacing: 0.02em;
+  }
+
+  &__key-remove {
+    padding: $space-1 $space-3;
+    background: none;
+    border: none;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: $label-sm;
+    font-weight: $weight-medium;
+    color: #ff716c;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: rgba(#ff716c, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+
+  &__key-input-row {
+    display: flex;
+    gap: $space-3;
+  }
+
+  &__key-input {
+    flex: 1;
+    padding: $space-3 $space-4;
+    background: $surface-container-low;
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface;
+    outline: none;
+    @include surface-transition;
+
+    &::placeholder {
+      color: $outline;
+    }
+
+    &:focus {
+      background: $surface-container;
+    }
+  }
+
+  &__key-save {
+    padding: $space-3 $space-6;
+    background: rgba($primary, 0.15);
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: $body-sm;
+    font-weight: $weight-medium;
+    color: $primary;
+    cursor: pointer;
+    white-space: nowrap;
+    @include surface-transition;
+
+    &:hover:not(:disabled) {
+      background: rgba($primary, 0.25);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+
+  &__status {
+    font-family: $font-body;
+    font-size: $label-sm;
+
+    &--success {
+      color: $primary;
+    }
+
+    &--error {
+      color: #ff716c;
+    }
+  }
+}

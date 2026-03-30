@@ -13,7 +13,10 @@ type MenuState =
   | { type: "closed" }
   | { type: "menu"; chatId: string }
   | { type: "confirmDelete"; chatId: string }
-  | { type: "rename"; chatId: string; value: string };
+  | { type: "rename"; chatId: string; value: string }
+  | { type: "branchMenu"; branchId: string }
+  | { type: "branchConfirmDelete"; branchId: string }
+  | { type: "branchRename"; branchId: string; value: string };
 
 export default function Sidebar() {
   const {
@@ -29,6 +32,8 @@ export default function Sidebar() {
     recentsLoaded,
     refreshRecents,
     switchBranch,
+    deleteBranchById,
+    renameBranchById,
   } = useChatContext();
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -39,7 +44,9 @@ export default function Sidebar() {
   const [actionLoading, setActionLoading] = useState(false);
   const [menu, setMenu] = useState<MenuState>({ type: "closed" });
   const menuRef = useRef<HTMLDivElement>(null);
+  const branchMenuRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const branchRenameInputRef = useRef<HTMLInputElement>(null);
 
   // Branches for the active conversation (exclude main)
   const branches = Object.values(tree.branches).filter(
@@ -55,7 +62,19 @@ export default function Sidebar() {
   // Close menu on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        (!branchMenuRef.current || !branchMenuRef.current.contains(target))
+      ) {
+        setMenu({ type: "closed" });
+      }
+      if (
+        branchMenuRef.current &&
+        !branchMenuRef.current.contains(target) &&
+        (!menuRef.current || !menuRef.current.contains(target))
+      ) {
         setMenu({ type: "closed" });
       }
     }
@@ -68,6 +87,7 @@ export default function Sidebar() {
   // Focus rename input when it appears
   useEffect(() => {
     if (menu.type === "rename") renameInputRef.current?.focus();
+    if (menu.type === "branchRename") branchRenameInputRef.current?.focus();
   }, [menu.type]);
 
   function handleLoadChat(id: string) {
@@ -83,6 +103,49 @@ export default function Sidebar() {
     switchBranch(branchId);
     router.push("/");
     setTimeout(() => setLoadingId(null), 300);
+  }
+
+  async function handleBranchRename(branchId: string, label: string) {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    setActionLoading(true);
+    try {
+      renameBranchById(branchId, trimmed);
+      if (conversationId) {
+        await trpc.conversation.renameBranch.mutate({
+          conversationId,
+          branchId,
+          label: trimmed,
+        });
+      }
+      setMenu({ type: "closed" });
+    } catch {
+      /* ignore */
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleBranchDelete(branchId: string) {
+    setActionLoading(true);
+    try {
+      const wasActive = tree.activeBranchId === branchId;
+      deleteBranchById(branchId);
+      if (conversationId) {
+        await trpc.conversation.deleteBranch.mutate({
+          conversationId,
+          branchId,
+        });
+      }
+      if (wasActive) {
+        router.push("/");
+      }
+      setMenu({ type: "closed" });
+    } catch {
+      /* ignore */
+    } finally {
+      setActionLoading(false);
+    }
   }
 
   async function handleDelete(chatId: string) {
@@ -257,7 +320,8 @@ export default function Sidebar() {
                               onKeyDown={(e) => {
                                 if (e.key === "Enter")
                                   handleRename(c.id, menu.value);
-                                if (e.key === "Escape") setMenu({ type: "closed" });
+                                if (e.key === "Escape")
+                                  setMenu({ type: "closed" });
                               }}
                               disabled={actionLoading}
                             />
@@ -345,7 +409,10 @@ export default function Sidebar() {
                                   type="button"
                                   className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
                                   onClick={() =>
-                                    setMenu({ type: "confirmDelete", chatId: c.id })
+                                    setMenu({
+                                      type: "confirmDelete",
+                                      chatId: c.id,
+                                    })
                                   }
                                 >
                                   Delete
@@ -389,37 +456,191 @@ export default function Sidebar() {
                           branches.length > 0 &&
                           menu.type !== "rename" && (
                             <div className="sidebar__branches">
-                              {branches.map((b) => (
-                                <button
-                                  key={b.id}
-                                  type="button"
-                                  className={`sidebar__branch sidebar__branch--${b.color}`}
-                                  onClick={() => handleSwitchBranch(b.id)}
-                                  disabled={loadingId === b.id}
-                                >
-                                  <span className="sidebar__branch-indicator">
-                                    {loadingId === b.id ? (
-                                      <BeatLoader
-                                        color={
-                                          b.color === "primary"
-                                            ? "#69f6b8"
-                                            : b.color === "secondary"
-                                              ? "#699cff"
-                                              : "#ac8aff"
-                                        }
-                                        size={2}
-                                      />
+                              {branches.map((b) => {
+                                const branchColor =
+                                  b.color === "primary"
+                                    ? "#69f6b8"
+                                    : b.color === "secondary"
+                                      ? "#699cff"
+                                      : "#ac8aff";
+                                const branchMenuOpen =
+                                  menu.type !== "closed" &&
+                                  "branchId" in menu &&
+                                  menu.branchId === b.id;
+
+                                return (
+                                  <div
+                                    key={b.id}
+                                    className="sidebar__branch-wrapper"
+                                    ref={
+                                      branchMenuOpen ? branchMenuRef : undefined
+                                    }
+                                  >
+                                    {/* Branch rename mode */}
+                                    {menu.type === "branchRename" &&
+                                    menu.branchId === b.id ? (
+                                      <div className="sidebar__rename">
+                                        <input
+                                          ref={branchRenameInputRef}
+                                          className="sidebar__rename-input"
+                                          type="text"
+                                          value={menu.value}
+                                          maxLength={20}
+                                          onChange={(e) =>
+                                            setMenu({
+                                              ...menu,
+                                              value: e.target.value,
+                                            })
+                                          }
+                                          onKeyDown={(e) => {
+                                            if (e.key === "Enter")
+                                              handleBranchRename(
+                                                b.id,
+                                                menu.value,
+                                              );
+                                            if (e.key === "Escape")
+                                              setMenu({ type: "closed" });
+                                          }}
+                                        />
+                                        <button
+                                          type="button"
+                                          className="sidebar__rename-save"
+                                          onClick={() =>
+                                            handleBranchRename(b.id, menu.value)
+                                          }
+                                          disabled={!menu.value.trim()}
+                                        >
+                                          Save
+                                        </button>
+                                      </div>
                                     ) : (
-                                      <span
-                                        className={`sidebar__branch-dot sidebar__branch-dot--${b.color}`}
-                                      />
+                                      <div className="sidebar__branch-row">
+                                        <button
+                                          type="button"
+                                          className={`sidebar__branch sidebar__branch--${b.color}`}
+                                          onClick={() =>
+                                            handleSwitchBranch(b.id)
+                                          }
+                                          disabled={loadingId === b.id}
+                                        >
+                                          <span className="sidebar__branch-indicator">
+                                            {loadingId === b.id ? (
+                                              <BeatLoader
+                                                color={branchColor}
+                                                size={2}
+                                              />
+                                            ) : (
+                                              <span
+                                                className={`sidebar__branch-dot sidebar__branch-dot--${b.color}`}
+                                              />
+                                            )}
+                                          </span>
+                                          <span className="sidebar__branch-title">
+                                            {b.label}
+                                          </span>
+                                        </button>
+
+                                        {/* Branch 3-dot menu trigger */}
+                                        <button
+                                          type="button"
+                                          className="sidebar__branch-menu-btn"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setMenu(
+                                              branchMenuOpen
+                                                ? { type: "closed" }
+                                                : {
+                                                    type: "branchMenu",
+                                                    branchId: b.id,
+                                                  },
+                                            );
+                                          }}
+                                          aria-label="Branch options"
+                                        >
+                                          <svg
+                                            width="12"
+                                            height="12"
+                                            viewBox="0 0 24 24"
+                                            fill="currentColor"
+                                          >
+                                            <circle cx="12" cy="5" r="2" />
+                                            <circle cx="12" cy="12" r="2" />
+                                            <circle cx="12" cy="19" r="2" />
+                                          </svg>
+                                        </button>
+
+                                        {/* Branch dropdown menu */}
+                                        {menu.type === "branchMenu" &&
+                                          menu.branchId === b.id && (
+                                            <div className="sidebar__recent-dropdown">
+                                              <button
+                                                type="button"
+                                                className="sidebar__recent-dropdown-item"
+                                                onClick={() =>
+                                                  setMenu({
+                                                    type: "branchRename",
+                                                    branchId: b.id,
+                                                    value: b.label,
+                                                  })
+                                                }
+                                              >
+                                                Rename
+                                              </button>
+                                              <button
+                                                type="button"
+                                                className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
+                                                onClick={() =>
+                                                  setMenu({
+                                                    type: "branchConfirmDelete",
+                                                    branchId: b.id,
+                                                  })
+                                                }
+                                              >
+                                                Delete
+                                              </button>
+                                            </div>
+                                          )}
+
+                                        {/* Branch delete confirmation */}
+                                        {menu.type === "branchConfirmDelete" &&
+                                          menu.branchId === b.id && (
+                                            <div className="sidebar__recent-dropdown">
+                                              <span className="sidebar__recent-dropdown-label">
+                                                Delete this branch?
+                                              </span>
+                                              <button
+                                                type="button"
+                                                className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
+                                                onClick={() =>
+                                                  handleBranchDelete(b.id)
+                                                }
+                                                disabled={actionLoading}
+                                              >
+                                                {actionLoading ? (
+                                                  <BeatLoader
+                                                    color="#ff716c"
+                                                    size={3}
+                                                  />
+                                                ) : (
+                                                  "Yes, delete"
+                                                )}
+                                              </button>
+                                              <button
+                                                type="button"
+                                                className="sidebar__recent-dropdown-item"
+                                                onClick={() =>
+                                                  setMenu({ type: "closed" })
+                                                }
+                                              >
+                                                Cancel
+                                              </button>
+                                            </div>
+                                          )}
+                                      </div>
                                     )}
-                                  </span>
-                                  <span className="sidebar__branch-title">
-                                    {b.label}
-                                  </span>
-                                </button>
-                              ))}
+                                  </div>
+                                );
+                              })}
                             </div>
                           )}
                       </div>

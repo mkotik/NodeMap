@@ -190,6 +190,62 @@ export const conversationRouter = router({
       return { id: convId };
     }),
 
+  // ----- rename a branch -----
+  renameBranch: protectedProcedure
+    .input(
+      z.object({
+        conversationId: z.string(),
+        branchId: z.string(),
+        label: z.string().min(1).max(20),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify ownership
+      const conv = await prisma.conversation.findFirst({
+        where: { id: input.conversationId, userId: ctx.user.userId },
+        select: { id: true },
+      });
+      if (!conv) return { success: false };
+
+      await prisma.branch.updateMany({
+        where: { id: input.branchId, conversationId: input.conversationId },
+        data: { label: input.label },
+      });
+      return { success: true };
+    }),
+
+  // ----- delete a branch -----
+  deleteBranch: protectedProcedure
+    .input(
+      z.object({
+        conversationId: z.string(),
+        branchId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify ownership and prevent deleting the main branch
+      const conv = await prisma.conversation.findFirst({
+        where: { id: input.conversationId, userId: ctx.user.userId },
+        include: {
+          branches: {
+            where: { id: input.branchId },
+            select: { id: true, isMain: true },
+          },
+        },
+      });
+      if (!conv || conv.branches.length === 0 || conv.branches[0].isMain) {
+        return { success: false };
+      }
+
+      await prisma.message.deleteMany({
+        where: { branchId: input.branchId },
+      });
+      await prisma.branch.deleteMany({
+        where: { id: input.branchId, conversationId: input.conversationId },
+      });
+      return { success: true };
+    }),
+
   // ----- rename a conversation -----
   rename: protectedProcedure
     .input(z.object({ id: z.string(), title: z.string().min(1).max(80) }))

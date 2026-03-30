@@ -2,7 +2,11 @@
 
 import { useCallback, type MutableRefObject } from "react";
 import type { ConversationTree, BranchId, NodeId } from "@/types/branch";
-import { createBranch as treeFnCreateBranch, deleteBranch } from "@/lib/tree";
+import {
+  createBranch as treeFnCreateBranch,
+  deleteBranch,
+  renameBranch,
+} from "@/lib/tree";
 
 interface UseBranchOpsArgs {
   treeRef: MutableRefObject<ConversationTree>;
@@ -16,6 +20,8 @@ interface UseBranchOpsReturn {
   switchBranch: (branchId: BranchId) => void;
   returnToMain: () => void;
   cleanupEmptyActiveBranch: () => void;
+  deleteBranchById: (branchId: BranchId) => void;
+  renameBranchById: (branchId: BranchId, label: string) => void;
 }
 
 export function useBranchOps({
@@ -123,5 +129,45 @@ export function useBranchOps({
     switchChatToBranch(next, next.mainBranchId);
   }, [treeRef, statusRef, setTree, switchChatToBranch]);
 
-  return { createBranch, switchBranch, returnToMain, cleanupEmptyActiveBranch };
+  const deleteBranchById = useCallback(
+    (branchId: BranchId) => {
+      const current = treeRef.current;
+      if (!current.branches[branchId] || branchId === current.mainBranchId)
+        return;
+
+      const next = structuredClone(current);
+      const wasActive = next.activeBranchId === branchId;
+      deleteBranch(next, branchId);
+
+      if (wasActive) {
+        next.activeBranchId = next.mainBranchId;
+        setTree(next);
+        switchChatToBranch(next, next.mainBranchId);
+      } else {
+        setTree(next);
+      }
+    },
+    [treeRef, setTree, switchChatToBranch],
+  );
+
+  const renameBranchById = useCallback(
+    (branchId: BranchId, label: string) => {
+      const current = treeRef.current;
+      if (!current.branches[branchId]) return;
+
+      const next = structuredClone(current);
+      renameBranch(next, branchId, label);
+      setTree(next);
+    },
+    [treeRef, setTree],
+  );
+
+  return {
+    createBranch,
+    switchBranch,
+    returnToMain,
+    cleanupEmptyActiveBranch,
+    deleteBranchById,
+    renameBranchById,
+  };
 }

@@ -47,6 +47,8 @@ interface ChatContextValue {
   returnToMain: () => void;
   resetAll: () => void;
   cleanupEmptyActiveBranch: () => void;
+  deleteBranchById: (branchId: BranchId) => void;
+  renameBranchById: (branchId: BranchId, label: string) => void;
   namingBranches: Set<BranchId>;
 
   // Persistence
@@ -233,13 +235,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   });
 
   // --- Branch operations (create, switch, return, cleanup) ---
-  const { createBranch, switchBranch, returnToMain, cleanupEmptyActiveBranch } =
-    useBranchOps({
-      treeRef,
-      statusRef,
-      setTree,
-      switchChatToBranch,
-    });
+  const {
+    createBranch,
+    switchBranch,
+    returnToMain,
+    cleanupEmptyActiveBranch,
+    deleteBranchById,
+    renameBranchById,
+  } = useBranchOps({
+    treeRef,
+    statusRef,
+    setTree,
+    switchChatToBranch,
+  });
 
   // -------------------------------------------------------------------
   // Background completion: finish LLM response + naming server-side
@@ -488,6 +496,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         returnToMain,
         resetAll: handleResetAll,
         cleanupEmptyActiveBranch,
+        deleteBranchById,
+        renameBranchById,
         namingBranches,
         conversationId,
         conversationTitle,

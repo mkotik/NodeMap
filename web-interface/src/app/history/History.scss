@@ -121,26 +121,34 @@
   }
 
   &__card {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: $space-3;
     width: 100%;
-    text-align: left;
-    padding: $space-2 $space-4;
     height: 40px;
     background: $surface-container-low;
     border: none;
     border-radius: $radius-sm;
-    cursor: pointer;
     @include surface-transition;
 
     &:hover {
       background: $surface-container;
     }
 
-    &:hover .history__card-delete {
+    &:hover .history__card-menu-btn {
       opacity: 1;
     }
+  }
+
+  &__card-clickable {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    flex: 1;
+    min-width: 0;
+    padding: $space-2 0 $space-2 $space-4;
+    cursor: pointer;
+    height: 100%;
   }
 
   &__card-dot {
@@ -203,25 +211,15 @@
     margin-left: auto;
   }
 
-  &__card-meta {
+  &__card-actions {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: $space-2;
     flex-shrink: 0;
+    padding-right: $space-2;
   }
 
-  &__card-branches {
-    font-family: $font-body;
-    font-size: $label-sm;
-    font-weight: $weight-medium;
-    color: $primary;
-    background: rgba($primary, 0.1);
-    padding: 1px $space-2;
-    border-radius: $radius-sm;
-    line-height: 1;
-  }
-
-  &__card-delete {
+  &__card-menu-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -236,8 +234,57 @@
     @include surface-transition;
 
     &:hover {
-      background: rgba(#ff716c, 0.1);
+      background: $surface-container-high;
+      color: $on-surface-variant;
+    }
+  }
+
+  &__card-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 20;
+    min-width: 130px;
+    padding: $space-1;
+    background: $surface-container-high;
+    border-radius: $radius-md;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  &__card-dropdown-label {
+    display: block;
+    padding: $space-2 $space-3;
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $outline;
+  }
+
+  &__card-dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: $space-2 $space-3;
+    background: none;
+    border: none;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface-variant;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container;
+      color: $on-surface;
+    }
+
+    &--danger {
       color: #ff716c;
+
+      &:hover {
+        background: rgba(#ff716c, 0.1);
+        color: #ff716c;
+      }
     }
 
     &:disabled {
@@ -246,34 +293,52 @@
     }
   }
 
-  &__card-confirm,
-  &__card-cancel {
-    padding: 1px $space-2;
+  &__card-rename {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    flex: 1;
+    padding: $space-2 $space-4;
+    height: 100%;
+  }
+
+  &__card-rename-input {
+    flex: 1;
+    min-width: 0;
+    padding: $space-1 $space-2;
+    background: $surface-container;
+    border: none;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface;
+    outline: none;
+
+    &:focus {
+      background: $surface-container-high;
+    }
+  }
+
+  &__card-rename-save {
+    padding: $space-1 $space-3;
+    background: rgba($primary, 0.15);
     border: none;
     border-radius: $radius-sm;
     font-family: $font-body;
     font-size: $label-sm;
     font-weight: $weight-medium;
+    color: $primary;
     cursor: pointer;
-    line-height: 1.4;
+    white-space: nowrap;
     @include surface-transition;
-  }
-
-  &__card-confirm {
-    background: rgba(#ff716c, 0.15);
-    color: #ff716c;
 
     &:hover {
-      background: rgba(#ff716c, 0.25);
+      background: rgba($primary, 0.25);
     }
-  }
 
-  &__card-cancel {
-    background: none;
-    color: $on-surface-variant;
-
-    &:hover {
-      color: $on-surface;
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
     }
   }
 

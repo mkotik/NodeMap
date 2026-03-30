@@ -278,7 +278,7 @@ export default function Sidebar() {
         </nav>
 
         {/* Recents divider + section */}
-        {user && (
+        {user && onChatPage && (
           <>
             <div className="sidebar__divider" />
             <div className="sidebar__recents">

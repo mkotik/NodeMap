@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useChatContext } from "@/context/ChatContext";
@@ -17,6 +23,12 @@ interface ConversationItem {
   createdAt: Date;
   updatedAt: Date;
 }
+
+type MenuState =
+  | { type: "closed" }
+  | { type: "menu"; chatId: string }
+  | { type: "confirmDelete"; chatId: string }
+  | { type: "rename"; chatId: string; value: string };
 
 function timeGroup(date: Date): string {
   const now = new Date();
@@ -42,7 +54,10 @@ export default function HistoryPage() {
   const [navigating, setNavigating] = useState(false);
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [menu, setMenu] = useState<MenuState>({ type: "closed" });
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   // Pagination: cursor stack for prev/next
   const [cursorStack, setCursorStack] = useState<string[]>([]);
@@ -55,6 +70,24 @@ export default function HistoryPage() {
 
   const searchRef = useRef(search);
   searchRef.current = search;
+
+  // Close menu on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenu({ type: "closed" });
+      }
+    }
+    if (menu.type !== "closed") {
+      document.addEventListener("mousedown", handleClick);
+      return () => document.removeEventListener("mousedown", handleClick);
+    }
+  }, [menu.type]);
+
+  // Focus rename input when it appears
+  useEffect(() => {
+    if (menu.type === "rename") renameInputRef.current?.focus();
+  }, [menu.type]);
 
   const fetchPage = useCallback(
     async (cursor?: string | null, searchTerm?: string) => {
@@ -180,14 +213,9 @@ export default function HistoryPage() {
   }
 
   async function handleDelete(id: string) {
-    if (confirmDeleteId !== id) {
-      setConfirmDeleteId(id);
-      return;
-    }
     setDeletingId(id);
-    setConfirmDeleteId(null);
+    setMenu({ type: "closed" });
     try {
-      // Current page's cursor (null for page 1, otherwise top of stack)
       const pageCursor =
         cursorStack.length === 0 ? null : cursorStack[cursorStack.length - 1];
       const result = await trpc.conversation.delete.mutate({
@@ -202,7 +230,6 @@ export default function HistoryPage() {
         updatedAt: new Date(c.updatedAt),
       }));
 
-      // If current page is now empty and we're not on page 1, go back one page
       if (items.length === 0 && cursorStack.length > 0) {
         const newStack = [...cursorStack];
         newStack.pop();
@@ -220,6 +247,20 @@ export default function HistoryPage() {
       console.error(err);
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function handleRename(id: string, title: string) {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+    try {
+      await trpc.conversation.rename.mutate({ id, title: trimmed });
+      setConversations((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, title: trimmed } : c)),
+      );
+      setMenu({ type: "closed" });
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -299,104 +340,189 @@ export default function HistoryPage() {
                 <section key={group} className="history__group">
                   <h2 className="history__group-label">{group}</h2>
                   <div className="history__cards">
-                    {grouped[group].map((c) => (
-                      <div
-                        key={c.id}
-                        role="button"
-                        tabIndex={0}
-                        className="history__card"
-                        onClick={() => handleOpen(c.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            handleOpen(c.id);
-                          }
-                        }}
-                      >
-                        <div className="history__card-dot" />
-                        <div className="history__card-body">
-                          <div className="history__card-header">
-                            <span className="history__card-title">
-                              {completingChatIds.has(c.id) ? (
-                                <BeatLoader color="#69f6b8" size={4} />
-                              ) : (
-                                c.title
-                              )}
-                            </span>
-                            {c.preview && (
-                              <span className="history__card-preview">
-                                {c.preview}
-                              </span>
-                            )}
-                          </div>
-                          <span className="history__card-time">
-                            {formatTime(c.updatedAt)}
-                          </span>
-                          <div className="history__card-meta">
-                            {c.branchCount > 1 && (
-                              <span className="history__card-branches">
-                                {c.branchCount}
-                              </span>
-                            )}
-                            {confirmDeleteId === c.id ? (
-                              <>
-                                <button
-                                  type="button"
-                                  className="history__card-confirm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(c.id);
-                                  }}
-                                  disabled={deletingId === c.id}
-                                >
-                                  {deletingId === c.id ? (
-                                    <BeatLoader color="#ff716c" size={4} />
-                                  ) : (
-                                    "Delete"
-                                  )}
-                                </button>
-                                <button
-                                  type="button"
-                                  className="history__card-cancel"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setConfirmDeleteId(null);
-                                  }}
-                                >
-                                  Cancel
-                                </button>
-                              </>
-                            ) : (
+                    {grouped[group].map((c) => {
+                      const menuOpen =
+                        menu.type !== "closed" &&
+                        "chatId" in menu &&
+                        menu.chatId === c.id;
+
+                      return (
+                        <div
+                          key={c.id}
+                          className="history__card"
+                          ref={menuOpen ? menuRef : undefined}
+                        >
+                          {menu.type === "rename" && menu.chatId === c.id ? (
+                            <div className="history__card-rename">
+                              <input
+                                ref={renameInputRef}
+                                className="history__card-rename-input"
+                                type="text"
+                                value={menu.value}
+                                maxLength={20}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) =>
+                                  setMenu({ ...menu, value: e.target.value })
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter")
+                                    handleRename(c.id, menu.value);
+                                  if (e.key === "Escape")
+                                    setMenu({ type: "closed" });
+                                }}
+                              />
                               <button
                                 type="button"
-                                className="history__card-delete"
+                                className="history__card-rename-save"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDelete(c.id);
+                                  handleRename(c.id, menu.value);
                                 }}
-                                disabled={deletingId === c.id}
-                                aria-label="Delete conversation"
+                                disabled={!menu.value.trim()}
                               >
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="M3 6h18" />
-                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                </svg>
+                                Save
                               </button>
-                            )}
-                          </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div
+                                className="history__card-clickable"
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => handleOpen(c.id)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    handleOpen(c.id);
+                                  }
+                                }}
+                              >
+                                <div className="history__card-dot" />
+                                <div className="history__card-body">
+                                  <div className="history__card-header">
+                                    <span className="history__card-title">
+                                      {completingChatIds.has(c.id) ? (
+                                        <BeatLoader
+                                          color="#69f6b8"
+                                          size={4}
+                                        />
+                                      ) : (
+                                        c.title
+                                      )}
+                                    </span>
+                                    {c.preview && (
+                                      <span className="history__card-preview">
+                                        {c.preview}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="history__card-time">
+                                    {formatTime(c.updatedAt)}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="history__card-actions">
+                                <button
+                                  type="button"
+                                  className="history__card-menu-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMenu(
+                                      menuOpen
+                                        ? { type: "closed" }
+                                        : { type: "menu", chatId: c.id },
+                                    );
+                                  }}
+                                  aria-label="Chat options"
+                                >
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                  >
+                                    <circle cx="12" cy="5" r="2" />
+                                    <circle cx="12" cy="12" r="2" />
+                                    <circle cx="12" cy="19" r="2" />
+                                  </svg>
+                                </button>
+
+                                {menu.type === "menu" &&
+                                  menu.chatId === c.id && (
+                                    <div className="history__card-dropdown">
+                                      <button
+                                        type="button"
+                                        className="history__card-dropdown-item"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setMenu({
+                                            type: "rename",
+                                            chatId: c.id,
+                                            value: c.title,
+                                          });
+                                        }}
+                                      >
+                                        Rename
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="history__card-dropdown-item history__card-dropdown-item--danger"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setMenu({
+                                            type: "confirmDelete",
+                                            chatId: c.id,
+                                          });
+                                        }}
+                                      >
+                                        Delete
+                                      </button>
+                                    </div>
+                                  )}
+
+                                {menu.type === "confirmDelete" &&
+                                  menu.chatId === c.id && (
+                                    <div className="history__card-dropdown">
+                                      <span className="history__card-dropdown-label">
+                                        Delete this chat?
+                                      </span>
+                                      <button
+                                        type="button"
+                                        className="history__card-dropdown-item history__card-dropdown-item--danger"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDelete(c.id);
+                                        }}
+                                        disabled={deletingId === c.id}
+                                      >
+                                        {deletingId === c.id ? (
+                                          <BeatLoader
+                                            color="#ff716c"
+                                            size={3}
+                                          />
+                                        ) : (
+                                          "Yes, delete"
+                                        )}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="history__card-dropdown-item"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setMenu({ type: "closed" });
+                                        }}
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  )}
+                              </div>
+                            </>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </section>
               ) : null,

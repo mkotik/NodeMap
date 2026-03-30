@@ -117,10 +117,17 @@
     }
   }
 
+  &__recent-indicator {
+    width: 16px;
+    min-width: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   &__recent-dot {
     width: 5px;
     height: 5px;
-    min-width: 5px;
     border-radius: 50%;
     background: $outline;
   }
@@ -161,10 +168,17 @@
     }
   }
 
+  &__branch-indicator {
+    width: 14px;
+    min-width: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   &__branch-dot {
     width: 4px;
     height: 4px;
-    min-width: 4px;
     border-radius: 50%;
 
     &--primary {

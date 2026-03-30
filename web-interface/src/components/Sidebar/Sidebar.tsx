@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
 import { useAuth } from "@/context/AuthContext";
+import BeatLoader from "react-spinners/BeatLoader";
 import "./Sidebar.scss";
 
 export default function Sidebar() {
@@ -20,13 +22,26 @@ export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
   // Branches for the active conversation (exclude main)
   const branches = Object.values(tree.branches).filter(
     (b) => b.id !== tree.mainBranchId && b.nodeIds.length > 0,
   );
 
   function handleLoadChat(id: string) {
-    loadConversation(id).then(() => router.push("/"));
+    setLoadingId(id);
+    loadConversation(id)
+      .then(() => router.push("/"))
+      .finally(() => setLoadingId(null));
+  }
+
+  function handleSwitchBranch(branchId: string) {
+    setLoadingId(branchId);
+    switchBranch(branchId);
+    router.push("/");
+    // switchBranch is synchronous, small delay for visual feedback
+    setTimeout(() => setLoadingId(null), 300);
   }
 
   return (
@@ -79,8 +94,15 @@ export default function Sidebar() {
                       type="button"
                       className={`sidebar__recent ${isActive ? "sidebar__recent--active" : ""}`}
                       onClick={() => handleLoadChat(c.id)}
+                      disabled={loadingId === c.id}
                     >
-                      <span className="sidebar__recent-dot" />
+                      <span className="sidebar__recent-indicator">
+                        {loadingId === c.id ? (
+                          <BeatLoader color="#69f6b8" size={3} />
+                        ) : (
+                          <span className="sidebar__recent-dot" />
+                        )}
+                      </span>
                       <span className="sidebar__recent-title">
                         {c.id === conversationId ? conversationTitle : c.title}
                       </span>
@@ -93,12 +115,19 @@ export default function Sidebar() {
                             key={b.id}
                             type="button"
                             className={`sidebar__branch sidebar__branch--${b.color}`}
-                            onClick={() => {
-                              switchBranch(b.id);
-                              router.push("/");
-                            }}
+                            onClick={() => handleSwitchBranch(b.id)}
+                            disabled={loadingId === b.id}
                           >
-                            <span className={`sidebar__branch-dot sidebar__branch-dot--${b.color}`} />
+                            <span className="sidebar__branch-indicator">
+                              {loadingId === b.id ? (
+                                <BeatLoader
+                                  color={b.color === "primary" ? "#69f6b8" : b.color === "secondary" ? "#699cff" : "#ac8aff"}
+                                  size={2}
+                                />
+                              ) : (
+                                <span className={`sidebar__branch-dot sidebar__branch-dot--${b.color}`} />
+                              )}
+                            </span>
                             <span className="sidebar__branch-title">{b.label}</span>
                           </button>
                         ))}

@@ -420,6 +420,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       setConversationTitle(data.title || "Untitled");
       conversationNamedRef.current = true;
+      namedBranchesRef.current = new Set(data.branches.map((b) => b.id));
 
       const newTree: ConversationTree = {
         nodes: {},
@@ -479,7 +480,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         isSwitchingRef.current = false;
       }, 0);
     },
-    [stop, setMessages, conversationNamedRef, completeInBackground],
+    [stop, setMessages, conversationNamedRef, namedBranchesRef, completeInBackground],
   );
 
   return (

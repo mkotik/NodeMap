@@ -132,6 +132,141 @@
     background: $outline;
   }
 
+  &__recent-wrapper {
+    position: relative;
+  }
+
+  &__recent-row {
+    display: flex;
+    align-items: center;
+  }
+
+  &__recent-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    border-radius: $radius-sm;
+    color: $outline;
+    cursor: pointer;
+    opacity: 0;
+    @include surface-transition;
+
+    &:hover {
+      color: $on-surface;
+      background: $surface-container-high;
+    }
+  }
+
+  &__recent-row:hover &__recent-menu-btn {
+    opacity: 1;
+  }
+
+  &__recent-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 20;
+    min-width: 130px;
+    padding: $space-1;
+    background: $surface-container-high;
+    border-radius: $radius-md;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  &__recent-dropdown-label {
+    display: block;
+    padding: $space-2 $space-3;
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $outline;
+  }
+
+  &__recent-dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: $space-2 $space-3;
+    background: none;
+    border: none;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface-variant;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container;
+      color: $on-surface;
+    }
+
+    &--danger {
+      color: #ff716c;
+
+      &:hover {
+        background: rgba(#ff716c, 0.1);
+        color: #ff716c;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  &__rename {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+    padding: $space-1 $space-2;
+  }
+
+  &__rename-input {
+    flex: 1;
+    min-width: 0;
+    padding: $space-1 $space-2;
+    background: $surface-container;
+    border: 1px solid $outline-variant;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface;
+    outline: none;
+
+    &:focus {
+      border-color: $primary;
+    }
+  }
+
+  &__rename-save {
+    padding: $space-1 $space-2;
+    background: rgba($primary, 0.15);
+    border: none;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: $label-sm;
+    font-weight: $weight-medium;
+    color: $primary;
+    cursor: pointer;
+    white-space: nowrap;
+    @include surface-transition;
+
+    &:hover {
+      background: rgba($primary, 0.25);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
   &__recent-title {
     font-family: $font-body;
     font-size: $body-sm;

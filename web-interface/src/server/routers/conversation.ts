@@ -190,6 +190,17 @@ export const conversationRouter = router({
       return { id: convId };
     }),
 
+  // ----- rename a conversation -----
+  rename: protectedProcedure
+    .input(z.object({ id: z.string(), title: z.string().min(1).max(80) }))
+    .mutation(async ({ ctx, input }) => {
+      await prisma.conversation.updateMany({
+        where: { id: input.id, userId: ctx.user.userId },
+        data: { title: input.title },
+      });
+      return { success: true };
+    }),
+
   // ----- delete a conversation and return refreshed page -----
   delete: protectedProcedure
     .input(

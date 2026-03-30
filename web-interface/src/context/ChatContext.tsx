@@ -50,8 +50,10 @@ interface ChatContextValue {
   // Persistence
   conversationId: string | null;
   conversationTitle: string;
+  setConversationTitle: (title: string) => void;
   loadConversation: (id: string) => Promise<void>;
   recentChats: Array<{ id: string; title: string }>;
+  refreshRecents: () => void;
 
   // For legacy compat
   setMessages: (messages: UIMessage[]) => void;
@@ -272,8 +274,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         namingBranches,
         conversationId,
         conversationTitle,
+        setConversationTitle,
         loadConversation,
         recentChats,
+        refreshRecents,
         setMessages,
       }}
     >

@@ -14,10 +14,17 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar__top">
-        <Link href="/" className="sidebar__brand">
+        <button
+          type="button"
+          className="sidebar__brand"
+          onClick={() => {
+            resetAll();
+            router.push("/");
+          }}
+        >
           <span className="sidebar__logo">NodeMap.io</span>
           <span className="sidebar__tagline">Digital Nervous System</span>
-        </Link>
+        </button>
 
         <button
           className="sidebar__new-chat"

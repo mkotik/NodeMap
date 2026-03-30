@@ -153,11 +153,13 @@ export default function HistoryPage() {
                 <h2 className="history__group-label">{group}</h2>
                 <div className="history__cards">
                   {grouped[group].map((c) => (
-                    <button
+                    <div
                       key={c.id}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       className="history__card"
                       onClick={() => handleOpen(c.id)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleOpen(c.id); }}
                     >
                       <div className="history__card-dot" />
                       <div className="history__card-body">
@@ -200,7 +202,7 @@ export default function HistoryPage() {
                           </button>
                         </div>
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               </section>

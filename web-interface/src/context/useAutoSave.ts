@@ -34,7 +34,9 @@ export function useAutoSave({
   sessionRef,
 }: UseAutoSaveArgs): UseAutoSaveReturn {
   const onSaveCompleteRef = useRef(onSaveComplete);
-  onSaveCompleteRef.current = onSaveComplete;
+  useEffect(() => {
+    onSaveCompleteRef.current = onSaveComplete;
+  });
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const convIdRef = useRef(conversationId);
   useEffect(() => {
@@ -151,7 +153,7 @@ export function useAutoSave({
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [tree, user, conversationTitle, saveNow]);
+  }, [tree, user, conversationTitle, saveNow, skipNextSaveRef]);
 
   return { pendingSaveRef };
 }

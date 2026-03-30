@@ -52,8 +52,7 @@ export async function POST(req: Request) {
   const messages = mainBranch.messages;
   const lastMessage = messages[messages.length - 1];
   const needsResponse = lastMessage.role === "user";
-  const needsTitle =
-    !conversation.title || conversation.title === "Untitled";
+  const needsTitle = !conversation.title || conversation.title === "Untitled";
 
   if (!needsResponse && !needsTitle) {
     return Response.json({ id: conversation.id, recovered: false });

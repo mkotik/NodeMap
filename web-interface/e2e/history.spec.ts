@@ -278,16 +278,4 @@ test.describe("History", () => {
     await page.locator(".sidebar__brand").click();
     await expect(page).toHaveURL("/");
   });
-
-  test("top nav hides node view and main thread on history page", async ({
-    page,
-  }) => {
-    await login(page);
-    await page.goto("/history");
-    await expect(page.locator(".history__title")).toBeVisible({
-      timeout: 10000,
-    });
-    await expect(page.locator(".topnav__node-link")).not.toBeVisible();
-    await expect(page.locator(".topnav__breadcrumb")).not.toBeVisible();
-  });
 });

@@ -110,22 +110,29 @@ export function useAutoName({
     if (!firstUserNode) return;
 
     conversationNamedRef.current = true;
-    setNamingConversation(true);
 
     const userText = getMessageText(firstUserNode.message);
 
-    fetch("/api/branch-name", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userMessage: userText, priorMessages: [] }),
-    })
-      .then((res) => res.json())
-      .then(({ name }: { name: string }) => {
-        if (name) setConversationTitle(name);
+    queueMicrotask(() => {
+      setNamingConversation(true);
+      fetch("/api/branch-name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userMessage: userText, priorMessages: [] }),
       })
-      .catch(console.error)
-      .finally(() => setNamingConversation(false));
+        .then((res) => res.json())
+        .then(({ name }: { name: string }) => {
+          if (name) setConversationTitle(name);
+        })
+        .catch(console.error)
+        .finally(() => setNamingConversation(false));
+    });
   }, [tree, treeRef, setConversationTitle]);
 
-  return { namingBranches, namedBranchesRef, conversationNamedRef, namingConversation };
+  return {
+    namingBranches,
+    namedBranchesRef,
+    conversationNamedRef,
+    namingConversation,
+  };
 }

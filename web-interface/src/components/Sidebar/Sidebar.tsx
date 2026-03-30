@@ -182,11 +182,19 @@ export default function Sidebar() {
               )}
               {recentChats.map((c) => {
                 const isActive = c.id === conversationId && pathname === "/";
-                const menuOpen = menu.type !== "closed" && "chatId" in menu && menu.chatId === c.id;
-                const displayTitle = c.id === conversationId ? conversationTitle : c.title;
+                const menuOpen =
+                  menu.type !== "closed" &&
+                  "chatId" in menu &&
+                  menu.chatId === c.id;
+                const displayTitle =
+                  c.id === conversationId ? conversationTitle : c.title;
 
                 return (
-                  <div key={c.id} className="sidebar__recent-wrapper" ref={menuOpen ? menuRef : undefined}>
+                  <div
+                    key={c.id}
+                    className="sidebar__recent-wrapper"
+                    ref={menuOpen ? menuRef : undefined}
+                  >
                     {/* Rename mode */}
                     {menu.type === "rename" && menu.chatId === c.id ? (
                       <div className="sidebar__rename">
@@ -196,9 +204,12 @@ export default function Sidebar() {
                           type="text"
                           value={menu.value}
                           maxLength={80}
-                          onChange={(e) => setMenu({ ...menu, value: e.target.value })}
+                          onChange={(e) =>
+                            setMenu({ ...menu, value: e.target.value })
+                          }
                           onKeyDown={(e) => {
-                            if (e.key === "Enter") handleRename(c.id, menu.value);
+                            if (e.key === "Enter")
+                              handleRename(c.id, menu.value);
                             if (e.key === "Escape") setMenu({ type: "closed" });
                           }}
                           disabled={actionLoading}
@@ -209,7 +220,11 @@ export default function Sidebar() {
                           onClick={() => handleRename(c.id, menu.value)}
                           disabled={actionLoading}
                         >
-                          {actionLoading ? <BeatLoader color="#69f6b8" size={3} /> : "Save"}
+                          {actionLoading ? (
+                            <BeatLoader color="#69f6b8" size={3} />
+                          ) : (
+                            "Save"
+                          )}
                         </button>
                       </div>
                     ) : (
@@ -228,7 +243,8 @@ export default function Sidebar() {
                             )}
                           </span>
                           <span className="sidebar__recent-title">
-                            {(isActive && namingConversation) || completingChatIds.has(c.id) ? (
+                            {(isActive && namingConversation) ||
+                            completingChatIds.has(c.id) ? (
                               <BeatLoader color="#69f6b8" size={3} />
                             ) : (
                               displayTitle
@@ -242,11 +258,20 @@ export default function Sidebar() {
                           className="sidebar__recent-menu-btn"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setMenu(menuOpen ? { type: "closed" } : { type: "menu", chatId: c.id });
+                            setMenu(
+                              menuOpen
+                                ? { type: "closed" }
+                                : { type: "menu", chatId: c.id },
+                            );
                           }}
                           aria-label="Chat options"
                         >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
                             <circle cx="12" cy="5" r="2" />
                             <circle cx="12" cy="12" r="2" />
                             <circle cx="12" cy="19" r="2" />
@@ -259,14 +284,22 @@ export default function Sidebar() {
                             <button
                               type="button"
                               className="sidebar__recent-dropdown-item"
-                              onClick={() => setMenu({ type: "rename", chatId: c.id, value: displayTitle })}
+                              onClick={() =>
+                                setMenu({
+                                  type: "rename",
+                                  chatId: c.id,
+                                  value: displayTitle,
+                                })
+                              }
                             >
                               Rename
                             </button>
                             <button
                               type="button"
                               className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
-                              onClick={() => setMenu({ type: "confirmDelete", chatId: c.id })}
+                              onClick={() =>
+                                setMenu({ type: "confirmDelete", chatId: c.id })
+                              }
                             >
                               Delete
                             </button>
@@ -274,55 +307,74 @@ export default function Sidebar() {
                         )}
 
                         {/* Delete confirmation */}
-                        {menu.type === "confirmDelete" && menu.chatId === c.id && (
-                          <div className="sidebar__recent-dropdown">
-                            <span className="sidebar__recent-dropdown-label">Delete this chat?</span>
-                            <button
-                              type="button"
-                              className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
-                              onClick={() => handleDelete(c.id)}
-                              disabled={actionLoading}
-                            >
-                              {actionLoading ? <BeatLoader color="#ff716c" size={3} /> : "Yes, delete"}
-                            </button>
-                            <button
-                              type="button"
-                              className="sidebar__recent-dropdown-item"
-                              onClick={() => setMenu({ type: "closed" })}
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        )}
+                        {menu.type === "confirmDelete" &&
+                          menu.chatId === c.id && (
+                            <div className="sidebar__recent-dropdown">
+                              <span className="sidebar__recent-dropdown-label">
+                                Delete this chat?
+                              </span>
+                              <button
+                                type="button"
+                                className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
+                                onClick={() => handleDelete(c.id)}
+                                disabled={actionLoading}
+                              >
+                                {actionLoading ? (
+                                  <BeatLoader color="#ff716c" size={3} />
+                                ) : (
+                                  "Yes, delete"
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                className="sidebar__recent-dropdown-item"
+                                onClick={() => setMenu({ type: "closed" })}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
                       </div>
                     )}
 
                     {/* Branches for active conversation */}
-                    {isActive && branches.length > 0 && menu.type !== "rename" && (
-                      <div className="sidebar__branches">
-                        {branches.map((b) => (
-                          <button
-                            key={b.id}
-                            type="button"
-                            className={`sidebar__branch sidebar__branch--${b.color}`}
-                            onClick={() => handleSwitchBranch(b.id)}
-                            disabled={loadingId === b.id}
-                          >
-                            <span className="sidebar__branch-indicator">
-                              {loadingId === b.id ? (
-                                <BeatLoader
-                                  color={b.color === "primary" ? "#69f6b8" : b.color === "secondary" ? "#699cff" : "#ac8aff"}
-                                  size={2}
-                                />
-                              ) : (
-                                <span className={`sidebar__branch-dot sidebar__branch-dot--${b.color}`} />
-                              )}
-                            </span>
-                            <span className="sidebar__branch-title">{b.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {isActive &&
+                      branches.length > 0 &&
+                      menu.type !== "rename" && (
+                        <div className="sidebar__branches">
+                          {branches.map((b) => (
+                            <button
+                              key={b.id}
+                              type="button"
+                              className={`sidebar__branch sidebar__branch--${b.color}`}
+                              onClick={() => handleSwitchBranch(b.id)}
+                              disabled={loadingId === b.id}
+                            >
+                              <span className="sidebar__branch-indicator">
+                                {loadingId === b.id ? (
+                                  <BeatLoader
+                                    color={
+                                      b.color === "primary"
+                                        ? "#69f6b8"
+                                        : b.color === "secondary"
+                                          ? "#699cff"
+                                          : "#ac8aff"
+                                    }
+                                    size={2}
+                                  />
+                                ) : (
+                                  <span
+                                    className={`sidebar__branch-dot sidebar__branch-dot--${b.color}`}
+                                  />
+                                )}
+                              </span>
+                              <span className="sidebar__branch-title">
+                                {b.label}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                   </div>
                 );
               })}
@@ -332,14 +384,32 @@ export default function Sidebar() {
 
         <nav className="sidebar__nav">
           <Link href="/history" className="sidebar__nav-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="10" />
               <path d="M12 6v6l4 2" />
             </svg>
             History
           </Link>
           <a href="#" className="sidebar__nav-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
@@ -366,7 +436,16 @@ export default function Sidebar() {
               onClick={() => logout()}
               aria-label="Sign out"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                 <polyline points="16 17 21 12 16 7" />
                 <line x1="21" y1="12" x2="9" y2="12" />
@@ -375,12 +454,31 @@ export default function Sidebar() {
           </div>
         ) : (
           <a href="/auth/login" className="sidebar__sign-in">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
             Sign In
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sidebar__sign-in-arrow">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="sidebar__sign-in-arrow"
+            >
               <path d="M9 18l6-6-6-6" />
             </svg>
           </a>

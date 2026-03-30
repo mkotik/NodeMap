@@ -139,13 +139,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [messages]);
 
   // --- Auto-naming (branches + conversation title) ---
-  const { namingBranches, namedBranchesRef, conversationNamedRef, namingConversation } =
-    useAutoName({
-      tree,
-      treeRef,
-      setTree,
-      setConversationTitle,
-    });
+  const {
+    namingBranches,
+    namedBranchesRef,
+    conversationNamedRef,
+    namingConversation,
+  } = useAutoName({
+    tree,
+    treeRef,
+    setTree,
+    setConversationTitle,
+  });
 
   // --- Recent chats: lightweight list for the sidebar ---
   const [recentChats, setRecentChats] = useState<
@@ -202,9 +206,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Auto-recover any "Untitled" chats that appear in recents
   useEffect(() => {
-    for (const c of recentChats) {
-      if (c.title === "Untitled") recoverChat(c.id);
-    }
+    const toRecover = recentChats.filter((c) => c.title === "Untitled");
+    if (toRecover.length === 0) return;
+    queueMicrotask(() => {
+      for (const c of toRecover) recoverChat(c.id);
+    });
   }, [recentChats, recoverChat]);
 
   // --- Auto-save (debounced persistence to DB) ---
@@ -373,7 +379,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setTimeout(() => {
       isSwitchingRef.current = false;
     }, 0);
-  }, [stop, setMessages, conversationNamedRef, namedBranchesRef, completeInBackground]);
+  }, [
+    stop,
+    setMessages,
+    conversationNamedRef,
+    namedBranchesRef,
+    completeInBackground,
+  ]);
 
   // -------------------------------------------------------------------
   // Load a conversation from the DB

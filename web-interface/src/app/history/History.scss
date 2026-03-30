@@ -2,10 +2,13 @@
 @use "../../styles/mixins" as *;
 
 .history {
+  // overflow-y: auto;
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: $space-8 $space-6;
+  padding: 0px $space-8;
+  padding-top: $space-6;
+  padding-right: 0px;
 
   &--empty {
     display: flex;
@@ -222,6 +225,49 @@
       opacity: 0.4;
       cursor: default;
     }
+  }
+
+  &__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-4;
+    position: sticky;
+    bottom: 0;
+    padding: $space-8 0 $space-4;
+    background: linear-gradient(transparent, $surface 40%);
+  }
+
+  &__page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-1;
+    padding: $space-2 $space-4;
+    background: $surface-container-low;
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: $body-sm;
+    font-weight: $weight-medium;
+    color: $on-surface-variant;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover:not(:disabled) {
+      background: $surface-container;
+      color: $on-surface;
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+  }
+
+  &__page-indicator {
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $outline;
   }
 }
 

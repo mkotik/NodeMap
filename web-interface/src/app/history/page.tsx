@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useChatContext } from "@/context/ChatContext";
@@ -29,6 +29,8 @@ function timeGroup(date: Date): string {
   return "Older";
 }
 
+const PAGE_SIZE = 4;
+
 export default function HistoryPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { loadConversation } = useChatContext();
@@ -38,18 +40,71 @@ export default function HistoryPage() {
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Pagination: cursor stack for prev/next
+  const [cursorStack, setCursorStack] = useState<string[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const page = cursorStack.length + 1;
+  const hasNext = nextCursor !== null;
+  const hasPrev = cursorStack.length > 0;
+
+  const fetchPage = useCallback(
+    async (cursor?: string | null) => {
+      const data = await trpc.conversation.list.query({
+        limit: PAGE_SIZE,
+        cursor: cursor ?? null,
+      });
+      const items = data.items.map((c) => ({
+        ...c,
+        createdAt: new Date(c.createdAt),
+        updatedAt: new Date(c.updatedAt),
+      }));
+      return { items, nextCursor: data.nextCursor };
+    },
+    [],
+  );
+
+  // Load current page
+  const loadPage = useCallback(
+    async (cursor?: string | null) => {
+      setLoading(true);
+      try {
+        const { items, nextCursor: nc } = await fetchPage(cursor);
+        setConversations(items);
+        setNextCursor(nc);
+      } catch {
+        /* ignore */
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchPage],
+  );
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
       setLoading(false);
       return;
     }
-    trpc.conversation.list
-      .query()
-      .then((data) => setConversations(data.map((c) => ({ ...c, createdAt: new Date(c.createdAt), updatedAt: new Date(c.updatedAt) }))))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [user, authLoading]);
+    loadPage();
+  }, [user, authLoading, loadPage]);
+
+  function handleNext() {
+    if (!nextCursor) return;
+    // Push current page's first item cursor onto the stack
+    const currentCursor = cursorStack.length === 0 ? null : cursorStack[cursorStack.length - 1];
+    setCursorStack((prev) => [...prev, nextCursor]);
+    loadPage(nextCursor);
+  }
+
+  function handlePrev() {
+    if (cursorStack.length === 0) return;
+    const newStack = [...cursorStack];
+    newStack.pop(); // remove current page's cursor
+    const prevCursor = newStack.length === 0 ? null : newStack[newStack.length - 1];
+    setCursorStack(newStack);
+    loadPage(prevCursor);
+  }
 
   const filtered = useMemo(() => {
     if (!search.trim()) return conversations;
@@ -139,76 +194,106 @@ export default function HistoryPage() {
         <div className="history__loading">
           <span className="history__spinner" />
         </div>
-      ) : filtered.length === 0 ? (
+      ) : filtered.length === 0 && !hasPrev ? (
         <div className="history--empty">
           <p className="history__empty-text">
             {search ? "No threads match your search." : "No conversation threads yet."}
           </p>
         </div>
       ) : (
-        <div className="history__groups">
-          {groupOrder.map((group) =>
-            grouped[group]?.length ? (
-              <section key={group} className="history__group">
-                <h2 className="history__group-label">{group}</h2>
-                <div className="history__cards">
-                  {grouped[group].map((c) => (
-                    <div
-                      key={c.id}
-                      role="button"
-                      tabIndex={0}
-                      className="history__card"
-                      onClick={() => handleOpen(c.id)}
-                      onKeyDown={(e) => { if (e.key === "Enter") handleOpen(c.id); }}
-                    >
-                      <div className="history__card-dot" />
-                      <div className="history__card-body">
-                        <div className="history__card-header">
-                          <span className="history__card-title">{c.title}</span>
-                          <span className="history__card-time">
-                            {formatTime(c.updatedAt)}
-                          </span>
-                        </div>
-                        {c.preview && (
-                          <p className="history__card-preview">{c.preview}</p>
-                        )}
-                        <div className="history__card-meta">
-                          {c.branchCount > 1 && (
-                            <span className="history__card-branches">
-                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                <line x1="6" y1="3" x2="6" y2="15" />
-                                <circle cx="18" cy="6" r="3" />
-                                <circle cx="6" cy="18" r="3" />
-                                <path d="M18 9a9 9 0 0 1-9 9" />
-                              </svg>
-                              {c.branchCount} branches
+        <>
+          <div className="history__groups">
+            {groupOrder.map((group) =>
+              grouped[group]?.length ? (
+                <section key={group} className="history__group">
+                  <h2 className="history__group-label">{group}</h2>
+                  <div className="history__cards">
+                    {grouped[group].map((c) => (
+                      <div
+                        key={c.id}
+                        role="button"
+                        tabIndex={0}
+                        className="history__card"
+                        onClick={() => handleOpen(c.id)}
+                        onKeyDown={(e) => { if (e.key === "Enter") handleOpen(c.id); }}
+                      >
+                        <div className="history__card-dot" />
+                        <div className="history__card-body">
+                          <div className="history__card-header">
+                            <span className="history__card-title">{c.title}</span>
+                            <span className="history__card-time">
+                              {formatTime(c.updatedAt)}
                             </span>
+                          </div>
+                          {c.preview && (
+                            <p className="history__card-preview">{c.preview}</p>
                           )}
-                          <button
-                            type="button"
-                            className="history__card-delete"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(c.id);
-                            }}
-                            disabled={deletingId === c.id}
-                            aria-label="Delete conversation"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M3 6h18" />
-                              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                            </svg>
-                          </button>
+                          <div className="history__card-meta">
+                            {c.branchCount > 1 && (
+                              <span className="history__card-branches">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <line x1="6" y1="3" x2="6" y2="15" />
+                                  <circle cx="18" cy="6" r="3" />
+                                  <circle cx="6" cy="18" r="3" />
+                                  <path d="M18 9a9 9 0 0 1-9 9" />
+                                </svg>
+                                {c.branchCount} branches
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              className="history__card-delete"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(c.id);
+                              }}
+                              disabled={deletingId === c.id}
+                              aria-label="Delete conversation"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18" />
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ) : null,
+                    ))}
+                  </div>
+                </section>
+              ) : null,
+            )}
+          </div>
+
+          {(hasPrev || hasNext) && !search && (
+            <div className="history__pagination">
+              <button
+                type="button"
+                className="history__page-btn"
+                onClick={handlePrev}
+                disabled={!hasPrev}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+                Prev
+              </button>
+              <span className="history__page-indicator">Page {page}</span>
+              <button
+                type="button"
+                className="history__page-btn"
+                onClick={handleNext}
+                disabled={!hasNext}
+              >
+                Next
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

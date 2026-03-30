@@ -22,44 +22,61 @@ const messageSchema = z.object({
 
 export const conversationRouter = router({
   // ----- list all conversations for the current user -----
-  list: protectedProcedure.query(async ({ ctx }) => {
-    const conversations = await prisma.conversation.findMany({
-      where: { userId: ctx.user.userId },
-      orderBy: { updatedAt: "desc" },
-      include: {
-        branches: {
-          select: { id: true, isMain: true, label: true },
-        },
-        _count: { select: { branches: true } },
-      },
-    });
-
-    // Build preview: first user message from the main branch
-    const previews = await Promise.all(
-      conversations.map(async (c) => {
-        const mainBranch = c.branches.find((b) => b.isMain);
-        let preview = "";
-        if (mainBranch) {
-          const firstMsg = await prisma.message.findFirst({
-            where: { branchId: mainBranch.id, role: "user" },
-            orderBy: { orderIndex: "asc" },
-            select: { content: true },
-          });
-          if (firstMsg) preview = firstMsg.content.slice(0, 120);
-        }
-        return {
-          id: c.id,
-          title: c.title,
-          preview,
-          branchCount: c._count.branches,
-          createdAt: c.createdAt,
-          updatedAt: c.updatedAt,
-        };
+  list: protectedProcedure
+    .input(
+      z.object({
+        cursor: z.string().nullish(),
+        limit: z.number().min(1).max(50).default(10),
       }),
-    );
+    )
+    .query(async ({ ctx, input }) => {
+      const { cursor, limit } = input;
 
-    return previews;
-  }),
+      const conversations = await prisma.conversation.findMany({
+        where: { userId: ctx.user.userId },
+        orderBy: { updatedAt: "desc" },
+        take: limit + 1,
+        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        include: {
+          branches: {
+            select: { id: true, isMain: true, label: true },
+          },
+          _count: { select: { branches: true } },
+        },
+      });
+
+      let nextCursor: string | null = null;
+      if (conversations.length > limit) {
+        const next = conversations.pop()!;
+        nextCursor = next.id;
+      }
+
+      // Build preview: first user message from the main branch
+      const items = await Promise.all(
+        conversations.map(async (c) => {
+          const mainBranch = c.branches.find((b) => b.isMain);
+          let preview = "";
+          if (mainBranch) {
+            const firstMsg = await prisma.message.findFirst({
+              where: { branchId: mainBranch.id, role: "user" },
+              orderBy: { orderIndex: "asc" },
+              select: { content: true },
+            });
+            if (firstMsg) preview = firstMsg.content.slice(0, 120);
+          }
+          return {
+            id: c.id,
+            title: c.title,
+            preview,
+            branchCount: c._count.branches,
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+          };
+        }),
+      );
+
+      return { items, nextCursor };
+    }),
 
   // ----- get a full conversation (branches + messages) -----
   get: protectedProcedure

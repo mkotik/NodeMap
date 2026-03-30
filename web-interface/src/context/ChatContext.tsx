@@ -53,6 +53,8 @@ interface ChatContextValue {
   conversationId: string | null;
   conversationTitle: string;
   setConversationTitle: (title: string) => void;
+  namingConversation: boolean;
+  completingChatIds: Set<string>;
   loadConversation: (id: string) => Promise<void>;
   recentChats: Array<{ id: string; title: string }>;
   refreshRecents: () => void;
@@ -72,6 +74,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const isSwitchingRef = useRef(false);
   const sessionRef = useRef(0);
+  const [completingChatIds, setCompletingChatIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   // Keep refs in sync so callbacks always read the latest values.
   const treeRef = useRef(tree);
@@ -133,7 +138,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [messages]);
 
   // --- Auto-naming (branches + conversation title) ---
-  const { namingBranches, namedBranchesRef, conversationNamedRef } =
+  const { namingBranches, namedBranchesRef, conversationNamedRef, namingConversation } =
     useAutoName({
       tree,
       treeRef,
@@ -162,7 +167,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Refresh recents when a background completion finishes
   useEffect(() => {
-    const handler = () => refreshRecents();
+    const handler = () => {
+      setCompletingChatIds(new Set());
+      refreshRecents();
+    };
     window.addEventListener("chat-completed", handler);
     return () => window.removeEventListener("chat-completed", handler);
   }, [refreshRecents]);
@@ -268,6 +276,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (!chatMessages.some((m) => m.role === "user")) return;
 
     const fireRequest = (convId: string | null) => {
+      if (convId) {
+        setCompletingChatIds((prev) => new Set(prev).add(convId));
+      }
       const token = getAccessToken();
       fetch("/api/chat/complete", {
         method: "POST",
@@ -432,6 +443,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         conversationId,
         conversationTitle,
         setConversationTitle,
+        namingConversation,
+        completingChatIds,
         loadConversation,
         recentChats,
         refreshRecents,

@@ -16,6 +16,7 @@ interface UseAutoNameReturn {
   namingBranches: Set<BranchId>;
   namedBranchesRef: MutableRefObject<Set<BranchId>>;
   conversationNamedRef: MutableRefObject<boolean>;
+  namingConversation: boolean;
 }
 
 export function useAutoName({
@@ -29,6 +30,7 @@ export function useAutoName({
     () => new Set(),
   );
   const conversationNamedRef = useRef(false);
+  const [namingConversation, setNamingConversation] = useState(false);
 
   // Auto-name non-main branches when first user message lands
   useEffect(() => {
@@ -108,6 +110,7 @@ export function useAutoName({
     if (!firstUserNode) return;
 
     conversationNamedRef.current = true;
+    setNamingConversation(true);
 
     const userText = getMessageText(firstUserNode.message);
 
@@ -120,8 +123,9 @@ export function useAutoName({
       .then(({ name }: { name: string }) => {
         if (name) setConversationTitle(name);
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setNamingConversation(false));
   }, [tree, treeRef, setConversationTitle]);
 
-  return { namingBranches, namedBranchesRef, conversationNamedRef };
+  return { namingBranches, namedBranchesRef, conversationNamedRef, namingConversation };
 }

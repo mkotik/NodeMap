@@ -22,6 +22,8 @@ export default function Sidebar() {
     conversationId,
     conversationTitle,
     setConversationTitle,
+    namingConversation,
+    completingChatIds,
     loadConversation,
     recentChats,
     refreshRecents,
@@ -41,6 +43,12 @@ export default function Sidebar() {
   const branches = Object.values(tree.branches).filter(
     (b) => b.id !== tree.mainBranchId && b.nodeIds.length > 0,
   );
+
+  // Show a pending entry when the user has sent a message but the chat
+  // hasn't appeared in recents yet (save still in-flight).
+  const hasMessages = Object.keys(tree.nodes).length > 0;
+  const activeInRecents = recentChats.some((c) => c.id === conversationId);
+  const showPendingEntry = hasMessages && !activeInRecents && pathname === "/";
 
   // Close menu on outside click
   useEffect(() => {
@@ -146,10 +154,32 @@ export default function Sidebar() {
         </button>
 
         {/* Recent chats */}
-        {recentChats.length > 0 && (
+        {(recentChats.length > 0 || showPendingEntry) && (
           <div className="sidebar__recents">
             <span className="sidebar__recents-label">Recent</span>
             <div className="sidebar__recents-list">
+              {showPendingEntry && (
+                <div className="sidebar__recent-wrapper">
+                  <div className="sidebar__recent-row">
+                    <button
+                      type="button"
+                      className="sidebar__recent sidebar__recent--active"
+                      disabled
+                    >
+                      <span className="sidebar__recent-indicator">
+                        <span className="sidebar__recent-dot" />
+                      </span>
+                      <span className="sidebar__recent-title">
+                        {namingConversation ? (
+                          <BeatLoader color="#69f6b8" size={3} />
+                        ) : (
+                          conversationTitle
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
               {recentChats.map((c) => {
                 const isActive = c.id === conversationId && pathname === "/";
                 const menuOpen = menu.type !== "closed" && "chatId" in menu && menu.chatId === c.id;
@@ -197,7 +227,13 @@ export default function Sidebar() {
                               <span className="sidebar__recent-dot" />
                             )}
                           </span>
-                          <span className="sidebar__recent-title">{displayTitle}</span>
+                          <span className="sidebar__recent-title">
+                            {(isActive && namingConversation) || completingChatIds.has(c.id) ? (
+                              <BeatLoader color="#69f6b8" size={3} />
+                            ) : (
+                              displayTitle
+                            )}
+                          </span>
                         </button>
 
                         {/* 3-dot menu trigger */}

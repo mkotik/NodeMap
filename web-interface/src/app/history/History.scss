@@ -2,7 +2,7 @@
 @use "../../styles/mixins" as *;
 
 .history {
-  margin-bottom: $space-8;
+  // margin-bottom: 70px !important;
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
@@ -117,8 +117,12 @@
     gap: $space-2;
 
     .history__card:last-child {
-      margin-bottom: 100px;
+      margin-bottom: 50px;
     }
+  }
+
+  .history__pagination-container {
+    background-color: red;
   }
 
   &__card {
@@ -244,6 +248,39 @@
     }
   }
 
+  &__card-confirm,
+  &__card-cancel {
+    margin-left: auto;
+    padding: 2px $space-3;
+    border: none;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: $label-sm;
+    font-weight: $weight-medium;
+    cursor: pointer;
+    @include surface-transition;
+  }
+
+  &__card-confirm {
+    background: rgba(#ff716c, 0.15);
+    color: #ff716c;
+    margin-left: auto;
+
+    &:hover {
+      background: rgba(#ff716c, 0.25);
+    }
+  }
+
+  &__card-cancel {
+    background: none;
+    color: $on-surface-variant;
+    margin-left: 0;
+
+    &:hover {
+      color: $on-surface;
+    }
+  }
+
   &__pagination {
     display: flex;
     align-items: center;
@@ -251,8 +288,13 @@
     gap: $space-4;
     position: fixed;
     bottom: $space-6;
-    left: 50%;
-    transform: translateX(calc(-50% + 120px)); // offset for sidebar width
+    // Center within the content area (right of sidebar)
+    // The sidebar is a flex item; .app-main takes the rest.
+    // This anchors to .app-main's horizontal center.
+    left: 240px; // sidebar width
+    right: 0;
+    width: fit-content;
+    margin: 0 auto;
     padding: $space-3 $space-6;
     background: $surface-container;
     border-radius: $radius-md;

@@ -40,6 +40,7 @@ export default function HistoryPage() {
   const [navigating, setNavigating] = useState(false);
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   // Pagination: cursor stack for prev/next
   const [cursorStack, setCursorStack] = useState<string[]>([]);
@@ -76,7 +77,11 @@ export default function HistoryPage() {
       setNavigating(true);
       try {
         const term = searchRef.current.trim() || undefined;
-        const { items, nextCursor: nc, total: t } = await fetchPage(cursor, term);
+        const {
+          items,
+          nextCursor: nc,
+          total: t,
+        } = await fetchPage(cursor, term);
         setConversations(items);
         setNextCursor(nc);
         setTotal(t);
@@ -124,7 +129,8 @@ export default function HistoryPage() {
     if (cursorStack.length === 0 || navigating) return;
     const newStack = [...cursorStack];
     newStack.pop();
-    const prevCursor = newStack.length === 0 ? null : newStack[newStack.length - 1];
+    const prevCursor =
+      newStack.length === 0 ? null : newStack[newStack.length - 1];
     setCursorStack(newStack);
     loadPage(prevCursor);
   }
@@ -147,7 +153,12 @@ export default function HistoryPage() {
   }
 
   async function handleDelete(id: string) {
+    if (confirmDeleteId !== id) {
+      setConfirmDeleteId(id);
+      return;
+    }
     setDeletingId(id);
+    setConfirmDeleteId(null);
     try {
       await trpc.conversation.delete.mutate({ id });
       setConversations((prev) => prev.filter((c) => c.id !== id));
@@ -170,7 +181,9 @@ export default function HistoryPage() {
   if (!user && !authLoading) {
     return (
       <div className="history history--empty">
-        <p className="history__empty-text">Sign in to view your conversation history.</p>
+        <p className="history__empty-text">
+          Sign in to view your conversation history.
+        </p>
       </div>
     );
   }
@@ -213,7 +226,9 @@ export default function HistoryPage() {
       ) : conversations.length === 0 && !hasPrev ? (
         <div className="history--empty">
           <p className="history__empty-text">
-            {search ? "No threads match your search." : "No conversation threads yet."}
+            {search
+              ? "No threads match your search."
+              : "No conversation threads yet."}
           </p>
         </div>
       ) : (
@@ -231,12 +246,16 @@ export default function HistoryPage() {
                         tabIndex={0}
                         className="history__card"
                         onClick={() => handleOpen(c.id)}
-                        onKeyDown={(e) => { if (e.key === "Enter") handleOpen(c.id); }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleOpen(c.id);
+                        }}
                       >
                         <div className="history__card-dot" />
                         <div className="history__card-body">
                           <div className="history__card-header">
-                            <span className="history__card-title">{c.title}</span>
+                            <span className="history__card-title">
+                              {c.title}
+                            </span>
                             <span className="history__card-time">
                               {formatTime(c.updatedAt)}
                             </span>
@@ -247,7 +266,14 @@ export default function HistoryPage() {
                           <div className="history__card-meta">
                             {c.branchCount > 1 && (
                               <span className="history__card-branches">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <svg
+                                  width="10"
+                                  height="10"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                >
                                   <line x1="6" y1="3" x2="6" y2="15" />
                                   <circle cx="18" cy="6" r="3" />
                                   <circle cx="6" cy="18" r="3" />
@@ -256,22 +282,57 @@ export default function HistoryPage() {
                                 {c.branchCount} branches
                               </span>
                             )}
-                            <button
-                              type="button"
-                              className="history__card-delete"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(c.id);
-                              }}
-                              disabled={deletingId === c.id}
-                              aria-label="Delete conversation"
-                            >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 6h18" />
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                              </svg>
-                            </button>
+                            {confirmDeleteId === c.id ? (
+                              <>
+                                <button
+                                  type="button"
+                                  className="history__card-confirm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(c.id);
+                                  }}
+                                  disabled={deletingId === c.id}
+                                >
+                                  Delete
+                                </button>
+                                <button
+                                  type="button"
+                                  className="history__card-cancel"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setConfirmDeleteId(null);
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                className="history__card-delete"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(c.id);
+                                }}
+                                disabled={deletingId === c.id}
+                                aria-label="Delete conversation"
+                              >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M3 6h18" />
+                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                </svg>
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -283,32 +344,56 @@ export default function HistoryPage() {
           </div>
 
           {(hasPrev || hasNext) && (
-            <div className="history__pagination">
-              <button
-                type="button"
-                className="history__page-btn"
-                onClick={handlePrev}
-                disabled={!hasPrev || navigating}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-                Prev
-              </button>
-              <span className="history__page-indicator">
-                {navigating ? <span className="history__spinner" /> : `Page ${page} of ${totalPages}`}
-              </span>
-              <button
-                type="button"
-                className="history__page-btn"
-                onClick={handleNext}
-                disabled={!hasNext || navigating}
-              >
-                Next
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </button>
+            <div className="history__pagination-container history__pagination">
+              <div className="history__pagination">
+                <button
+                  type="button"
+                  className="history__page-btn"
+                  onClick={handlePrev}
+                  disabled={!hasPrev || navigating}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                  Prev
+                </button>
+                <span className="history__page-indicator">
+                  {navigating ? (
+                    <span className="history__spinner" />
+                  ) : (
+                    `Page ${page} of ${totalPages}`
+                  )}
+                </span>
+                <button
+                  type="button"
+                  className="history__page-btn"
+                  onClick={handleNext}
+                  disabled={!hasNext || navigating}
+                >
+                  Next
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
         </>

@@ -9,14 +9,13 @@ export const settingsRouter = router({
       where: { id: ctx.user.userId },
       select: { openRouterKeyEncrypted: true },
     });
-    if (!user?.openRouterKeyEncrypted) return { hasKey: false, maskedKey: null };
+    if (!user?.openRouterKeyEncrypted)
+      return { hasKey: false, maskedKey: null };
 
     const key = decrypt(user.openRouterKeyEncrypted);
     // Return masked version: show first 8 and last 4 chars
     const masked =
-      key.length > 12
-        ? key.slice(0, 8) + "..." + key.slice(-4)
-        : "***";
+      key.length > 12 ? key.slice(0, 8) + "..." + key.slice(-4) : "***";
     return { hasKey: true, maskedKey: masked };
   }),
 

@@ -2,7 +2,6 @@ import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12;
-const TAG_LENGTH = 16;
 
 function getKey(): Buffer {
   const hex = process.env.ENCRYPTION_KEY;
@@ -25,7 +24,11 @@ export function encrypt(plaintext: string): string {
     cipher.final(),
   ]);
   const tag = cipher.getAuthTag();
-  return [iv.toString("hex"), encrypted.toString("hex"), tag.toString("hex")].join(":");
+  return [
+    iv.toString("hex"),
+    encrypted.toString("hex"),
+    tag.toString("hex"),
+  ].join(":");
 }
 
 /** Decrypt "iv:ciphertext:tag" → plaintext. */
@@ -33,11 +36,7 @@ export function decrypt(blob: string): string {
   const key = getKey();
   const [ivHex, encHex, tagHex] = blob.split(":");
   if (!ivHex || !encHex || !tagHex) throw new Error("Invalid encrypted blob");
-  const decipher = createDecipheriv(
-    ALGORITHM,
-    key,
-    Buffer.from(ivHex, "hex"),
-  );
+  const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(ivHex, "hex"));
   decipher.setAuthTag(Buffer.from(tagHex, "hex"));
   const decrypted = Buffer.concat([
     decipher.update(Buffer.from(encHex, "hex")),

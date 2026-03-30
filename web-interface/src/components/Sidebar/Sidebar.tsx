@@ -152,7 +152,10 @@ export default function Sidebar() {
       let wasActive = false;
       let checkId: string | null = tree.activeBranchId;
       while (checkId) {
-        if (checkId === branchId) { wasActive = true; break; }
+        if (checkId === branchId) {
+          wasActive = true;
+          break;
+        }
         checkId = tree.branches[checkId]?.parentBranchId ?? null;
       }
       deleteBranchById(branchId);
@@ -247,7 +250,10 @@ export default function Sidebar() {
         </button>
 
         <nav className="sidebar__nav">
-          <Link href="/history" className={`sidebar__nav-item${pathname === "/history" ? " sidebar__nav-item--active" : ""}`}>
+          <Link
+            href="/history"
+            className={`sidebar__nav-item${pathname === "/history" ? " sidebar__nav-item--active" : ""}`}
+          >
             <svg
               width="18"
               height="18"
@@ -263,7 +269,10 @@ export default function Sidebar() {
             </svg>
             History
           </Link>
-          <Link href="/settings" className={`sidebar__nav-item${pathname === "/settings" ? " sidebar__nav-item--active" : ""}`}>
+          <Link
+            href="/settings"
+            className={`sidebar__nav-item${pathname === "/settings" ? " sidebar__nav-item--active" : ""}`}
+          >
             <svg
               width="18"
               height="18"
@@ -640,14 +649,17 @@ export default function Sidebar() {
                                                 {descendants.length > 0 && (
                                                   <div className="sidebar__recent-dropdown-label sidebar__recent-dropdown-label--warning">
                                                     This will also delete{" "}
-                                                    {descendants.length} sub-branch
+                                                    {descendants.length}{" "}
+                                                    sub-branch
                                                     {descendants.length > 1
                                                       ? "es"
                                                       : ""}
                                                     :
                                                     <ul className="sidebar__recent-dropdown-list">
                                                       {descendants.map((d) => (
-                                                        <li key={d.id}>{d.label}</li>
+                                                        <li key={d.id}>
+                                                          {d.label}
+                                                        </li>
                                                       ))}
                                                     </ul>
                                                   </div>

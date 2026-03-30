@@ -19,7 +19,11 @@ export async function POST(req: Request) {
   const auth = req.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) {
     return Response.json(
-      { error: "NO_API_KEY", message: "Sign in and add your OpenRouter API key in Settings to start chatting." },
+      {
+        error: "NO_API_KEY",
+        message:
+          "Sign in and add your OpenRouter API key in Settings to start chatting.",
+      },
       { status: 403 },
     );
   }
@@ -30,7 +34,11 @@ export async function POST(req: Request) {
     userId = payload.userId;
   } catch {
     return Response.json(
-      { error: "NO_API_KEY", message: "Sign in and add your OpenRouter API key in Settings to start chatting." },
+      {
+        error: "NO_API_KEY",
+        message:
+          "Sign in and add your OpenRouter API key in Settings to start chatting.",
+      },
       { status: 403 },
     );
   }
@@ -38,7 +46,10 @@ export async function POST(req: Request) {
   const openrouter = await getOpenRouter(userId);
   if (!openrouter) {
     return Response.json(
-      { error: "NO_API_KEY", message: "Add your OpenRouter API key in Settings to start chatting." },
+      {
+        error: "NO_API_KEY",
+        message: "Add your OpenRouter API key in Settings to start chatting.",
+      },
       { status: 403 },
     );
   }

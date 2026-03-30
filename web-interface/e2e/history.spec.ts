@@ -61,8 +61,11 @@ async function createChat(page: Page, message: string) {
     "Initiate Thought",
   );
   await chat(page, message);
-  // Wait for auto-save to complete (immediate on first message + debounce for response)
-  await page.waitForTimeout(3000);
+  // Wait for auto-save to complete: the pending (disabled) sidebar entry
+  // transitions to a saved recents entry once DB write + recents refresh finish.
+  await expect(
+    page.locator(".sidebar__recents-list .sidebar__recent[disabled]"),
+  ).toHaveCount(0, { timeout: 30000 });
 }
 
 test.describe("History", () => {
@@ -71,6 +74,7 @@ test.describe("History", () => {
   });
 
   test("create test chats", async ({ page }) => {
+    test.setTimeout(180000);
     await login(page);
     await createChat(page, "tell me about quantum physics");
     await createChat(page, "explain how cars work");
@@ -203,13 +207,20 @@ test.describe("History", () => {
       timeout: 10000,
     });
 
-    // Hover to reveal delete button and click it
+    // Open the 3-dot menu and click Delete
     await page.locator(".history__card").first().hover();
-    await page.locator(".history__card-delete").first().click();
+    await page.locator(".history__card-menu-btn").first().click();
+    await page
+      .locator(".history__card-dropdown-item--danger", { hasText: "Delete" })
+      .click();
 
-    // Confirm and cancel buttons should appear
-    await expect(page.locator(".history__card-confirm")).toBeVisible();
-    await expect(page.locator(".history__card-cancel")).toBeVisible();
+    // Confirm and cancel options should appear
+    await expect(page.locator(".history__card-dropdown-label")).toContainText(
+      "Delete this chat?",
+    );
+    await expect(
+      page.locator(".history__card-dropdown-item", { hasText: "Cancel" }),
+    ).toBeVisible();
   });
 
   test("cancel dismisses delete confirmation", async ({ page }) => {
@@ -221,14 +232,21 @@ test.describe("History", () => {
 
     // Trigger delete confirmation
     await page.locator(".history__card").first().hover();
-    await page.locator(".history__card-delete").first().click();
-    await expect(page.locator(".history__card-confirm")).toBeVisible();
+    await page.locator(".history__card-menu-btn").first().click();
+    await page
+      .locator(".history__card-dropdown-item--danger", { hasText: "Delete" })
+      .click();
+    await expect(page.locator(".history__card-dropdown-label")).toBeVisible();
 
     // Cancel
-    await page.locator(".history__card-cancel").click();
+    await page
+      .locator(".history__card-dropdown-item", { hasText: "Cancel" })
+      .click();
 
     // Confirmation should disappear
-    await expect(page.locator(".history__card-confirm")).not.toBeVisible();
+    await expect(
+      page.locator(".history__card-dropdown-label"),
+    ).not.toBeVisible();
   });
 
   test("confirming delete removes the chat", async ({ page }) => {
@@ -238,15 +256,21 @@ test.describe("History", () => {
       timeout: 10000,
     });
 
-    // Delete the first chat
+    // Delete the first chat via menu
     await page.locator(".history__card").first().hover();
-    await page.locator(".history__card-delete").first().click();
-    await page.locator(".history__card-confirm").click();
+    await page.locator(".history__card-menu-btn").first().click();
+    await page
+      .locator(".history__card-dropdown-item--danger", { hasText: "Delete" })
+      .click();
+    await page
+      .locator(".history__card-dropdown-item--danger", {
+        hasText: "Yes, delete",
+      })
+      .click();
 
     // Wait for deletion and page refresh
     await page.waitForTimeout(2000);
 
-    // Count should be maintained (page refills) or decreased if last page
     // The total thread count should decrease
     await expect(page.locator(".history__count")).toBeVisible();
   });

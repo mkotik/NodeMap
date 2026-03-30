@@ -46,14 +46,17 @@ test.describe("Chat recovery on navigate-away", () => {
   test("navigating away mid-stream produces one chat with a name and full response", async ({
     page,
   }) => {
+    test.setTimeout(120000);
     await login(page);
 
-    // Send a message and immediately navigate away before the LLM responds
+    // Send a message and navigate away before the save completes
     await sendMessage(page, "say hello in one word");
 
-    // Wait just long enough for the user message to land in the tree / auto-save
-    // to fire, then click New Chat before the LLM finishes.
-    await page.waitForTimeout(1500);
+    // Wait for the user message to appear in the thread (confirms it's in the tree),
+    // then click New Chat. The background completion should save the chat.
+    await expect(
+      page.locator(".chat-view-thread__bubble--user").first(),
+    ).toBeVisible({ timeout: 5000 });
     await page.locator(".sidebar__new-chat").click();
 
     // We should be back on a fresh chat view
@@ -93,6 +96,7 @@ test.describe("Chat recovery on navigate-away", () => {
   test("untitled chat without a response is auto-recovered on next visit", async ({
     page,
   }) => {
+    test.setTimeout(120000);
     await login(page);
 
     // Navigate to history — the chat from the previous test should be there

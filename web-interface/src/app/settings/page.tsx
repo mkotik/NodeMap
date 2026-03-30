@@ -77,9 +77,7 @@ export default function SettingsPage() {
   if (!user && !authLoading) {
     return (
       <div className="settings settings--empty">
-        <p className="settings__empty-text">
-          Sign in to manage your settings.
-        </p>
+        <p className="settings__empty-text">Sign in to manage your settings.</p>
       </div>
     );
   }

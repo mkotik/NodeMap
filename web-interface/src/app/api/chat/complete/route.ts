@@ -61,7 +61,10 @@ export async function POST(req: Request) {
   const openrouter = await getOpenRouter(userId);
   if (!openrouter) {
     return Response.json(
-      { error: "NO_API_KEY", message: "Add your OpenRouter API key in Settings." },
+      {
+        error: "NO_API_KEY",
+        message: "Add your OpenRouter API key in Settings.",
+      },
       { status: 403 },
     );
   }

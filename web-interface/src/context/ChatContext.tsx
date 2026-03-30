@@ -72,10 +72,12 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 export function ChatProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const userRef = useRef(user);
-  useEffect(() => { userRef.current = user; }, [user]);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
-  const { messages, sendMessage, status, setMessages, stop, error } = useChat({
+  const { messages, sendMessage, status, setMessages, stop } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
       headers: (): Record<string, string> => {
@@ -221,7 +223,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const recoverFailedRef = useRef(new Set<string>());
 
   const recoverChat = useCallback((id: string) => {
-    if (recoveringRef.current.has(id) || recoverFailedRef.current.has(id)) return;
+    if (recoveringRef.current.has(id) || recoverFailedRef.current.has(id))
+      return;
     recoveringRef.current.add(id);
     setCompletingChatIds((prev) => new Set(prev).add(id));
 
@@ -422,10 +425,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // Reset everything (New Chat)
   // -------------------------------------------------------------------
   const handleResetAll = useCallback(() => {
-    // If streaming/submitted, finish the conversation server-side
+    // If streaming/submitted OR the chat has unsaved content, finish server-side.
+    // The unsaved check handles the case where the AI finished but the debounced
+    // auto-save hasn't fired yet — without this the chat would be lost on reset.
+    const hasUnsavedContent =
+      Object.keys(treeRef.current.nodes).length > 0 &&
+      !conversationIdRef.current;
     if (
       statusRef.current === "streaming" ||
-      statusRef.current === "submitted"
+      statusRef.current === "submitted" ||
+      hasUnsavedContent
     ) {
       completeInBackground();
     }
@@ -529,7 +538,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         isSwitchingRef.current = false;
       }, 0);
     },
-    [stop, setMessages, conversationNamedRef, namedBranchesRef, completeInBackground],
+    [
+      stop,
+      setMessages,
+      conversationNamedRef,
+      namedBranchesRef,
+      completeInBackground,
+    ],
   );
 
   return (

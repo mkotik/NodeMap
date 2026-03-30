@@ -72,7 +72,9 @@ export function useAutoName({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(getAccessToken() ? { Authorization: `Bearer ${getAccessToken()}` } : {}),
+        ...(getAccessToken()
+          ? { Authorization: `Bearer ${getAccessToken()}` }
+          : {}),
       },
       body: JSON.stringify({ userMessage: userText, priorMessages }),
     })
@@ -122,9 +124,11 @@ export function useAutoName({
       fetch("/api/branch-name", {
         method: "POST",
         headers: {
-        "Content-Type": "application/json",
-        ...(getAccessToken() ? { Authorization: `Bearer ${getAccessToken()}` } : {}),
-      },
+          "Content-Type": "application/json",
+          ...(getAccessToken()
+            ? { Authorization: `Bearer ${getAccessToken()}` }
+            : {}),
+        },
         body: JSON.stringify({ userMessage: userText, priorMessages: [] }),
       })
         .then((res) => res.json())

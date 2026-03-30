@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useChatContext } from "@/context/ChatContext";
@@ -402,10 +396,7 @@ export default function HistoryPage() {
                                   <div className="history__card-header">
                                     <span className="history__card-title">
                                       {completingChatIds.has(c.id) ? (
-                                        <BeatLoader
-                                          color="#69f6b8"
-                                          size={4}
-                                        />
+                                        <BeatLoader color="#69f6b8" size={4} />
                                       ) : (
                                         c.title
                                       )}

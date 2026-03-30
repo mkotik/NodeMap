@@ -14,7 +14,12 @@ export async function getOpenRouter(userId?: string) {
     select: { openRouterKeyEncrypted: true },
   });
 
-  if (!user?.openRouterKeyEncrypted) return null;
+  if (!user?.openRouterKeyEncrypted) {
+    // Fall back to server-level key (for local dev / tests)
+    const envKey = process.env.OPENROUTER_API_KEY;
+    if (!envKey) return null;
+    return createOpenRouter({ apiKey: envKey });
+  }
 
   const apiKey = decrypt(user.openRouterKeyEncrypted);
   return createOpenRouter({ apiKey });

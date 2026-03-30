@@ -186,13 +186,91 @@ export const conversationRouter = router({
       return { id: convId };
     }),
 
-  // ----- delete a conversation -----
+  // ----- delete a conversation and return refreshed page -----
   delete: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        pageCursor: z.string().nullish(),
+        pageLimit: z.number().min(1).max(50).default(10),
+        search: z.string().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user.userId;
+
       await prisma.conversation.deleteMany({
-        where: { id: input.id, userId: ctx.user.userId },
+        where: { id: input.id, userId },
       });
-      return { success: true };
+
+      // Re-fetch the current page after deletion
+      const where = {
+        userId,
+        ...(input.search
+          ? {
+              OR: [
+                { title: { contains: input.search, mode: "insensitive" as const } },
+                {
+                  branches: {
+                    some: {
+                      isMain: true,
+                      messages: {
+                        some: {
+                          role: "user",
+                          content: { contains: input.search, mode: "insensitive" as const },
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            }
+          : {}),
+      };
+
+      const [conversations, total] = await Promise.all([
+        prisma.conversation.findMany({
+          where,
+          orderBy: { updatedAt: "desc" },
+          take: input.pageLimit + 1,
+          ...(input.pageCursor ? { cursor: { id: input.pageCursor }, skip: 1 } : {}),
+          include: {
+            branches: { select: { id: true, isMain: true, label: true } },
+            _count: { select: { branches: true } },
+          },
+        }),
+        prisma.conversation.count({ where }),
+      ]);
+
+      let nextCursor: string | null = null;
+      if (conversations.length > input.pageLimit) {
+        conversations.pop();
+        nextCursor = conversations[conversations.length - 1].id;
+      }
+
+      const items = await Promise.all(
+        conversations.map(async (c) => {
+          const mainBranch = c.branches.find((b) => b.isMain);
+          let preview = "";
+          if (mainBranch) {
+            const firstMsg = await prisma.message.findFirst({
+              where: { branchId: mainBranch.id, role: "user" },
+              orderBy: { orderIndex: "asc" },
+              select: { content: true },
+            });
+            if (firstMsg) preview = firstMsg.content.slice(0, 120);
+          }
+          return {
+            id: c.id,
+            title: c.title,
+            preview,
+            branchCount: c._count.branches,
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+          };
+        }),
+      );
+
+      return { items, nextCursor, total };
     }),
 });

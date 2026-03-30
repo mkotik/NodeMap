@@ -161,8 +161,33 @@ export default function HistoryPage() {
     setDeletingId(id);
     setConfirmDeleteId(null);
     try {
-      await trpc.conversation.delete.mutate({ id });
-      setConversations((prev) => prev.filter((c) => c.id !== id));
+      // Current page's cursor (null for page 1, otherwise top of stack)
+      const pageCursor = cursorStack.length === 0 ? null : cursorStack[cursorStack.length - 1];
+      const result = await trpc.conversation.delete.mutate({
+        id,
+        pageCursor,
+        pageLimit: PAGE_SIZE,
+        search: search.trim() || undefined,
+      });
+      const items = result.items.map((c) => ({
+        ...c,
+        createdAt: new Date(c.createdAt),
+        updatedAt: new Date(c.updatedAt),
+      }));
+
+      // If current page is now empty and we're not on page 1, go back one page
+      if (items.length === 0 && cursorStack.length > 0) {
+        const newStack = [...cursorStack];
+        newStack.pop();
+        const prevCursor = newStack.length === 0 ? null : newStack[newStack.length - 1];
+        setCursorStack(newStack);
+        setTotal(result.total);
+        loadPage(prevCursor);
+      } else {
+        setConversations(items);
+        setNextCursor(result.nextCursor);
+        setTotal(result.total);
+      }
     } catch {
       /* ignore */
     } finally {
@@ -300,7 +325,11 @@ export default function HistoryPage() {
                                   }}
                                   disabled={deletingId === c.id}
                                 >
-                                  Delete
+                                  {deletingId === c.id ? (
+                                    <BeatLoader color="#ff716c" size={5} />
+                                  ) : (
+                                    "Delete"
+                                  )}
                                 </button>
                                 <button
                                   type="button"

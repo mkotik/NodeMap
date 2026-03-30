@@ -70,6 +70,10 @@ interface ChatContextValue {
 const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  const userRef = useRef(user);
+  useEffect(() => { userRef.current = user; }, [user]);
+
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const { messages, sendMessage, status, setMessages, stop, error } = useChat({
     transport: new DefaultChatTransport({
@@ -82,17 +86,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     onError: (err) => {
       if (err.message?.includes("NO_API_KEY")) {
         setApiKeyMissing(true);
+        const text = userRef.current
+          ? "It looks like you haven't added an API key yet. Head over to [Settings](/settings) to add your OpenRouter API key, then try again."
+          : "You need to sign in before you can chat. Head over to [Sign In](/auth/login) to get started.";
         setMessages((prev) => [
           ...prev,
           {
             id: `api-key-error-${Date.now()}`,
             role: "assistant",
-            parts: [
-              {
-                type: "text",
-                text: "It looks like you haven't added an API key yet. Head over to [Settings](/settings) to add your OpenRouter API key, then try again.",
-              },
-            ],
+            parts: [{ type: "text", text }],
             createdAt: new Date(),
           } as UIMessage,
         ]);
@@ -102,7 +104,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [tree, setTree] = useState<ConversationTree>(createEmptyTree);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversationTitle, setConversationTitle] = useState("Untitled");
-  const { user } = useAuth();
 
   const isSwitchingRef = useRef(false);
   const sessionRef = useRef(0);

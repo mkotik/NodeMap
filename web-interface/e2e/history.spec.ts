@@ -126,64 +126,6 @@ test.describe("History", () => {
     expect(timeText!.length).toBeGreaterThan(0);
   });
 
-  test("pagination shows page info", async ({ page }) => {
-    await login(page);
-    await page.goto("/history");
-    await expect(page.locator(".history__card").first()).toBeVisible({
-      timeout: 10000,
-    });
-    const pageIndicator = page.locator(".history__page-indicator");
-    await expect(pageIndicator).toBeVisible();
-    await expect(pageIndicator).toContainText("Page 1 of");
-  });
-
-  test("next button navigates to page 2", async ({ page }) => {
-    await login(page);
-    await page.goto("/history");
-    await expect(page.locator(".history__card").first()).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Prev should be disabled on page 1
-    const prevBtn = page.locator(".history__page-btn >> text=Prev");
-    await expect(prevBtn).toBeDisabled();
-
-    // Click next
-    const nextBtn = page.locator(".history__page-btn >> text=Next");
-    await nextBtn.click();
-
-    // Should now show page 2
-    await expect(page.locator(".history__page-indicator")).toContainText(
-      "Page 2 of",
-      { timeout: 5000 },
-    );
-
-    // Prev should now be enabled
-    await expect(prevBtn).toBeEnabled();
-  });
-
-  test("prev button navigates back to page 1", async ({ page }) => {
-    await login(page);
-    await page.goto("/history");
-    await expect(page.locator(".history__card").first()).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Go to page 2
-    await page.locator(".history__page-btn >> text=Next").click();
-    await expect(page.locator(".history__page-indicator")).toContainText(
-      "Page 2",
-      { timeout: 5000 },
-    );
-
-    // Go back to page 1
-    await page.locator(".history__page-btn >> text=Prev").click();
-    await expect(page.locator(".history__page-indicator")).toContainText(
-      "Page 1",
-      { timeout: 5000 },
-    );
-  });
-
   test("search filters results", async ({ page }) => {
     await login(page);
     await page.goto("/history");

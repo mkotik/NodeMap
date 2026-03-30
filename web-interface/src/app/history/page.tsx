@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useChatContext } from "@/context/ChatContext";
 import { trpc } from "@/lib/trpc";
 import BeatLoader from "react-spinners/BeatLoader";
+import ClipLoader from "react-spinners/ClipLoader";
 import "./History.scss";
 
 interface ConversationItem {
@@ -253,7 +254,7 @@ export default function HistoryPage() {
 
       {initialLoading ? (
         <div className="history__loading">
-          <span className="history__spinner" />
+          <ClipLoader color="#6d758c" size={24} />
         </div>
       ) : conversations.length === 0 && !hasPrev ? (
         <div className="history--empty">
@@ -404,7 +405,7 @@ export default function HistoryPage() {
                 </button>
                 <span className="history__page-indicator">
                   {navigating ? (
-                    <span className="history__spinner" />
+                    <BeatLoader color="#6d758c" size={6} />
                   ) : (
                     `Page ${page} of ${totalPages}`
                   )}

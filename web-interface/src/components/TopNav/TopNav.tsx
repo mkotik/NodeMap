@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
+import BeatLoader from "react-spinners/BeatLoader";
 import "./TopNav.scss";
 
 export default function TopNav() {
@@ -66,7 +67,14 @@ export default function TopNav() {
                   className={`topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--${activeBranch.color}`}
                 >
                   {isNamingBranch ? (
-                    <span className="topnav__spinner" />
+                    <BeatLoader
+                      color={
+                        activeBranch.color === "primary" ? "#69f6b8"
+                          : activeBranch.color === "secondary" ? "#699cff"
+                          : "#ac8aff"
+                      }
+                      size={6}
+                    />
                   ) : (
                     activeBranch.label
                   )}

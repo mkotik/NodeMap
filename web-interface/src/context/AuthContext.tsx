@@ -57,13 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [setAccessToken]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await trpc.auth.login.mutate({ email, password });
-    setUser(res.user);
-    setAccessToken(res.accessToken);
-  }, []);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const res = await trpc.auth.login.mutate({ email, password });
+      setUser(res.user);
+      setAccessToken(res.accessToken);
+    },
+    [setAccessToken],
+  );
 
   const register = useCallback(
     async (
@@ -81,20 +84,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(res.user);
       setAccessToken(res.accessToken);
     },
-    [],
+    [setAccessToken],
   );
 
-  const loginWithGoogle = useCallback(async (idToken: string) => {
-    const res = await trpc.auth.google.mutate({ idToken });
-    setUser(res.user);
-    setAccessToken(res.accessToken);
-  }, []);
+  const loginWithGoogle = useCallback(
+    async (idToken: string) => {
+      const res = await trpc.auth.google.mutate({ idToken });
+      setUser(res.user);
+      setAccessToken(res.accessToken);
+    },
+    [setAccessToken],
+  );
 
   const logout = useCallback(async () => {
     await trpc.auth.logout.mutate().catch(() => {});
     setUser(null);
     setAccessToken(null);
-  }, []);
+  }, [setAccessToken]);
 
   return (
     <AuthContext.Provider

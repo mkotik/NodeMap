@@ -15,6 +15,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import type { ConversationTree, BranchColor } from "@/types/branch";
+import { getMessageText, getLabel } from "@/lib/messages";
 import { getBranchesFromNode } from "@/lib/tree";
 import MessageNode from "../MessageNode/MessageNode";
 import UserNode from "../UserNode/UserNode";
@@ -38,22 +39,6 @@ const BRANCH_COLOR_MAP: Record<BranchColor, string> = {
   secondary: "#699cff",
   tertiary: "#ac8aff",
 };
-
-function getMessageText(msg: {
-  parts: Array<{ type: string; text?: string }>;
-}): string {
-  return msg.parts
-    .filter(
-      (part): part is { type: "text"; text: string } => part.type === "text",
-    )
-    .map((part) => part.text)
-    .join("");
-}
-
-function getLabel(role: string, index: number): string {
-  if (role === "assistant") return "Neural Logic";
-  return index === 0 ? "User Request" : "Follow Up";
-}
 
 function buildGraph(
   tree: ConversationTree,

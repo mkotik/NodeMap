@@ -1,19 +1,39 @@
 import { generateText } from "ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { z } from "zod";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
+const BranchNameRequestSchema = z.object({
+  userMessage: z.string().min(1).max(5000),
+  priorMessages: z
+    .array(
+      z.object({
+        role: z.string(),
+        text: z.string(),
+      }),
+    )
+    .optional()
+    .default([]),
+});
+
 export async function POST(req: Request) {
-  const { userMessage, priorMessages } = await req.json();
+  const body = await req.json().catch(() => null);
+  const parsed = BranchNameRequestSchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const { userMessage, priorMessages } = parsed.data;
 
   let context = "";
-  if (priorMessages?.length) {
+  if (priorMessages.length) {
     context =
       "Recent conversation before the branch:\n" +
       priorMessages
-        .map((m: { role: string; text: string }) => `${m.role}: ${m.text}`)
+        .map((m) => `${m.role}: ${m.text}`)
         .join("\n") +
       "\n\n";
   }

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import type { Branch } from "@/types/branch";
+import { getMessageText, getLabel } from "@/lib/messages";
 import Markdown from "react-markdown";
 import "./ChatView.scss";
 
@@ -38,20 +39,6 @@ interface ChatViewProps {
   onCreateBranch: (fromMessageId: string) => void;
   onSwitchBranch: (branchId: string) => void;
   onReturnToMain: () => void;
-}
-
-function getMessageText(msg: UIMessage): string {
-  return msg.parts
-    .filter(
-      (part): part is { type: "text"; text: string } => part.type === "text",
-    )
-    .map((part) => part.text)
-    .join("");
-}
-
-function getLabel(role: string, index: number): string {
-  if (role === "assistant") return "Neural Logic";
-  return index === 0 ? "User Request" : "Follow Up";
 }
 
 export default function ChatView({

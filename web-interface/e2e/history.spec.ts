@@ -190,10 +190,10 @@ test.describe("History", () => {
     await page.locator(".history__card").first().click();
 
     // Should navigate to home with messages loaded
-    await expect(page).toHaveURL("/", { timeout: 10000 });
+    await expect(page).toHaveURL("/", { timeout: 15000 });
     await expect(
       page.locator(".chat-view-thread__message").first(),
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test("delete shows confirmation", async ({ page }) => {

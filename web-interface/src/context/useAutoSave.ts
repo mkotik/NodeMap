@@ -13,6 +13,8 @@ interface UseAutoSaveArgs {
   conversationTitle: string;
   conversationId: string | null;
   setConversationId: (id: string) => void;
+  onSaveComplete?: () => void;
+  skipNextSaveRef: MutableRefObject<boolean>;
 }
 
 export function useAutoSave({
@@ -22,7 +24,11 @@ export function useAutoSave({
   conversationTitle,
   conversationId,
   setConversationId,
+  onSaveComplete,
+  skipNextSaveRef,
 }: UseAutoSaveArgs): void {
+  const onSaveCompleteRef = useRef(onSaveComplete);
+  onSaveCompleteRef.current = onSaveComplete;
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const convIdRef = useRef(conversationId);
   useEffect(() => {
@@ -78,6 +84,7 @@ export function useAutoSave({
       })
       .then(({ id }) => {
         if (!convIdRef.current) setConversationId(id);
+        onSaveCompleteRef.current?.();
       })
       .catch(console.error)
       .finally(() => {
@@ -85,10 +92,34 @@ export function useAutoSave({
       });
   }, [treeRef, conversationTitle, setConversationId]);
 
+  // Fingerprint: only save when actual content changes (not just activeBranchId)
+  function treeFingerprint(t: ConversationTree): string {
+    const nodeCount = Object.keys(t.nodes).length;
+    const branchSig = Object.values(t.branches)
+      .map((b) => `${b.id}:${b.nodeIds.length}:${b.label}`)
+      .sort()
+      .join("|");
+    return `${nodeCount}::${branchSig}`;
+  }
+
+  const lastFingerprintRef = useRef("");
+
   useEffect(() => {
     if (!user) return;
     const hasMessages = Object.keys(tree.nodes).length > 0;
     if (!hasMessages) return;
+
+    // Skip save when tree was just loaded from DB (not user-modified)
+    if (skipNextSaveRef.current) {
+      skipNextSaveRef.current = false;
+      lastFingerprintRef.current = treeFingerprint(tree);
+      return;
+    }
+
+    // Skip if nothing meaningful changed (e.g. only activeBranchId switched)
+    const fp = treeFingerprint(tree);
+    if (fp === lastFingerprintRef.current && convIdRef.current) return;
+    lastFingerprintRef.current = fp;
 
     // First save (no conversation yet): save immediately
     if (!convIdRef.current) {

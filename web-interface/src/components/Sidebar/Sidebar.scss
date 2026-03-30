@@ -64,6 +64,135 @@
     }
   }
 
+  // Recent chats section
+  &__recents {
+    margin-bottom: $space-6;
+  }
+
+  &__recents-label {
+    display: block;
+    font-family: $font-body;
+    font-size: $label-sm;
+    font-weight: $weight-semibold;
+    color: $outline;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 $space-2;
+    margin-bottom: $space-2;
+  }
+
+  &__recents-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &__recent {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    width: 100%;
+    padding: $space-2 $space-3;
+    background: none;
+    border: none;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-high;
+    }
+
+    &--active {
+      background: $surface-container;
+
+      .sidebar__recent-dot {
+        background: $primary;
+        box-shadow: 0 0 6px rgba($primary, 0.5);
+      }
+
+      .sidebar__recent-title {
+        color: $on-surface;
+      }
+    }
+  }
+
+  &__recent-dot {
+    width: 5px;
+    height: 5px;
+    min-width: 5px;
+    border-radius: 50%;
+    background: $outline;
+  }
+
+  &__recent-title {
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface-variant;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+  }
+
+  // Branch list (indented under active chat)
+  &__branches {
+    display: flex;
+    flex-direction: column;
+    padding-left: $space-4;
+    margin-left: $space-3;
+    border-left: 1px solid rgba($outline-variant, 0.3);
+  }
+
+  &__branch {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    width: 100%;
+    padding: $space-1 $space-3;
+    background: none;
+    border: none;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-high;
+    }
+  }
+
+  &__branch-dot {
+    width: 4px;
+    height: 4px;
+    min-width: 4px;
+    border-radius: 50%;
+
+    &--primary {
+      background: $primary;
+      box-shadow: 0 0 4px rgba($primary, 0.4);
+    }
+
+    &--secondary {
+      background: $secondary;
+      box-shadow: 0 0 4px rgba($secondary, 0.4);
+    }
+
+    &--tertiary {
+      background: $tertiary;
+      box-shadow: 0 0 4px rgba($tertiary, 0.4);
+    }
+  }
+
+  &__branch-title {
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $outline;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+  }
+
   &__nav {
     display: flex;
     flex-direction: column;

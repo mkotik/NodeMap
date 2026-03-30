@@ -1,15 +1,33 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
 import { useAuth } from "@/context/AuthContext";
 import "./Sidebar.scss";
 
 export default function Sidebar() {
-  const { resetAll } = useChatContext();
+  const {
+    resetAll,
+    tree,
+    conversationId,
+    conversationTitle,
+    loadConversation,
+    recentChats,
+    switchBranch,
+  } = useChatContext();
   const { user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Branches for the active conversation (exclude main)
+  const branches = Object.values(tree.branches).filter(
+    (b) => b.id !== tree.mainBranchId && b.nodeIds.length > 0,
+  );
+
+  function handleLoadChat(id: string) {
+    loadConversation(id).then(() => router.push("/"));
+  }
 
   return (
     <aside className="sidebar">
@@ -47,6 +65,51 @@ export default function Sidebar() {
           </svg>
           New Chat
         </button>
+
+        {/* Recent chats */}
+        {recentChats.length > 0 && (
+          <div className="sidebar__recents">
+            <span className="sidebar__recents-label">Recent</span>
+            <div className="sidebar__recents-list">
+              {recentChats.map((c) => {
+                const isActive = c.id === conversationId && pathname === "/";
+                return (
+                  <div key={c.id}>
+                    <button
+                      type="button"
+                      className={`sidebar__recent ${isActive ? "sidebar__recent--active" : ""}`}
+                      onClick={() => handleLoadChat(c.id)}
+                    >
+                      <span className="sidebar__recent-dot" />
+                      <span className="sidebar__recent-title">
+                        {c.id === conversationId ? conversationTitle : c.title}
+                      </span>
+                    </button>
+                    {/* Show branches for the active conversation */}
+                    {isActive && branches.length > 0 && (
+                      <div className="sidebar__branches">
+                        {branches.map((b) => (
+                          <button
+                            key={b.id}
+                            type="button"
+                            className={`sidebar__branch sidebar__branch--${b.color}`}
+                            onClick={() => {
+                              switchBranch(b.id);
+                              router.push("/");
+                            }}
+                          >
+                            <span className={`sidebar__branch-dot sidebar__branch-dot--${b.color}`} />
+                            <span className="sidebar__branch-title">{b.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <nav className="sidebar__nav">
           <Link href="/history" className="sidebar__nav-item">

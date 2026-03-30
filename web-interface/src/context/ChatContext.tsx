@@ -49,7 +49,9 @@ interface ChatContextValue {
 
   // Persistence
   conversationId: string | null;
+  conversationTitle: string;
   loadConversation: (id: string) => Promise<void>;
+  recentChats: Array<{ id: string; title: string }>;
 
   // For legacy compat
   setMessages: (messages: UIMessage[]) => void;
@@ -124,7 +126,27 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setConversationTitle,
     });
 
+  // --- Recent chats: lightweight list for the sidebar ---
+  const [recentChats, setRecentChats] = useState<
+    Array<{ id: string; title: string }>
+  >([]);
+
+  const refreshRecents = useCallback(() => {
+    if (!user) return;
+    trpc.conversation.list
+      .query({ limit: 5 })
+      .then((data) =>
+        setRecentChats(data.items.map((c) => ({ id: c.id, title: c.title }))),
+      )
+      .catch(() => {});
+  }, [user]);
+
+  useEffect(() => {
+    refreshRecents();
+  }, [refreshRecents]);
+
   // --- Auto-save (debounced persistence to DB) ---
+  const skipNextSaveRef = useRef(false);
   useAutoSave({
     tree,
     treeRef,
@@ -132,6 +154,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     conversationTitle,
     conversationId,
     setConversationId,
+    onSaveComplete: refreshRecents,
+    skipNextSaveRef,
   });
 
   // --- Branch operations (create, switch, return, cleanup) ---
@@ -216,6 +240,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      skipNextSaveRef.current = true;
       setConversationId(id);
       setTree(newTree);
 
@@ -246,7 +271,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         cleanupEmptyActiveBranch,
         namingBranches,
         conversationId,
+        conversationTitle,
         loadConversation,
+        recentChats,
         setMessages,
       }}
     >

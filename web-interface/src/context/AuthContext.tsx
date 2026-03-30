@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { trpc } from "@/lib/trpc";
+import { setAccessToken as syncAccessToken } from "@/lib/auth-token";
 
 export interface User {
   id: string;
@@ -38,8 +39,14 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, _setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Keep the module-level token store in sync so the tRPC client can send it
+  const setAccessToken = useCallback((token: string | null) => {
+    _setAccessToken(token);
+    syncAccessToken(token);
+  }, []);
 
   useEffect(() => {
     trpc.auth.refresh

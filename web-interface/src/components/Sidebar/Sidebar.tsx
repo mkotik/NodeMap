@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
 import { useAuth } from "@/context/AuthContext";
 import "./Sidebar.scss";
@@ -41,7 +42,7 @@ export default function Sidebar() {
         </button>
 
         <nav className="sidebar__nav">
-          <a href="#" className="sidebar__nav-item">
+          <Link href="/history" className="sidebar__nav-item">
             <svg
               width="18"
               height="18"
@@ -56,7 +57,7 @@ export default function Sidebar() {
               <path d="M12 6v6l4 2" />
             </svg>
             History
-          </a>
+          </Link>
           <a href="#" className="sidebar__nav-item">
             <svg
               width="18"

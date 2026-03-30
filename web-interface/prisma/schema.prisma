@@ -17,6 +17,7 @@ model User {
   avatarUrl     String?
   role          String         @default("Member")
   refreshTokens RefreshToken[]
+  conversations Conversation[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -28,4 +29,38 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String   @default("")
+  branches  Branch[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Branch {
+  id             String       @id
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  parentBranchId String?
+  forkPointId    String?
+  label          String
+  color          String
+  isMain         Boolean      @default(false)
+  messages       Message[]
+  createdAt      DateTime     @default(now())
+}
+
+model Message {
+  id              String   @id
+  branchId        String
+  branch          Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  parentMessageId String?
+  role            String
+  content         String
+  orderIndex      Int
+  createdAt       DateTime @default(now())
 }

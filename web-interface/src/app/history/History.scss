@@ -1,0 +1,232 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/mixins" as *;
+
+.history {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: $space-8 $space-6;
+
+  &--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40vh;
+  }
+
+  &__empty-text {
+    font-family: $font-body;
+    font-size: $body-md;
+    color: $on-surface-variant;
+  }
+
+  &__title {
+    font-family: $font-display;
+    font-size: $headline-sm;
+    font-weight: $weight-bold;
+    color: $on-surface;
+    margin-bottom: $space-6;
+  }
+
+  &__search {
+    position: relative;
+    margin-bottom: $space-8;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: $space-4;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $outline;
+    pointer-events: none;
+  }
+
+  &__search-input {
+    width: 100%;
+    padding: $space-3 $space-4 $space-3 $space-10;
+    background: $surface-container-low;
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: $body-md;
+    color: $on-surface;
+    outline: none;
+    @include surface-transition;
+
+    &::placeholder {
+      color: $outline;
+    }
+
+    &:focus {
+      background: $surface-container;
+    }
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: $space-16 0;
+  }
+
+  &__spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid $outline;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: history-spin 0.6s linear infinite;
+  }
+
+  &__groups {
+    display: flex;
+    flex-direction: column;
+    gap: $space-8;
+  }
+
+  &__group-label {
+    font-family: $font-body;
+    font-size: $label-sm;
+    font-weight: $weight-semibold;
+    color: $outline;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: $space-3;
+  }
+
+  &__cards {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__card {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-4;
+    width: 100%;
+    text-align: left;
+    padding: $space-4 $space-5;
+    background: $surface-container-low;
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container;
+    }
+
+    &:hover .history__card-delete {
+      opacity: 1;
+    }
+  }
+
+  &__card-dot {
+    width: 8px;
+    height: 8px;
+    min-width: 8px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: $primary;
+    box-shadow: 0 0 8px rgba($primary, 0.4);
+  }
+
+  &__card-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: $space-4;
+    margin-bottom: $space-1;
+  }
+
+  &__card-title {
+    font-family: $font-body;
+    font-size: $body-md;
+    font-weight: $weight-semibold;
+    color: $on-surface;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__card-time {
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $outline;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__card-preview {
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $on-surface-variant;
+    margin-bottom: $space-2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__card-meta {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+  }
+
+  &__card-branches {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-1;
+    font-family: $font-body;
+    font-size: $label-sm;
+    font-weight: $weight-medium;
+    color: $primary;
+    background: rgba($primary, 0.1);
+    padding: 2px $space-2;
+    border-radius: $radius-sm;
+
+    svg {
+      color: $primary;
+    }
+  }
+
+  &__card-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-left: auto;
+    background: none;
+    border: none;
+    border-radius: $radius-md;
+    color: $outline;
+    cursor: pointer;
+    opacity: 0;
+    @include surface-transition;
+
+    &:hover {
+      background: rgba(#ff716c, 0.1);
+      color: #ff716c;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+}
+
+@keyframes history-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

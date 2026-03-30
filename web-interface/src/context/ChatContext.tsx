@@ -26,6 +26,8 @@ import {
   deleteBranch,
   renameBranch,
 } from "@/lib/tree";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/context/AuthContext";
 
 interface ChatContextValue {
   // Active branch chat
@@ -46,15 +48,28 @@ interface ChatContextValue {
   cleanupEmptyActiveBranch: () => void;
   namingBranches: Set<BranchId>;
 
+  // Persistence
+  conversationId: string | null;
+  loadConversation: (id: string) => Promise<void>;
+
   // For legacy compat
   setMessages: (messages: UIMessage[]) => void;
 }
 
 const ChatContext = createContext<ChatContextValue | null>(null);
 
+function extractText(msg: { parts: Array<{ type: string; text?: string }> }) {
+  return msg.parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("");
+}
+
 export function ChatProvider({ children }: { children: ReactNode }) {
   const { messages, sendMessage, status, setMessages } = useChat();
   const [tree, setTree] = useState<ConversationTree>(createEmptyTree);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const isSwitchingRef = useRef(false);
 
@@ -136,12 +151,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     // Mark as loading
     setNamingBranches((prev) => new Set(prev).add(branchId));
-
-    const extractText = (msg: { parts: Array<{ type: string; text?: string }> }) =>
-      msg.parts
-        .filter((p): p is { type: "text"; text: string } => p.type === "text")
-        .map((p) => p.text)
-        .join("");
 
     const userText = extractText(firstUserNode.message);
 
@@ -282,6 +291,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // Reset everything (New Chat)
   // -------------------------------------------------------------------
   const handleResetAll = useCallback(() => {
+    setConversationId(null);
     setTree(createEmptyTree());
     isSwitchingRef.current = true;
     setMessages([]);
@@ -289,6 +299,155 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       isSwitchingRef.current = false;
     }, 0);
   }, [setMessages]);
+
+  // -------------------------------------------------------------------
+  // Auto-save: debounce saves to the DB when the tree changes
+  // -------------------------------------------------------------------
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const convIdRef = useRef(conversationId);
+  convIdRef.current = conversationId;
+
+  useEffect(() => {
+    if (!user) return;
+    // Only save if there are actual messages in the tree
+    const hasMessages = Object.keys(tree.nodes).length > 0;
+    if (!hasMessages) return;
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      const t = treeRef.current;
+
+      // Build title from first user message on main branch
+      const mainBranch = t.branches[t.mainBranchId];
+      let title = "Untitled";
+      if (mainBranch?.nodeIds.length) {
+        const firstUser = mainBranch.nodeIds
+          .map((id) => t.nodes[id])
+          .find((n) => n?.message.role === "user");
+        if (firstUser) title = extractText(firstUser.message).slice(0, 80) || "Untitled";
+      }
+
+      const branches = Object.values(t.branches).map((b) => ({
+        id: b.id,
+        parentBranchId: b.parentBranchId,
+        forkPointId: b.forkPointId,
+        label: b.label,
+        color: b.color,
+        isMain: b.id === t.mainBranchId,
+      }));
+
+      const msgs: Array<{
+        id: string;
+        branchId: string;
+        parentMessageId: string | null;
+        role: string;
+        content: string;
+        orderIndex: number;
+      }> = [];
+
+      for (const branch of Object.values(t.branches)) {
+        branch.nodeIds.forEach((nodeId, idx) => {
+          const node = t.nodes[nodeId];
+          if (!node) return;
+          msgs.push({
+            id: node.message.id,
+            branchId: branch.id,
+            parentMessageId: node.parentId,
+            role: node.message.role,
+            content: extractText(node.message),
+            orderIndex: idx,
+          });
+        });
+      }
+
+      trpc.conversation.save
+        .mutate({
+          id: convIdRef.current ?? undefined,
+          title,
+          mainBranchId: t.mainBranchId,
+          branches,
+          messages: msgs,
+        })
+        .then(({ id }) => {
+          if (!convIdRef.current) setConversationId(id);
+        })
+        .catch(() => {});
+    }, 2000);
+
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [tree, user]);
+
+  // -------------------------------------------------------------------
+  // Load a conversation from the DB
+  // -------------------------------------------------------------------
+  const loadConversation = useCallback(
+    async (id: string) => {
+      const data = await trpc.conversation.get.query({ id });
+      if (!data) return;
+
+      const newTree: ConversationTree = {
+        nodes: {},
+        branches: {},
+        mainBranchId: "",
+        activeBranchId: "",
+      };
+
+      // Rebuild branches
+      for (const b of data.branches) {
+        newTree.branches[b.id] = {
+          id: b.id,
+          label: b.label,
+          forkPointId: b.forkPointId,
+          parentBranchId: b.parentBranchId,
+          nodeIds: b.messages.map((m) => m.id),
+          color: b.color as "primary" | "secondary" | "tertiary",
+        };
+        if (b.isMain) {
+          newTree.mainBranchId = b.id;
+          newTree.activeBranchId = b.id;
+        }
+      }
+
+      // Rebuild nodes
+      for (const b of data.branches) {
+        for (const m of b.messages) {
+          newTree.nodes[m.id] = {
+            message: {
+              id: m.id,
+              role: m.role as "user" | "assistant",
+              parts: [{ type: "text" as const, text: m.content }],
+            } as UIMessage,
+            parentId: m.parentMessageId,
+            branchId: b.id,
+            childIds: [],
+          };
+        }
+      }
+
+      // Rebuild childIds
+      for (const node of Object.values(newTree.nodes)) {
+        if (node.parentId && newTree.nodes[node.parentId]) {
+          newTree.nodes[node.parentId].childIds.push(
+            node.message.id,
+          );
+        }
+      }
+
+      setConversationId(id);
+      setTree(newTree);
+
+      // Set chat messages to main branch
+      const chain = getBranchMessageChain(newTree, newTree.mainBranchId);
+      isSwitchingRef.current = true;
+      setMessages(chain);
+      setTimeout(() => {
+        isSwitchingRef.current = false;
+      }, 0);
+    },
+    [setMessages],
+  );
 
   return (
     <ChatContext.Provider
@@ -305,6 +464,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         resetAll: handleResetAll,
         cleanupEmptyActiveBranch,
         namingBranches,
+        conversationId,
+        loadConversation,
         setMessages,
       }}
     >

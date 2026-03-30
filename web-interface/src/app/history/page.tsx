@@ -31,7 +31,7 @@ function timeGroup(date: Date): string {
   return "Older";
 }
 
-const PAGE_SIZE = 4;
+const PAGE_SIZE = 10;
 
 export default function HistoryPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -288,33 +288,18 @@ export default function HistoryPage() {
                         <div className="history__card-dot" />
                         <div className="history__card-body">
                           <div className="history__card-header">
-                            <span className="history__card-title">
-                              {c.title}
-                            </span>
-                            <span className="history__card-time">
-                              {formatTime(c.updatedAt)}
-                            </span>
+                            <span className="history__card-title">{c.title}</span>
+                            {c.preview && (
+                              <span className="history__card-preview">{c.preview}</span>
+                            )}
                           </div>
-                          {c.preview && (
-                            <p className="history__card-preview">{c.preview}</p>
-                          )}
+                          <span className="history__card-time">
+                            {formatTime(c.updatedAt)}
+                          </span>
                           <div className="history__card-meta">
                             {c.branchCount > 1 && (
                               <span className="history__card-branches">
-                                <svg
-                                  width="10"
-                                  height="10"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2.5"
-                                >
-                                  <line x1="6" y1="3" x2="6" y2="15" />
-                                  <circle cx="18" cy="6" r="3" />
-                                  <circle cx="6" cy="18" r="3" />
-                                  <path d="M18 9a9 9 0 0 1-9 9" />
-                                </svg>
-                                {c.branchCount} branches
+                                {c.branchCount}
                               </span>
                             )}
                             {confirmDeleteId === c.id ? (
@@ -322,25 +307,15 @@ export default function HistoryPage() {
                                 <button
                                   type="button"
                                   className="history__card-confirm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(c.id);
-                                  }}
+                                  onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }}
                                   disabled={deletingId === c.id}
                                 >
-                                  {deletingId === c.id ? (
-                                    <BeatLoader color="#ff716c" size={5} />
-                                  ) : (
-                                    "Delete"
-                                  )}
+                                  {deletingId === c.id ? <BeatLoader color="#ff716c" size={4} /> : "Delete"}
                                 </button>
                                 <button
                                   type="button"
                                   className="history__card-cancel"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setConfirmDeleteId(null);
-                                  }}
+                                  onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
                                 >
                                   Cancel
                                 </button>
@@ -349,23 +324,11 @@ export default function HistoryPage() {
                               <button
                                 type="button"
                                 className="history__card-delete"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(c.id);
-                                }}
+                                onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }}
                                 disabled={deletingId === c.id}
                                 aria-label="Delete conversation"
                               >
-                                <svg
-                                  width="14"
-                                  height="14"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <path d="M3 6h18" />
                                   <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                   <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />

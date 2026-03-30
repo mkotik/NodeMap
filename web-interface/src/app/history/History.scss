@@ -17,11 +17,10 @@
     justify-content: center;
     min-height: 40vh;
   }
-
-  .history__cards {
+  .history__groups {
     margin-bottom: 50px !important;
+    padding-bottom: 50px !important;
   }
-
   &__empty-text {
     font-family: $font-body;
     font-size: $body-md;
@@ -99,11 +98,10 @@
     padding: $space-16 0;
   }
 
-
   &__groups {
     display: flex;
     flex-direction: column;
-    gap: $space-8;
+    gap: $space-4;
   }
 
   &__group-label {
@@ -113,33 +111,25 @@
     color: $outline;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: $space-3;
+    margin-bottom: $space-1;
   }
 
   &__cards {
     display: flex;
     flex-direction: column;
-    gap: $space-2;
-
-    .history__card:last-child {
-      margin-bottom: 50px;
-    }
-  }
-
-  .history__pagination-container {
-    background-color: red;
+    gap: 1px;
   }
 
   &__card {
     display: flex;
-    align-items: flex-start;
-    gap: $space-4;
+    align-items: center;
+    gap: $space-3;
     width: 100%;
     text-align: left;
-    padding: $space-4 $space-5;
+    padding: $space-2 $space-4;
     background: $surface-container-low;
     border: none;
-    border-radius: $radius-md;
+    border-radius: $radius-sm;
     cursor: pointer;
     @include surface-transition;
 
@@ -153,36 +143,54 @@
   }
 
   &__card-dot {
-    width: 8px;
-    height: 8px;
-    min-width: 8px;
-    margin-top: 6px;
+    width: 6px;
+    height: 6px;
+    min-width: 6px;
     border-radius: 50%;
     background: $primary;
-    box-shadow: 0 0 8px rgba($primary, 0.4);
+    box-shadow: 0 0 6px rgba($primary, 0.4);
   }
 
   &__card-body {
     flex: 1;
     min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
   }
 
   &__card-header {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: $space-4;
-    margin-bottom: $space-1;
+    align-items: center;
+    gap: $space-2;
+    flex: 1;
+    min-width: 0;
   }
 
   &__card-title {
     font-family: $font-body;
-    font-size: $body-md;
+    font-size: $body-sm;
     font-weight: $weight-semibold;
     color: $on-surface;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  &__card-preview {
+    font-family: $font-body;
+    font-size: $body-sm;
+    color: $outline;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+    min-width: 0;
+
+    &::before {
+      content: "—";
+      margin-right: $space-1;
+    }
   }
 
   &__card-time {
@@ -191,53 +199,36 @@
     color: $outline;
     white-space: nowrap;
     flex-shrink: 0;
-  }
-
-  &__card-preview {
-    font-family: $font-body;
-    font-size: $body-sm;
-    color: $on-surface-variant;
-    margin-bottom: $space-2;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    margin-left: auto;
   }
 
   &__card-meta {
     display: flex;
     align-items: center;
-    gap: $space-3;
-    min-height: 28px;
+    gap: $space-2;
+    flex-shrink: 0;
   }
 
   &__card-branches {
-    display: inline-flex;
-    align-items: center;
-    gap: $space-1;
     font-family: $font-body;
     font-size: $label-sm;
     font-weight: $weight-medium;
     color: $primary;
     background: rgba($primary, 0.1);
-    padding: 2px $space-2;
+    padding: 1px $space-2;
     border-radius: $radius-sm;
-
-    svg {
-      color: $primary;
-    }
+    line-height: 1;
   }
 
   &__card-delete {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    margin-left: auto;
+    width: 24px;
+    height: 24px;
     background: none;
     border: none;
-    border-radius: $radius-md;
+    border-radius: $radius-sm;
     color: $outline;
     cursor: pointer;
     opacity: 0;
@@ -256,21 +247,20 @@
 
   &__card-confirm,
   &__card-cancel {
-    margin-left: auto;
-    padding: 2px $space-3;
+    padding: 1px $space-2;
     border: none;
     border-radius: $radius-sm;
     font-family: $font-body;
     font-size: $label-sm;
     font-weight: $weight-medium;
     cursor: pointer;
+    line-height: 1.4;
     @include surface-transition;
   }
 
   &__card-confirm {
     background: rgba(#ff716c, 0.15);
     color: #ff716c;
-    margin-left: auto;
 
     &:hover {
       background: rgba(#ff716c, 0.25);
@@ -280,7 +270,6 @@
   &__card-cancel {
     background: none;
     color: $on-surface-variant;
-    margin-left: 0;
 
     &:hover {
       color: $on-surface;
@@ -342,5 +331,4 @@
     justify-content: center;
     min-width: 100px;
   }
-
 }

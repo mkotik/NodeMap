@@ -158,7 +158,7 @@ export default function Sidebar() {
           branchId,
         });
       }
-      if (wasActive) {
+      if (wasActive && pathname !== "/nodes") {
         router.push("/");
       }
       setMenu({ type: "closed" });

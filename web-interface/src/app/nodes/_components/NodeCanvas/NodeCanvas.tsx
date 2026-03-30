@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -288,8 +288,13 @@ export default function NodeCanvas({
     () => buildGraph(tree, onCreateBranch, onSwitchBranch),
     [tree, onCreateBranch, onSwitchBranch],
   );
-  const [nodes, , onNodesChange] = useNodesState(graph.nodes);
-  const [edges, , onEdgesChange] = useEdgesState(graph.edges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(graph.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
+
+  useEffect(() => {
+    setNodes(graph.nodes);
+    setEdges(graph.edges);
+  }, [graph, setNodes, setEdges]);
 
   const nodeCount = Object.keys(tree.nodes).length;
 

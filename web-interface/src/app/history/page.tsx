@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useChatContext } from "@/context/ChatContext";
 import { trpc } from "@/lib/trpc";
+import BeatLoader from "react-spinners/BeatLoader";
 import "./History.scss";
 
 interface ConversationItem {
@@ -215,8 +216,14 @@ export default function HistoryPage() {
           type="text"
           placeholder="Search your logic tree..."
           value={search}
+          maxLength={100}
           onChange={(e) => setSearch(e.target.value)}
         />
+        {navigating && search && (
+          <div className="history__search-dots">
+            <BeatLoader color="#6d758c" size={6} />
+          </div>
+        )}
       </div>
 
       {initialLoading ? (

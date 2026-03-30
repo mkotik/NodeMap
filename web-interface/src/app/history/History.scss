@@ -53,6 +53,16 @@
     margin-bottom: $space-8;
   }
 
+  &__search-dots {
+    position: absolute;
+    right: $space-4;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
   &__search-icon {
     position: absolute;
     left: $space-4;
@@ -340,6 +350,7 @@
     justify-content: center;
     min-width: 100px;
   }
+
 }
 
 @keyframes history-spin {

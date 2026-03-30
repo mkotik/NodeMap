@@ -69,6 +69,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const { messages, sendMessage, status, setMessages } = useChat();
   const [tree, setTree] = useState<ConversationTree>(createEmptyTree);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationTitle, setConversationTitle] = useState("Untitled");
   const { user } = useAuth();
 
   const isSwitchingRef = useRef(false);
@@ -193,6 +194,40 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [tree]);
 
   // -------------------------------------------------------------------
+  // Auto-name conversation: when the first user message lands on the
+  // main branch, call the LLM to generate a short title.
+  // -------------------------------------------------------------------
+  const conversationNamedRef = useRef(false);
+
+  useEffect(() => {
+    const currentTree = treeRef.current;
+    const mainBranch = currentTree.branches[currentTree.mainBranchId];
+    if (!mainBranch || mainBranch.nodeIds.length === 0 || conversationNamedRef.current) {
+      return;
+    }
+
+    const firstUserNode = mainBranch.nodeIds
+      .map((id) => currentTree.nodes[id])
+      .find((n) => n?.message.role === "user");
+    if (!firstUserNode) return;
+
+    conversationNamedRef.current = true;
+
+    const userText = extractText(firstUserNode.message);
+
+    fetch("/api/branch-name", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userMessage: userText, priorMessages: [] }),
+    })
+      .then((res) => res.json())
+      .then(({ name }: { name: string }) => {
+        if (name) setConversationTitle(name);
+      })
+      .catch(() => {});
+  }, [tree]);
+
+  // -------------------------------------------------------------------
   // Auto-delete the active branch if it has no messages and isn't main.
   // Used when navigating away from the chat view of an empty branch.
   // -------------------------------------------------------------------
@@ -292,6 +327,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // -------------------------------------------------------------------
   const handleResetAll = useCallback(() => {
     setConversationId(null);
+    setConversationTitle("Untitled");
+    conversationNamedRef.current = false;
+    namedBranchesRef.current = new Set();
     setTree(createEmptyTree());
     isSwitchingRef.current = true;
     setMessages([]);
@@ -316,16 +354,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       const t = treeRef.current;
-
-      // Build title from first user message on main branch
-      const mainBranch = t.branches[t.mainBranchId];
-      let title = "Untitled";
-      if (mainBranch?.nodeIds.length) {
-        const firstUser = mainBranch.nodeIds
-          .map((id) => t.nodes[id])
-          .find((n) => n?.message.role === "user");
-        if (firstUser) title = extractText(firstUser.message).slice(0, 80) || "Untitled";
-      }
 
       const branches = Object.values(t.branches).map((b) => ({
         id: b.id,
@@ -363,7 +391,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       trpc.conversation.save
         .mutate({
           id: convIdRef.current ?? undefined,
-          title,
+          title: conversationTitle,
           mainBranchId: t.mainBranchId,
           branches,
           messages: msgs,
@@ -377,7 +405,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [tree, user]);
+  }, [tree, user, conversationTitle]);
 
   // -------------------------------------------------------------------
   // Load a conversation from the DB
@@ -386,6 +414,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     async (id: string) => {
       const data = await trpc.conversation.get.query({ id });
       if (!data) return;
+
+      setConversationTitle(data.title || "Untitled");
+      conversationNamedRef.current = true;
 
       const newTree: ConversationTree = {
         nodes: {},

@@ -14,10 +14,10 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar__top">
-        <div className="sidebar__brand">
+        <Link href="/" className="sidebar__brand">
           <span className="sidebar__logo">NodeMap.io</span>
           <span className="sidebar__tagline">Digital Nervous System</span>
-        </div>
+        </Link>
 
         <button
           className="sidebar__new-chat"

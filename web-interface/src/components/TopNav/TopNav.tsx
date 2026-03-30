@@ -17,16 +17,18 @@ export default function TopNav() {
   useEffect(() => setMounted(true), []);
 
   const isAuth = pathname.startsWith("/auth");
+  const isHistory = pathname === "/history";
   const isNodes = pathname === "/nodes";
   const isThread = pathname === "/";
   const onBranch = !isMainBranch && isThread;
   const hasMessages = messages.length > 0;
   const isEmpty = isThread && isMainBranch && !hasMessages;
+  const hideNav = isAuth || isHistory;
 
   return (
     <header className="topnav">
       <div className="topnav__left">
-        {mounted && !isAuth && (
+        {mounted && !hideNav && (
           <>
             {!isEmpty && (
               <Link

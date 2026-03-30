@@ -19,6 +19,8 @@
     flex-direction: column;
     gap: $space-1;
     margin-bottom: $space-6;
+    text-decoration: none;
+    color: inherit;
   }
 
   &__logo {

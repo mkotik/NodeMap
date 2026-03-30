@@ -132,6 +132,17 @@
     }
   }
 
+  &__spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: topnav-spin 0.6s linear infinite;
+    opacity: 0.7;
+  }
+
   &__breadcrumb-sep {
     font-family: $font-body;
     font-size: $body-sm;
@@ -183,5 +194,11 @@
       background: $surface-container-low;
       color: $on-surface;
     }
+  }
+}
+
+@keyframes topnav-spin {
+  to {
+    transform: rotate(360deg);
   }
 }

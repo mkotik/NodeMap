@@ -21,8 +21,10 @@ import {
   createEmptyTree,
   addNodeToBranch,
   getBranchMessageChain,
+  getAncestorChain,
   createBranch as treeFnCreateBranch,
   deleteBranch,
+  renameBranch,
 } from "@/lib/tree";
 
 interface ChatContextValue {
@@ -42,6 +44,7 @@ interface ChatContextValue {
   returnToMain: () => void;
   resetAll: () => void;
   cleanupEmptyActiveBranch: () => void;
+  namingBranches: Set<BranchId>;
 
   // For legacy compat
   setMessages: (messages: UIMessage[]) => void;
@@ -100,6 +103,85 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       return hasNew ? next : prev;
     });
   }, [messages]);
+
+  // -------------------------------------------------------------------
+  // Auto-name: when the first user message lands on a non-main branch,
+  // call the LLM to generate a short label.
+  // -------------------------------------------------------------------
+  const namedBranchesRef = useRef(new Set<BranchId>());
+  const [namingBranches, setNamingBranches] = useState<Set<BranchId>>(
+    () => new Set(),
+  );
+
+  useEffect(() => {
+    const currentTree = treeRef.current;
+    const branch = currentTree.branches[currentTree.activeBranchId];
+    if (
+      !branch ||
+      currentTree.activeBranchId === currentTree.mainBranchId ||
+      branch.nodeIds.length === 0 ||
+      namedBranchesRef.current.has(branch.id)
+    ) {
+      return;
+    }
+
+    // Find the first user message in this branch
+    const firstUserNode = branch.nodeIds
+      .map((id) => currentTree.nodes[id])
+      .find((n) => n?.message.role === "user");
+    if (!firstUserNode) return;
+
+    const branchId = branch.id;
+    namedBranchesRef.current.add(branchId);
+
+    // Mark as loading
+    setNamingBranches((prev) => new Set(prev).add(branchId));
+
+    const extractText = (msg: { parts: Array<{ type: string; text?: string }> }) =>
+      msg.parts
+        .filter((p): p is { type: "text"; text: string } => p.type === "text")
+        .map((p) => p.text)
+        .join("");
+
+    const userText = extractText(firstUserNode.message);
+
+    // Grab the last few ancestor messages for context
+    const priorMessages: Array<{ role: string; text: string }> = [];
+    if (branch.forkPointId) {
+      const ancestors = getAncestorChain(currentTree, branch.forkPointId);
+      for (const msg of ancestors.slice(-4)) {
+        const text = extractText(msg);
+        if (text) priorMessages.push({ role: msg.role, text: text.slice(0, 200) });
+      }
+    }
+
+    fetch("/api/branch-name", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userMessage: userText, priorMessages }),
+    })
+      .then((res) => res.json())
+      .then(({ name }: { name: string }) => {
+        if (!name) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- async callback from fetch
+        setTree((prev) => {
+          if (!prev.branches[branchId]) return prev;
+          const next = structuredClone(prev);
+          renameBranch(next, branchId, name);
+          return next;
+        });
+      })
+      .catch(() => {
+        /* keep default label on failure */
+      })
+      .finally(() => {
+        setNamingBranches((prev) => {
+          const next = new Set(prev);
+          next.delete(branchId);
+          return next;
+        });
+      });
+  }, [tree]);
 
   // -------------------------------------------------------------------
   // Auto-delete the active branch if it has no messages and isn't main.
@@ -222,6 +304,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         returnToMain: handleReturnToMain,
         resetAll: handleResetAll,
         cleanupEmptyActiveBranch,
+        namingBranches,
         setMessages,
       }}
     >

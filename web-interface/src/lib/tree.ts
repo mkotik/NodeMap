@@ -175,6 +175,18 @@ export function isForkPoint(tree: ConversationTree, nodeId: NodeId): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Rename a branch (mutates)
+// ---------------------------------------------------------------------------
+export function renameBranch(
+  tree: ConversationTree,
+  branchId: BranchId,
+  label: string,
+): void {
+  const branch = tree.branches[branchId];
+  if (branch) branch.label = label;
+}
+
+// ---------------------------------------------------------------------------
 // Delete a branch and its nodes from the tree (mutates)
 // ---------------------------------------------------------------------------
 export function deleteBranch(

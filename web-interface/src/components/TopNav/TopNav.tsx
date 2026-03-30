@@ -9,8 +9,9 @@ import "./TopNav.scss";
 export default function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { activeBranch, isMainBranch, returnToMain, messages } =
+  const { activeBranch, isMainBranch, returnToMain, messages, namingBranches } =
     useChatContext();
+  const isNamingBranch = namingBranches.has(activeBranch.id);
   const [mounted, setMounted] = useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- standard hydration guard
   useEffect(() => setMounted(true), []);
@@ -62,7 +63,11 @@ export default function TopNav() {
                 <span
                   className={`topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--${activeBranch.color}`}
                 >
-                  {activeBranch.label}
+                  {isNamingBranch ? (
+                    <span className="topnav__spinner" />
+                  ) : (
+                    activeBranch.label
+                  )}
                 </span>
               </nav>
             ) : !isEmpty ? (

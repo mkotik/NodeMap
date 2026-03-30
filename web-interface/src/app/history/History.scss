@@ -9,13 +9,17 @@
   padding: 0px $space-8;
   padding-top: $space-6;
   padding-right: 0px;
-  min-height: 100%;
+  min-height: 100%i;
   position: relative;
   &--empty {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 40vh;
+  }
+
+  .history__cards {
+    margin-bottom: 50px !important;
   }
 
   &__empty-text {

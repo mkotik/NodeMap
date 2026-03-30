@@ -27,14 +27,37 @@ export const conversationRouter = router({
       z.object({
         cursor: z.string().nullish(),
         limit: z.number().min(1).max(50).default(10),
+        search: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { cursor, limit } = input;
+      const { cursor, limit, search } = input;
+
+      const where = {
+        userId: ctx.user.userId,
+        ...(search
+          ? {
+              OR: [
+                { title: { contains: search, mode: "insensitive" as const } },
+                {
+                  branches: {
+                    some: {
+                      messages: {
+                        some: {
+                          content: { contains: search, mode: "insensitive" as const },
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            }
+          : {}),
+      };
 
       const [conversations, total] = await Promise.all([
         prisma.conversation.findMany({
-          where: { userId: ctx.user.userId },
+          where,
           orderBy: { updatedAt: "desc" },
           take: limit + 1,
           ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
@@ -45,7 +68,7 @@ export const conversationRouter = router({
             _count: { select: { branches: true } },
           },
         }),
-        prisma.conversation.count({ where: { userId: ctx.user.userId } }),
+        prisma.conversation.count({ where }),
       ]);
 
       let nextCursor: string | null = null;

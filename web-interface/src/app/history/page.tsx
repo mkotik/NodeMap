@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useChatContext } from "@/context/ChatContext";
@@ -50,11 +50,15 @@ export default function HistoryPage() {
   const hasNext = nextCursor !== null;
   const hasPrev = cursorStack.length > 0;
 
+  const searchRef = useRef(search);
+  searchRef.current = search;
+
   const fetchPage = useCallback(
-    async (cursor?: string | null) => {
+    async (cursor?: string | null, searchTerm?: string) => {
       const data = await trpc.conversation.list.query({
         limit: PAGE_SIZE,
         cursor: cursor ?? null,
+        ...(searchTerm ? { search: searchTerm } : {}),
       });
       const items = data.items.map((c) => ({
         ...c,
@@ -66,12 +70,13 @@ export default function HistoryPage() {
     [],
   );
 
-  // Load a page by cursor
+  // Load a page by cursor (uses current search term from ref)
   const loadPage = useCallback(
     async (cursor?: string | null) => {
       setNavigating(true);
       try {
-        const { items, nextCursor: nc, total: t } = await fetchPage(cursor);
+        const term = searchRef.current.trim() || undefined;
+        const { items, nextCursor: nc, total: t } = await fetchPage(cursor, term);
         setConversations(items);
         setNextCursor(nc);
         setTotal(t);
@@ -84,6 +89,7 @@ export default function HistoryPage() {
     [fetchPage],
   );
 
+  // Initial load
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -92,6 +98,21 @@ export default function HistoryPage() {
     }
     loadPage().finally(() => setInitialLoading(false));
   }, [user, authLoading, loadPage]);
+
+  // Debounced search: reset to page 1 when search changes
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (initialLoading) return;
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setCursorStack([]);
+      setNextCursor(null);
+      loadPage(null);
+    }, 300);
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleNext() {
     if (!nextCursor || navigating) return;
@@ -108,25 +129,15 @@ export default function HistoryPage() {
     loadPage(prevCursor);
   }
 
-  const filtered = useMemo(() => {
-    if (!search.trim()) return conversations;
-    const q = search.toLowerCase();
-    return conversations.filter(
-      (c) =>
-        c.title.toLowerCase().includes(q) ||
-        c.preview.toLowerCase().includes(q),
-    );
-  }, [conversations, search]);
-
   const grouped = useMemo(() => {
     const groups: Record<string, ConversationItem[]> = {};
-    for (const c of filtered) {
+    for (const c of conversations) {
       const group = timeGroup(c.updatedAt);
       if (!groups[group]) groups[group] = [];
       groups[group].push(c);
     }
     return groups;
-  }, [filtered]);
+  }, [conversations]);
 
   const groupOrder = ["Today", "Yesterday", "This Week", "This Month", "Older"];
 
@@ -199,7 +210,7 @@ export default function HistoryPage() {
         <div className="history__loading">
           <span className="history__spinner" />
         </div>
-      ) : filtered.length === 0 && !hasPrev ? (
+      ) : conversations.length === 0 && !hasPrev ? (
         <div className="history--empty">
           <p className="history__empty-text">
             {search ? "No threads match your search." : "No conversation threads yet."}
@@ -271,7 +282,7 @@ export default function HistoryPage() {
             )}
           </div>
 
-          {(hasPrev || hasNext) && !search && (
+          {(hasPrev || hasNext) && (
             <div className="history__pagination">
               <button
                 type="button"

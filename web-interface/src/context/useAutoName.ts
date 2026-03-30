@@ -80,9 +80,7 @@ export function useAutoName({
           return next;
         });
       })
-      .catch(() => {
-        /* keep default label on failure */
-      })
+      .catch(console.error)
       .finally(() => {
         setNamingBranches((prev) => {
           const next = new Set(prev);
@@ -122,7 +120,7 @@ export function useAutoName({
       .then(({ name }: { name: string }) => {
         if (name) setConversationTitle(name);
       })
-      .catch(() => {});
+      .catch(console.error);
   }, [tree, treeRef, setConversationTitle]);
 
   return { namingBranches, namedBranchesRef, conversationNamedRef };

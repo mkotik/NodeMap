@@ -79,7 +79,7 @@ export function useAutoSave({
       .then(({ id }) => {
         if (!convIdRef.current) setConversationId(id);
       })
-      .catch(() => {})
+      .catch(console.error)
       .finally(() => {
         savingRef.current = false;
       });

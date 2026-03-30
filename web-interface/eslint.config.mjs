@@ -19,7 +19,7 @@ const eslintConfig = defineConfig([
         { argsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/no-explicit-any": "error",
-      "no-console": "warn",
+      "no-console": ["warn", { allow: ["error"] }],
       "react/self-closing-comp": "error",
     },
   },

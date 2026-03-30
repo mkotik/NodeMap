@@ -42,36 +42,53 @@ export default function LoginPage() {
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.onload = () => {
-      const w = window as unknown as Record<string, unknown>;
-      const google = w.google as {
-        accounts: {
-          id: {
-            initialize: (config: Record<string, unknown>) => void;
-            renderButton: (
-              el: HTMLElement,
-              config: Record<string, unknown>,
-            ) => void;
+      try {
+        const w = window as unknown as Record<string, unknown>;
+        const google = w.google as {
+          accounts: {
+            id: {
+              initialize: (config: Record<string, unknown>) => void;
+              renderButton: (
+                el: HTMLElement,
+                config: Record<string, unknown>,
+              ) => void;
+              cancel: () => void;
+            };
           };
         };
-      };
 
-      google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse,
-      });
-
-      if (googleBtnRef.current) {
-        google.accounts.id.renderButton(googleBtnRef.current, {
-          type: "standard",
-          theme: "filled_black",
-          size: "large",
-          width: googleBtnRef.current.offsetWidth,
-          text: "continue_with",
+        google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
         });
+
+        if (googleBtnRef.current) {
+          google.accounts.id.renderButton(googleBtnRef.current, {
+            type: "standard",
+            theme: "filled_black",
+            size: "large",
+            width: googleBtnRef.current.offsetWidth,
+            text: "continue_with",
+          });
+        }
+      } catch {
+        setError("Failed to load Google sign-in. Please try again later.");
       }
+    };
+    script.onerror = () => {
+      setError("Failed to load Google sign-in. Please try again later.");
     };
     document.head.appendChild(script);
     return () => {
+      try {
+        const w = window as unknown as Record<string, unknown>;
+        const google = w.google as {
+          accounts?: { id?: { cancel: () => void } };
+        };
+        google?.accounts?.id?.cancel();
+      } catch {
+        // google SDK not loaded yet
+      }
       script.remove();
     };
   }, [handleCredentialResponse]);

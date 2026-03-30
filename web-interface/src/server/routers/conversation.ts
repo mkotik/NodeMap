@@ -68,7 +68,17 @@ export const conversationRouter = router({
           ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
           include: {
             branches: {
-              select: { id: true, isMain: true, label: true },
+              select: {
+                id: true,
+                isMain: true,
+                label: true,
+                messages: {
+                  where: { role: "user" },
+                  orderBy: { orderIndex: "asc" },
+                  take: 1,
+                  select: { content: true },
+                },
+              },
             },
             _count: { select: { branches: true } },
           },
@@ -82,29 +92,18 @@ export const conversationRouter = router({
         nextCursor = conversations[conversations.length - 1].id;
       }
 
-      // Build preview: first user message from the main branch
-      const items = await Promise.all(
-        conversations.map(async (c) => {
-          const mainBranch = c.branches.find((b) => b.isMain);
-          let preview = "";
-          if (mainBranch) {
-            const firstMsg = await prisma.message.findFirst({
-              where: { branchId: mainBranch.id, role: "user" },
-              orderBy: { orderIndex: "asc" },
-              select: { content: true },
-            });
-            if (firstMsg) preview = firstMsg.content.slice(0, 120);
-          }
-          return {
-            id: c.id,
-            title: c.title,
-            preview,
-            branchCount: c._count.branches,
-            createdAt: c.createdAt,
-            updatedAt: c.updatedAt,
-          };
-        }),
-      );
+      const items = conversations.map((c) => {
+        const mainBranch = c.branches.find((b) => b.isMain);
+        const preview = mainBranch?.messages[0]?.content.slice(0, 120) ?? "";
+        return {
+          id: c.id,
+          title: c.title,
+          preview,
+          branchCount: c._count.branches,
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+        };
+      });
 
       return { items, nextCursor, total };
     }),
@@ -250,7 +249,19 @@ export const conversationRouter = router({
             ? { cursor: { id: input.pageCursor }, skip: 1 }
             : {}),
           include: {
-            branches: { select: { id: true, isMain: true, label: true } },
+            branches: {
+              select: {
+                id: true,
+                isMain: true,
+                label: true,
+                messages: {
+                  where: { role: "user" },
+                  orderBy: { orderIndex: "asc" },
+                  take: 1,
+                  select: { content: true },
+                },
+              },
+            },
             _count: { select: { branches: true } },
           },
         }),
@@ -263,28 +274,18 @@ export const conversationRouter = router({
         nextCursor = conversations[conversations.length - 1].id;
       }
 
-      const items = await Promise.all(
-        conversations.map(async (c) => {
-          const mainBranch = c.branches.find((b) => b.isMain);
-          let preview = "";
-          if (mainBranch) {
-            const firstMsg = await prisma.message.findFirst({
-              where: { branchId: mainBranch.id, role: "user" },
-              orderBy: { orderIndex: "asc" },
-              select: { content: true },
-            });
-            if (firstMsg) preview = firstMsg.content.slice(0, 120);
-          }
-          return {
-            id: c.id,
-            title: c.title,
-            preview,
-            branchCount: c._count.branches,
-            createdAt: c.createdAt,
-            updatedAt: c.updatedAt,
-          };
-        }),
-      );
+      const items = conversations.map((c) => {
+        const mainBranch = c.branches.find((b) => b.isMain);
+        const preview = mainBranch?.messages[0]?.content.slice(0, 120) ?? "";
+        return {
+          id: c.id,
+          title: c.title,
+          preview,
+          branchCount: c._count.branches,
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+        };
+      });
 
       return { items, nextCursor, total };
     }),

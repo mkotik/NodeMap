@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(res.user);
         setAccessToken(res.accessToken);
       })
-      .catch(() => {})
+      .catch(console.error)
       .finally(() => setIsLoading(false));
   }, [setAccessToken]);
 
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
-    await trpc.auth.logout.mutate().catch(() => {});
+    await trpc.auth.logout.mutate().catch(console.error);
     setUser(null);
     setAccessToken(null);
   }, [setAccessToken]);

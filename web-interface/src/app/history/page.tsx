@@ -90,8 +90,8 @@ export default function HistoryPage() {
         setConversations(items);
         setNextCursor(nc);
         setTotal(t);
-      } catch {
-        /* ignore */
+      } catch (err) {
+        console.error(err);
       } finally {
         setNavigating(false);
       }
@@ -137,7 +137,8 @@ export default function HistoryPage() {
     if (cursorStack.length === 0 || navigating) return;
     const newStack = [...cursorStack];
     newStack.pop();
-    const prevCursor = newStack.length === 0 ? null : newStack[newStack.length - 1];
+    const prevCursor =
+      newStack.length === 0 ? null : newStack[newStack.length - 1];
     loadPage(prevCursor, () => {
       setCursorStack(newStack);
     });
@@ -197,8 +198,8 @@ export default function HistoryPage() {
         setNextCursor(result.nextCursor);
         setTotal(result.total);
       }
-    } catch {
-      /* ignore */
+    } catch (err) {
+      console.error(err);
     } finally {
       setDeletingId(null);
     }
@@ -288,15 +289,22 @@ export default function HistoryPage() {
                         className="history__card"
                         onClick={() => handleOpen(c.id)}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") handleOpen(c.id);
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleOpen(c.id);
+                          }
                         }}
                       >
                         <div className="history__card-dot" />
                         <div className="history__card-body">
                           <div className="history__card-header">
-                            <span className="history__card-title">{c.title}</span>
+                            <span className="history__card-title">
+                              {c.title}
+                            </span>
                             {c.preview && (
-                              <span className="history__card-preview">{c.preview}</span>
+                              <span className="history__card-preview">
+                                {c.preview}
+                              </span>
                             )}
                           </div>
                           <span className="history__card-time">
@@ -313,15 +321,25 @@ export default function HistoryPage() {
                                 <button
                                   type="button"
                                   className="history__card-confirm"
-                                  onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(c.id);
+                                  }}
                                   disabled={deletingId === c.id}
                                 >
-                                  {deletingId === c.id ? <BeatLoader color="#ff716c" size={4} /> : "Delete"}
+                                  {deletingId === c.id ? (
+                                    <BeatLoader color="#ff716c" size={4} />
+                                  ) : (
+                                    "Delete"
+                                  )}
                                 </button>
                                 <button
                                   type="button"
                                   className="history__card-cancel"
-                                  onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setConfirmDeleteId(null);
+                                  }}
                                 >
                                   Cancel
                                 </button>
@@ -330,11 +348,23 @@ export default function HistoryPage() {
                               <button
                                 type="button"
                                 className="history__card-delete"
-                                onClick={(e) => { e.stopPropagation(); handleDelete(c.id); }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(c.id);
+                                }}
                                 disabled={deletingId === c.id}
                                 aria-label="Delete conversation"
                               >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
                                   <path d="M3 6h18" />
                                   <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                   <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />

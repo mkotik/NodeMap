@@ -1,7 +1,13 @@
 import jwt from "jsonwebtoken";
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required environment variable: ${name}`);
+  return value;
+}
+
+const ACCESS_SECRET = requireEnv("JWT_ACCESS_SECRET");
+const REFRESH_SECRET = requireEnv("JWT_REFRESH_SECRET");
 const ACCESS_EXPIRY = (process.env.ACCESS_TOKEN_EXPIRY ||
   "15m") as jwt.SignOptions["expiresIn"];
 const REFRESH_EXPIRY = (process.env.REFRESH_TOKEN_EXPIRY ||

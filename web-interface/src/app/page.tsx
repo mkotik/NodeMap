@@ -4,16 +4,8 @@ import { useChatContext } from "@/context/ChatContext";
 import ChatView from "./_components/ChatView/ChatView";
 
 export default function Home() {
-  const {
-    messages,
-    sendMessage,
-    status,
-    activeBranch,
-    isMainBranch,
-    createBranch,
-    switchBranch,
-    returnToMain,
-  } = useChatContext();
+  const { messages, sendMessage, status, activeBranch, createBranch } =
+    useChatContext();
 
   function handleSend(text: string) {
     sendMessage({ text });
@@ -25,10 +17,7 @@ export default function Home() {
       status={status}
       onSend={handleSend}
       activeBranch={activeBranch}
-      isMainBranch={isMainBranch}
       onCreateBranch={createBranch}
-      onSwitchBranch={switchBranch}
-      onReturnToMain={returnToMain}
     />
   );
 }

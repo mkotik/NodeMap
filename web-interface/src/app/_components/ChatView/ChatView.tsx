@@ -35,20 +35,15 @@ interface ChatViewProps {
   status: ChatStatus;
   onSend: (text: string) => void;
   activeBranch: Branch;
-  isMainBranch: boolean;
   onCreateBranch: (fromMessageId: string) => void;
-  onSwitchBranch: (branchId: string) => void;
-  onReturnToMain: () => void;
 }
 
 export default function ChatView({
   messages,
   status,
   onSend,
-  activeBranch: _activeBranch,
-  isMainBranch: _isMainBranch,
+  activeBranch,
   onCreateBranch,
-  onReturnToMain: _onReturnToMain,
 }: ChatViewProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -67,7 +62,7 @@ export default function ChatView({
     } else {
       inputRef.current?.focus();
     }
-  }, [isEmpty, messages.length, _activeBranch.id]);
+  }, [isEmpty, messages.length, activeBranch.id]);
 
   function handleSubmit() {
     const trimmed = input.trim();

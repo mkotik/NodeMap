@@ -1,11 +1,18 @@
 import { OAuth2Client } from "google-auth-library";
 
-const client = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+if (!googleClientId) {
+  throw new Error(
+    "Missing required environment variable: NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+  );
+}
+
+const client = new OAuth2Client(googleClientId);
 
 export async function verifyGoogleToken(idToken: string) {
   const ticket = await client.verifyIdToken({
     idToken,
-    audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    audience: googleClientId,
   });
 
   const payload = ticket.getPayload();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
 import { useAuth } from "@/context/AuthContext";
@@ -32,6 +32,8 @@ export default function Sidebar() {
   } = useChatContext();
   const { user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const onChatPage = pathname === "/" || pathname === "/nodes";
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -48,7 +50,7 @@ export default function Sidebar() {
   // hasn't appeared in recents yet (save still in-flight).
   const hasMessages = Object.keys(tree.nodes).length > 0;
   const activeInRecents = recentChats.some((c) => c.id === conversationId);
-  const showPendingEntry = hasMessages && !activeInRecents;
+  const showPendingEntry = hasMessages && !activeInRecents && onChatPage;
 
   // Close menu on outside click
   useEffect(() => {
@@ -226,7 +228,7 @@ export default function Sidebar() {
                     </div>
                   )}
                   {recentChats.map((c) => {
-                    const isActive = c.id === conversationId;
+                    const isActive = c.id === conversationId && onChatPage;
                     const menuOpen =
                       menu.type !== "closed" &&
                       "chatId" in menu &&

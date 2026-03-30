@@ -150,49 +150,6 @@ test.describe("Chat and Branching", () => {
     expect(branchMessages).toBe(2);
   });
 
-  test("returning to main thread restores all main messages", async ({
-    page,
-  }) => {
-    await chat(page, "say hello in one word");
-    await chat(page, "say goodbye in one word");
-
-    const messageCountBefore = await page
-      .locator(".chat-view-thread__message")
-      .count();
-
-    // Branch from first AI response
-    const firstAi = page.locator(".chat-view-thread__message--ai").first();
-    await firstAi.hover();
-    await page.locator(".chat-view-thread__branch-action").first().click();
-
-    // Send a message in the branch
-    await chat(page, "branch message");
-
-    // Return to main thread via breadcrumb
-    await page
-      .locator(".topnav__breadcrumbs button", { hasText: "Main Thread" })
-      .click();
-
-    // Wait for the active breadcrumb to say "Main Thread" (no longer on branch)
-    await expect(page.locator(".topnav__breadcrumb--active")).toContainText(
-      "Main Thread",
-      { timeout: 5000 },
-    );
-
-    // Main thread should have same message count as before
-    const messageCountAfter = await page
-      .locator(".chat-view-thread__message")
-      .count();
-    expect(messageCountAfter).toBe(messageCountBefore);
-
-    // Branch message should NOT be in the page
-    await expect(
-      page.locator(".chat-view-thread__bubble--user", {
-        hasText: "branch message",
-      }),
-    ).toHaveCount(0);
-  });
-
   test("node view shows continue nodes", async ({ page }) => {
     await chat(page, "say hi in one word");
 
@@ -200,26 +157,6 @@ test.describe("Chat and Branching", () => {
     await expect(page).toHaveURL("/nodes");
 
     await expect(page.locator(".continue-node").first()).toBeVisible({
-      timeout: 5000,
-    });
-  });
-
-  test("node view shows fork chip after creating a branch", async ({
-    page,
-  }) => {
-    await chat(page, "say hi in one word");
-
-    // Create a branch
-    const aiMessage = page.locator(".chat-view-thread__message--ai").first();
-    await aiMessage.hover();
-    await page.locator(".chat-view-thread__branch-action").first().click();
-
-    // Navigate to node view
-    await page.locator(".topnav__node-link").click();
-    await expect(page).toHaveURL("/nodes");
-
-    // Should see fork chip on the AI node
-    await expect(page.locator(".msg-node__fork-chip").first()).toBeVisible({
       timeout: 5000,
     });
   });

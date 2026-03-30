@@ -54,10 +54,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [tree, setTree] = useState<ConversationTree>(createEmptyTree);
 
   const isSwitchingRef = useRef(false);
+
+  // Update refs synchronously during render so callbacks always read
+  // the latest values — no lag from a deferred useEffect.
   const treeRef = useRef(tree);
-  useEffect(() => {
-    treeRef.current = tree;
-  }, [tree]);
+  treeRef.current = tree;
+
+  const statusRef = useRef(status);
+  statusRef.current = status;
 
   const activeBranch = tree.branches[tree.activeBranchId];
   const isMainBranch = tree.activeBranchId === tree.mainBranchId;
@@ -124,7 +128,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // -------------------------------------------------------------------
   const handleCreateBranch = useCallback(
     (forkFromNodeId: NodeId) => {
-      if (status === "streaming" || status === "submitted") return;
+      if (statusRef.current === "streaming" || statusRef.current === "submitted") return;
 
       const prev = treeRef.current;
       const next = structuredClone(prev);
@@ -142,7 +146,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setTree(next);
       switchChatToBranch(next, branchId);
     },
-    [status, switchChatToBranch],
+    [switchChatToBranch],
   );
 
   // -------------------------------------------------------------------
@@ -150,7 +154,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // -------------------------------------------------------------------
   const handleSwitchBranch = useCallback(
     (branchId: BranchId) => {
-      if (status === "streaming" || status === "submitted") return;
+      if (statusRef.current === "streaming" || statusRef.current === "submitted") return;
 
       const prev = treeRef.current;
       if (!prev.branches[branchId]) return;
@@ -167,15 +171,30 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setTree(next);
       switchChatToBranch(next, branchId);
     },
-    [status, switchChatToBranch],
+    [switchChatToBranch],
   );
 
   // -------------------------------------------------------------------
-  // Return to main thread
+  // Return to main thread (self-contained — no indirection)
   // -------------------------------------------------------------------
   const handleReturnToMain = useCallback(() => {
-    handleSwitchBranch(treeRef.current.mainBranchId);
-  }, [handleSwitchBranch]);
+    if (statusRef.current === "streaming" || statusRef.current === "submitted") return;
+
+    const current = treeRef.current;
+    if (current.activeBranchId === current.mainBranchId) return;
+
+    const next = structuredClone(current);
+
+    // Auto-delete the branch we're leaving if it's empty
+    const leaving = next.branches[next.activeBranchId];
+    if (leaving && leaving.nodeIds.length === 0) {
+      deleteBranch(next, next.activeBranchId);
+    }
+
+    next.activeBranchId = next.mainBranchId;
+    setTree(next);
+    switchChatToBranch(next, next.mainBranchId);
+  }, [switchChatToBranch]);
 
   // -------------------------------------------------------------------
   // Reset everything (New Chat)

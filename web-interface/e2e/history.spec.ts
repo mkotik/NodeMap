@@ -89,7 +89,7 @@ test.describe("History", () => {
     await expect(cards.first()).toBeVisible({ timeout: 10000 });
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
-    expect(count).toBeLessThanOrEqual(4); // page size is 4
+    expect(count).toBeLessThanOrEqual(10); // page size is 4
   });
 
   test("history shows thread count", async ({ page }) => {

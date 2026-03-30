@@ -73,9 +73,10 @@ export default function HistoryPage() {
     [],
   );
 
-  // Load a page by cursor (uses current search term from ref)
+  // Load a page by cursor, with an optional state callback that runs
+  // atomically when the data arrives (so cursor stack + data update together).
   const loadPage = useCallback(
-    async (cursor?: string | null) => {
+    async (cursor?: string | null, onData?: () => void) => {
       setNavigating(true);
       try {
         const term = searchRef.current.trim() || undefined;
@@ -84,6 +85,8 @@ export default function HistoryPage() {
           nextCursor: nc,
           total: t,
         } = await fetchPage(cursor, term);
+        // Update cursor stack and data in the same tick — no flash
+        onData?.();
         setConversations(items);
         setNextCursor(nc);
         setTotal(t);
@@ -112,9 +115,10 @@ export default function HistoryPage() {
     if (initialLoading) return;
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
-      setCursorStack([]);
-      setNextCursor(null);
-      loadPage(null);
+      loadPage(null, () => {
+        setCursorStack([]);
+        setNextCursor(null);
+      });
     }, 300);
     return () => {
       if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
@@ -123,18 +127,20 @@ export default function HistoryPage() {
 
   function handleNext() {
     if (!nextCursor || navigating) return;
-    setCursorStack((prev) => [...prev, nextCursor]);
-    loadPage(nextCursor);
+    const cursor = nextCursor;
+    loadPage(cursor, () => {
+      setCursorStack((prev) => [...prev, cursor]);
+    });
   }
 
   function handlePrev() {
     if (cursorStack.length === 0 || navigating) return;
     const newStack = [...cursorStack];
     newStack.pop();
-    const prevCursor =
-      newStack.length === 0 ? null : newStack[newStack.length - 1];
-    setCursorStack(newStack);
-    loadPage(prevCursor);
+    const prevCursor = newStack.length === 0 ? null : newStack[newStack.length - 1];
+    loadPage(prevCursor, () => {
+      setCursorStack(newStack);
+    });
   }
 
   const grouped = useMemo(() => {

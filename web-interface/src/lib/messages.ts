@@ -4,7 +4,9 @@ import type { UIMessage } from "ai";
  * Extract the concatenated text content from a message's parts.
  */
 export function getMessageText(
-  msg: Pick<UIMessage, "parts"> | { parts: Array<{ type: string; text?: string }> },
+  msg:
+    | Pick<UIMessage, "parts">
+    | { parts: Array<{ type: string; text?: string }> },
 ): string {
   return msg.parts
     .filter(

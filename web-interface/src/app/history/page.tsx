@@ -163,7 +163,8 @@ export default function HistoryPage() {
     setConfirmDeleteId(null);
     try {
       // Current page's cursor (null for page 1, otherwise top of stack)
-      const pageCursor = cursorStack.length === 0 ? null : cursorStack[cursorStack.length - 1];
+      const pageCursor =
+        cursorStack.length === 0 ? null : cursorStack[cursorStack.length - 1];
       const result = await trpc.conversation.delete.mutate({
         id,
         pageCursor,
@@ -180,7 +181,8 @@ export default function HistoryPage() {
       if (items.length === 0 && cursorStack.length > 0) {
         const newStack = [...cursorStack];
         newStack.pop();
-        const prevCursor = newStack.length === 0 ? null : newStack[newStack.length - 1];
+        const prevCursor =
+          newStack.length === 0 ? null : newStack[newStack.length - 1];
         setCursorStack(newStack);
         setTotal(result.total);
         loadPage(prevCursor);

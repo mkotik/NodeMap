@@ -32,9 +32,7 @@ export async function POST(req: Request) {
   if (priorMessages.length) {
     context =
       "Recent conversation before the branch:\n" +
-      priorMessages
-        .map((m) => `${m.role}: ${m.text}`)
-        .join("\n") +
+      priorMessages.map((m) => `${m.role}: ${m.text}`).join("\n") +
       "\n\n";
   }
 

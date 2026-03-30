@@ -46,7 +46,10 @@ export const conversationRouter = router({
                       messages: {
                         some: {
                           role: "user",
-                          content: { contains: search, mode: "insensitive" as const },
+                          content: {
+                            contains: search,
+                            mode: "insensitive" as const,
+                          },
                         },
                       },
                     },
@@ -151,7 +154,9 @@ export const conversationRouter = router({
       const convId = conversation.id;
 
       // Delete old data and reinsert (simple full-replace strategy)
-      await prisma.message.deleteMany({ where: { branch: { conversationId: convId } } });
+      await prisma.message.deleteMany({
+        where: { branch: { conversationId: convId } },
+      });
       await prisma.branch.deleteMany({ where: { conversationId: convId } });
 
       // Insert branches
@@ -209,7 +214,12 @@ export const conversationRouter = router({
         ...(input.search
           ? {
               OR: [
-                { title: { contains: input.search, mode: "insensitive" as const } },
+                {
+                  title: {
+                    contains: input.search,
+                    mode: "insensitive" as const,
+                  },
+                },
                 {
                   branches: {
                     some: {
@@ -217,7 +227,10 @@ export const conversationRouter = router({
                       messages: {
                         some: {
                           role: "user",
-                          content: { contains: input.search, mode: "insensitive" as const },
+                          content: {
+                            contains: input.search,
+                            mode: "insensitive" as const,
+                          },
                         },
                       },
                     },
@@ -233,7 +246,9 @@ export const conversationRouter = router({
           where,
           orderBy: { updatedAt: "desc" },
           take: input.pageLimit + 1,
-          ...(input.pageCursor ? { cursor: { id: input.pageCursor }, skip: 1 } : {}),
+          ...(input.pageCursor
+            ? { cursor: { id: input.pageCursor }, skip: 1 }
+            : {}),
           include: {
             branches: { select: { id: true, isMain: true, label: true } },
             _count: { select: { branches: true } },

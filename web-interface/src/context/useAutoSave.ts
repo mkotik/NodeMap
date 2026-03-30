@@ -25,7 +25,9 @@ export function useAutoSave({
 }: UseAutoSaveArgs): void {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const convIdRef = useRef(conversationId);
-  convIdRef.current = conversationId;
+  useEffect(() => {
+    convIdRef.current = conversationId;
+  }, [conversationId]);
   const savingRef = useRef(false);
 
   const saveNow = useCallback(() => {

@@ -189,10 +189,7 @@ export function renameBranch(
 // ---------------------------------------------------------------------------
 // Delete a branch and its nodes from the tree (mutates)
 // ---------------------------------------------------------------------------
-export function deleteBranch(
-  tree: ConversationTree,
-  branchId: BranchId,
-): void {
+export function deleteBranch(tree: ConversationTree, branchId: BranchId): void {
   const branch = tree.branches[branchId];
   if (!branch || branchId === tree.mainBranchId) return;
 

@@ -8,11 +8,13 @@ const openrouter = createOpenRouter({
 
 const ChatRequestSchema = z.object({
   messages: z.array(
-    z.object({
-      id: z.string(),
-      role: z.enum(["user", "assistant", "system"]),
-      parts: z.array(z.record(z.string(), z.unknown())),
-    }).passthrough(),
+    z
+      .object({
+        id: z.string(),
+        role: z.enum(["user", "assistant", "system"]),
+        parts: z.array(z.record(z.string(), z.unknown())),
+      })
+      .passthrough(),
   ),
 });
 

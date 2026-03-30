@@ -66,13 +66,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const isSwitchingRef = useRef(false);
 
-  // Update refs synchronously during render so callbacks always read
-  // the latest values — no lag from a deferred useEffect.
+  // Keep refs in sync so callbacks always read the latest values.
   const treeRef = useRef(tree);
-  treeRef.current = tree;
+  useEffect(() => {
+    treeRef.current = tree;
+  }, [tree]);
 
   const statusRef = useRef(status);
-  statusRef.current = status;
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   const activeBranch = tree.branches[tree.activeBranchId];
   const isMainBranch = tree.activeBranchId === tree.mainBranchId;
@@ -113,12 +116,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [messages]);
 
   // --- Auto-naming (branches + conversation title) ---
-  const { namingBranches, namedBranchesRef, conversationNamedRef } = useAutoName({
-    tree,
-    treeRef,
-    setTree,
-    setConversationTitle,
-  });
+  const { namingBranches, namedBranchesRef, conversationNamedRef } =
+    useAutoName({
+      tree,
+      treeRef,
+      setTree,
+      setConversationTitle,
+    });
 
   // --- Auto-save (debounced persistence to DB) ---
   useAutoSave({
@@ -208,9 +212,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       // Rebuild childIds
       for (const node of Object.values(newTree.nodes)) {
         if (node.parentId && newTree.nodes[node.parentId]) {
-          newTree.nodes[node.parentId].childIds.push(
-            node.message.id,
-          );
+          newTree.nodes[node.parentId].childIds.push(node.message.id);
         }
       }
 

@@ -69,9 +69,11 @@ export default function TopNav() {
                   {isNamingBranch ? (
                     <BeatLoader
                       color={
-                        activeBranch.color === "primary" ? "#69f6b8"
-                          : activeBranch.color === "secondary" ? "#699cff"
-                          : "#ac8aff"
+                        activeBranch.color === "primary"
+                          ? "#69f6b8"
+                          : activeBranch.color === "secondary"
+                            ? "#699cff"
+                            : "#ac8aff"
                       }
                       size={6}
                     />

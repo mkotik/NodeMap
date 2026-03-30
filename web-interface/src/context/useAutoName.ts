@@ -60,7 +60,8 @@ export function useAutoName({
       const ancestors = getAncestorChain(currentTree, branch.forkPointId);
       for (const msg of ancestors.slice(-4)) {
         const text = getMessageText(msg);
-        if (text) priorMessages.push({ role: msg.role, text: text.slice(0, 200) });
+        if (text)
+          priorMessages.push({ role: msg.role, text: text.slice(0, 200) });
       }
     }
 
@@ -95,7 +96,11 @@ export function useAutoName({
   useEffect(() => {
     const currentTree = treeRef.current;
     const mainBranch = currentTree.branches[currentTree.mainBranchId];
-    if (!mainBranch || mainBranch.nodeIds.length === 0 || conversationNamedRef.current) {
+    if (
+      !mainBranch ||
+      mainBranch.nodeIds.length === 0 ||
+      conversationNamedRef.current
+    ) {
       return;
     }
 

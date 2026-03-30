@@ -57,7 +57,9 @@ async function chat(page: Page, text: string) {
 
 async function createChat(page: Page, message: string) {
   await page.locator(".sidebar__new-chat").click();
-  await expect(page.locator(".chat-view__title")).toHaveText("Initiate Thought");
+  await expect(page.locator(".chat-view__title")).toHaveText(
+    "Initiate Thought",
+  );
   await chat(page, message);
   // Wait for auto-save to complete (immediate on first message + debounce for response)
   await page.waitForTimeout(3000);
@@ -93,7 +95,9 @@ test.describe("History", () => {
   test("history shows thread count", async ({ page }) => {
     await login(page);
     await page.goto("/history");
-    await expect(page.locator(".history__count")).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(".history__count")).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.locator(".history__count")).toContainText("threads");
   });
 
@@ -240,9 +244,6 @@ test.describe("History", () => {
       timeout: 10000,
     });
 
-    // Remember the title
-    const title = await page.locator(".history__card-title").first().textContent();
-
     // Click the first chat
     await page.locator(".history__card").first().click();
 
@@ -295,8 +296,6 @@ test.describe("History", () => {
       timeout: 10000,
     });
 
-    const countBefore = await page.locator(".history__card").count();
-
     // Delete the first chat
     await page.locator(".history__card").first().hover();
     await page.locator(".history__card-delete").first().click();
@@ -331,7 +330,9 @@ test.describe("History", () => {
   test("NodeMap.io logo navigates home", async ({ page }) => {
     await login(page);
     await page.goto("/history");
-    await expect(page.locator(".history__title")).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(".history__title")).toBeVisible({
+      timeout: 10000,
+    });
     await page.locator(".sidebar__brand").click();
     await expect(page).toHaveURL("/");
   });
@@ -341,7 +342,9 @@ test.describe("History", () => {
   }) => {
     await login(page);
     await page.goto("/history");
-    await expect(page.locator(".history__title")).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(".history__title")).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.locator(".topnav__node-link")).not.toBeVisible();
     await expect(page.locator(".topnav__breadcrumb")).not.toBeVisible();
   });

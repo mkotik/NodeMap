@@ -1,15 +1,8 @@
 "use client";
 
 import { useCallback, type MutableRefObject } from "react";
-import type {
-  ConversationTree,
-  BranchId,
-  NodeId,
-} from "@/types/branch";
-import {
-  createBranch as treeFnCreateBranch,
-  deleteBranch,
-} from "@/lib/tree";
+import type { ConversationTree, BranchId, NodeId } from "@/types/branch";
+import { createBranch as treeFnCreateBranch, deleteBranch } from "@/lib/tree";
 
 interface UseBranchOpsArgs {
   treeRef: MutableRefObject<ConversationTree>;
@@ -51,14 +44,22 @@ export function useBranchOps({
 
   const createBranch = useCallback(
     (forkFromNodeId: NodeId) => {
-      if (statusRef.current === "streaming" || statusRef.current === "submitted") return;
+      if (
+        statusRef.current === "streaming" ||
+        statusRef.current === "submitted"
+      )
+        return;
 
       const prev = treeRef.current;
       const next = structuredClone(prev);
 
       // Auto-delete the branch we're leaving if it's empty
       const leaving = next.branches[next.activeBranchId];
-      if (leaving && next.activeBranchId !== next.mainBranchId && leaving.nodeIds.length === 0) {
+      if (
+        leaving &&
+        next.activeBranchId !== next.mainBranchId &&
+        leaving.nodeIds.length === 0
+      ) {
         deleteBranch(next, next.activeBranchId);
       }
 
@@ -74,7 +75,11 @@ export function useBranchOps({
 
   const switchBranch = useCallback(
     (branchId: BranchId) => {
-      if (statusRef.current === "streaming" || statusRef.current === "submitted") return;
+      if (
+        statusRef.current === "streaming" ||
+        statusRef.current === "submitted"
+      )
+        return;
 
       const prev = treeRef.current;
       if (!prev.branches[branchId]) return;
@@ -83,7 +88,11 @@ export function useBranchOps({
 
       // Auto-delete the branch we're leaving if it's empty
       const leaving = next.branches[next.activeBranchId];
-      if (leaving && next.activeBranchId !== next.mainBranchId && leaving.nodeIds.length === 0) {
+      if (
+        leaving &&
+        next.activeBranchId !== next.mainBranchId &&
+        leaving.nodeIds.length === 0
+      ) {
         deleteBranch(next, next.activeBranchId);
       }
 
@@ -95,7 +104,8 @@ export function useBranchOps({
   );
 
   const returnToMain = useCallback(() => {
-    if (statusRef.current === "streaming" || statusRef.current === "submitted") return;
+    if (statusRef.current === "streaming" || statusRef.current === "submitted")
+      return;
 
     const current = treeRef.current;
     if (current.activeBranchId === current.mainBranchId) return;

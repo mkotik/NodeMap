@@ -47,8 +47,8 @@ export const conversationRouter = router({
 
       let nextCursor: string | null = null;
       if (conversations.length > limit) {
-        const next = conversations.pop()!;
-        nextCursor = next.id;
+        conversations.pop(); // discard the extra peek row
+        nextCursor = conversations[conversations.length - 1].id;
       }
 
       // Build preview: first user message from the main branch

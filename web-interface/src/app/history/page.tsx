@@ -36,7 +36,8 @@ export default function HistoryPage() {
   const { loadConversation } = useChatContext();
   const router = useRouter();
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [navigating, setNavigating] = useState(false);
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -63,10 +64,10 @@ export default function HistoryPage() {
     [],
   );
 
-  // Load current page
+  // Load a page by cursor
   const loadPage = useCallback(
     async (cursor?: string | null) => {
-      setLoading(true);
+      setNavigating(true);
       try {
         const { items, nextCursor: nc } = await fetchPage(cursor);
         setConversations(items);
@@ -74,7 +75,7 @@ export default function HistoryPage() {
       } catch {
         /* ignore */
       } finally {
-        setLoading(false);
+        setNavigating(false);
       }
     },
     [fetchPage],
@@ -83,24 +84,22 @@ export default function HistoryPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      setLoading(false);
+      setInitialLoading(false);
       return;
     }
-    loadPage();
+    loadPage().finally(() => setInitialLoading(false));
   }, [user, authLoading, loadPage]);
 
   function handleNext() {
-    if (!nextCursor) return;
-    // Push current page's first item cursor onto the stack
-    const currentCursor = cursorStack.length === 0 ? null : cursorStack[cursorStack.length - 1];
+    if (!nextCursor || navigating) return;
     setCursorStack((prev) => [...prev, nextCursor]);
     loadPage(nextCursor);
   }
 
   function handlePrev() {
-    if (cursorStack.length === 0) return;
+    if (cursorStack.length === 0 || navigating) return;
     const newStack = [...cursorStack];
-    newStack.pop(); // remove current page's cursor
+    newStack.pop();
     const prevCursor = newStack.length === 0 ? null : newStack[newStack.length - 1];
     setCursorStack(newStack);
     loadPage(prevCursor);
@@ -190,7 +189,7 @@ export default function HistoryPage() {
         />
       </div>
 
-      {loading ? (
+      {initialLoading ? (
         <div className="history__loading">
           <span className="history__spinner" />
         </div>
@@ -272,19 +271,21 @@ export default function HistoryPage() {
                 type="button"
                 className="history__page-btn"
                 onClick={handlePrev}
-                disabled={!hasPrev}
+                disabled={!hasPrev || navigating}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
                 Prev
               </button>
-              <span className="history__page-indicator">Page {page}</span>
+              <span className="history__page-indicator">
+                {navigating ? <span className="history__spinner" /> : `Page ${page}`}
+              </span>
               <button
                 type="button"
                 className="history__page-btn"
                 onClick={handleNext}
-                disabled={!hasNext}
+                disabled={!hasNext || navigating}
               >
                 Next
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

@@ -22,6 +22,8 @@ import {
   addNodeToBranch,
   getBranchMessageChain,
 } from "@/lib/tree";
+import { getMessageText } from "@/lib/messages";
+import { getAccessToken } from "@/lib/auth-token";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/context/AuthContext";
 import { useAutoName } from "@/context/useAutoName";
@@ -62,13 +64,14 @@ interface ChatContextValue {
 const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const { messages, sendMessage, status, setMessages } = useChat();
+  const { messages, sendMessage, status, setMessages, stop } = useChat();
   const [tree, setTree] = useState<ConversationTree>(createEmptyTree);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversationTitle, setConversationTitle] = useState("Untitled");
   const { user } = useAuth();
 
   const isSwitchingRef = useRef(false);
+  const sessionRef = useRef(0);
 
   // Keep refs in sync so callbacks always read the latest values.
   const treeRef = useRef(tree);
@@ -80,6 +83,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
+
+  const conversationIdRef = useRef(conversationId);
+  useEffect(() => {
+    conversationIdRef.current = conversationId;
+  }, [conversationId]);
+
+  const conversationTitleRef = useRef(conversationTitle);
+  useEffect(() => {
+    conversationTitleRef.current = conversationTitle;
+  }, [conversationTitle]);
 
   const activeBranch = tree.branches[tree.activeBranchId];
   const isMainBranch = tree.activeBranchId === tree.mainBranchId;
@@ -147,9 +160,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     refreshRecents();
   }, [refreshRecents]);
 
+  // Refresh recents when a background completion finishes
+  useEffect(() => {
+    const handler = () => refreshRecents();
+    window.addEventListener("chat-completed", handler);
+    return () => window.removeEventListener("chat-completed", handler);
+  }, [refreshRecents]);
+
   // --- Auto-save (debounced persistence to DB) ---
   const skipNextSaveRef = useRef(false);
-  useAutoSave({
+  const { pendingSaveRef } = useAutoSave({
     tree,
     treeRef,
     user,
@@ -158,6 +178,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setConversationId,
     onSaveComplete: refreshRecents,
     skipNextSaveRef,
+    sessionRef,
   });
 
   // --- Branch operations (create, switch, return, cleanup) ---
@@ -170,9 +191,135 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     });
 
   // -------------------------------------------------------------------
+  // Background completion: finish LLM response + naming server-side
+  // when the user navigates away during streaming.
+  // -------------------------------------------------------------------
+  const completeInBackground = useCallback(() => {
+    const t = treeRef.current;
+    const capturedConvId = conversationIdRef.current;
+    const capturedTitle = conversationTitleRef.current;
+    const capturedPendingSave = pendingSaveRef.current;
+
+    // Build branches payload
+    const branches = Object.values(t.branches).map((b) => ({
+      id: b.id,
+      parentBranchId: b.parentBranchId,
+      forkPointId: b.forkPointId,
+      label: b.label,
+      color: b.color,
+      isMain: b.id === t.mainBranchId,
+    }));
+
+    // Build messages payload, excluding any partial streaming assistant message
+    const msgs: Array<{
+      id: string;
+      branchId: string;
+      parentMessageId: string | null;
+      role: string;
+      content: string;
+      orderIndex: number;
+    }> = [];
+
+    for (const branch of Object.values(t.branches)) {
+      branch.nodeIds.forEach((nodeId, idx) => {
+        const node = t.nodes[nodeId];
+        if (!node) return;
+        msgs.push({
+          id: node.message.id,
+          branchId: branch.id,
+          parentMessageId: node.parentId,
+          role: node.message.role,
+          content: getMessageText(node.message),
+          orderIndex: idx,
+        });
+      });
+    }
+
+    // Remove partial streaming assistant message from active branch
+    const activeBranchObj = t.branches[t.activeBranchId];
+    if (activeBranchObj) {
+      const lastNodeId =
+        activeBranchObj.nodeIds[activeBranchObj.nodeIds.length - 1];
+      const lastNode = lastNodeId ? t.nodes[lastNodeId] : null;
+      if (lastNode?.message.role === "assistant") {
+        const idx = msgs.findIndex((m) => m.id === lastNode.message.id);
+        if (idx !== -1) msgs.splice(idx, 1);
+      }
+    }
+
+    // Build simplified chat messages for the LLM
+    const chain = getBranchMessageChain(t, t.activeBranchId);
+    const chatMessages = chain
+      .map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: getMessageText(m),
+      }))
+      .filter((m) => m.content);
+
+    // Remove trailing partial assistant message from chatMessages
+    if (
+      chatMessages.length > 0 &&
+      chatMessages[chatMessages.length - 1].role === "assistant"
+    ) {
+      chatMessages.pop();
+    }
+
+    // If no user messages, nothing to complete
+    if (!chatMessages.some((m) => m.role === "user")) return;
+
+    const fireRequest = (convId: string | null) => {
+      const token = getAccessToken();
+      fetch("/api/chat/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          conversationId: convId,
+          title: capturedTitle,
+          mainBranchId: t.mainBranchId,
+          activeBranchId: t.activeBranchId,
+          branches,
+          messages: msgs,
+          chatMessages,
+        }),
+      })
+        .then((res) => {
+          if (res.ok) window.dispatchEvent(new Event("chat-completed"));
+        })
+        .catch(console.error);
+    };
+
+    // If conversationId is already set, fire immediately
+    if (capturedConvId) {
+      fireRequest(capturedConvId);
+      return;
+    }
+
+    // Otherwise, wait for any in-flight save to get the ID
+    if (capturedPendingSave) {
+      capturedPendingSave
+        .then((id) => fireRequest(id))
+        .catch(() => fireRequest(null));
+    } else {
+      fireRequest(null);
+    }
+  }, [pendingSaveRef]);
+
+  // -------------------------------------------------------------------
   // Reset everything (New Chat)
   // -------------------------------------------------------------------
   const handleResetAll = useCallback(() => {
+    // If streaming/submitted, finish the conversation server-side
+    if (
+      statusRef.current === "streaming" ||
+      statusRef.current === "submitted"
+    ) {
+      completeInBackground();
+    }
+    stop();
+    sessionRef.current++;
     setConversationId(null);
     setConversationTitle("Untitled");
     conversationNamedRef.current = false;
@@ -183,13 +330,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setTimeout(() => {
       isSwitchingRef.current = false;
     }, 0);
-  }, [setMessages, conversationNamedRef, namedBranchesRef]);
+  }, [stop, setMessages, conversationNamedRef, namedBranchesRef, completeInBackground]);
 
   // -------------------------------------------------------------------
   // Load a conversation from the DB
   // -------------------------------------------------------------------
   const loadConversation = useCallback(
     async (id: string) => {
+      // If streaming/submitted, finish the conversation server-side
+      if (
+        statusRef.current === "streaming" ||
+        statusRef.current === "submitted"
+      ) {
+        completeInBackground();
+      }
+      stop();
+      sessionRef.current++;
+
       const data = await trpc.conversation.get.query({ id });
       if (!data) return;
 
@@ -254,7 +411,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         isSwitchingRef.current = false;
       }, 0);
     },
-    [setMessages, conversationNamedRef],
+    [stop, setMessages, conversationNamedRef, completeInBackground],
   );
 
   return (

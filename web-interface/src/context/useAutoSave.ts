@@ -15,6 +15,11 @@ interface UseAutoSaveArgs {
   setConversationId: (id: string) => void;
   onSaveComplete?: () => void;
   skipNextSaveRef: MutableRefObject<boolean>;
+  sessionRef: MutableRefObject<number>;
+}
+
+export interface UseAutoSaveReturn {
+  pendingSaveRef: MutableRefObject<Promise<string | null> | null>;
 }
 
 export function useAutoSave({
@@ -26,7 +31,8 @@ export function useAutoSave({
   setConversationId,
   onSaveComplete,
   skipNextSaveRef,
-}: UseAutoSaveArgs): void {
+  sessionRef,
+}: UseAutoSaveArgs): UseAutoSaveReturn {
   const onSaveCompleteRef = useRef(onSaveComplete);
   onSaveCompleteRef.current = onSaveComplete;
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -35,10 +41,12 @@ export function useAutoSave({
     convIdRef.current = conversationId;
   }, [conversationId]);
   const savingRef = useRef(false);
+  const pendingSaveRef = useRef<Promise<string | null> | null>(null);
 
   const saveNow = useCallback(() => {
     if (savingRef.current) return;
     const t = treeRef.current;
+    const session = sessionRef.current;
 
     const branches = Object.values(t.branches).map((b) => ({
       id: b.id,
@@ -74,7 +82,7 @@ export function useAutoSave({
     }
 
     savingRef.current = true;
-    trpc.conversation.save
+    const savePromise = trpc.conversation.save
       .mutate({
         id: convIdRef.current ?? undefined,
         title: conversationTitle,
@@ -83,14 +91,23 @@ export function useAutoSave({
         messages: msgs,
       })
       .then(({ id }) => {
-        if (!convIdRef.current) setConversationId(id);
-        onSaveCompleteRef.current?.();
+        // Only update state if still in the same session
+        if (sessionRef.current === session) {
+          if (!convIdRef.current) setConversationId(id);
+          onSaveCompleteRef.current?.();
+        }
+        return id;
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        return null;
+      })
       .finally(() => {
         savingRef.current = false;
       });
-  }, [treeRef, conversationTitle, setConversationId]);
+
+    pendingSaveRef.current = savePromise;
+  }, [treeRef, conversationTitle, setConversationId, sessionRef]);
 
   // Fingerprint: only save when actual content changes (not just activeBranchId)
   function treeFingerprint(t: ConversationTree): string {
@@ -135,4 +152,6 @@ export function useAutoSave({
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
   }, [tree, user, conversationTitle, saveNow]);
+
+  return { pendingSaveRef };
 }

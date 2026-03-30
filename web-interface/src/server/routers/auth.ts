@@ -209,7 +209,7 @@ export const authRouter = router({
     const stored = await prisma.refreshToken.findUnique({ where: { token } });
     if (!stored || stored.expiresAt < new Date()) {
       if (stored)
-        await prisma.refreshToken.delete({ where: { id: stored.id } });
+        await prisma.refreshToken.deleteMany({ where: { id: stored.id } });
       ctx.cookies.delete("refreshToken");
       throw new TRPCError({
         code: "UNAUTHORIZED",
@@ -217,7 +217,7 @@ export const authRouter = router({
       });
     }
 
-    await prisma.refreshToken.delete({ where: { id: stored.id } });
+    await prisma.refreshToken.deleteMany({ where: { id: stored.id } });
 
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },

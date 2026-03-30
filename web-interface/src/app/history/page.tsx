@@ -109,6 +109,17 @@ export default function HistoryPage() {
     loadPage().finally(() => setInitialLoading(false));
   }, [user, authLoading, loadPage]);
 
+  // Reload current page when a background completion finishes
+  useEffect(() => {
+    const handler = () => {
+      const cursor =
+        cursorStack.length === 0 ? null : cursorStack[cursorStack.length - 1];
+      loadPage(cursor);
+    };
+    window.addEventListener("chat-completed", handler);
+    return () => window.removeEventListener("chat-completed", handler);
+  }, [cursorStack, loadPage]);
+
   // Debounced search: reset to page 1 when search changes
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {

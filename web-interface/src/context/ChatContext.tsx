@@ -58,6 +58,7 @@ interface ChatContextValue {
   recoverChat: (id: string) => void;
   loadConversation: (id: string) => Promise<void>;
   recentChats: Array<{ id: string; title: string }>;
+  recentsLoaded: boolean;
   refreshRecents: () => void;
 
   // For legacy compat
@@ -155,15 +156,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [recentChats, setRecentChats] = useState<
     Array<{ id: string; title: string }>
   >([]);
+  const [recentsLoaded, setRecentsLoaded] = useState(false);
 
   const refreshRecents = useCallback(() => {
     if (!user) return;
     trpc.conversation.list
       .query({ limit: 5 })
-      .then((data) =>
-        setRecentChats(data.items.map((c) => ({ id: c.id, title: c.title }))),
-      )
-      .catch(() => {});
+      .then((data) => {
+        setRecentChats(data.items.map((c) => ({ id: c.id, title: c.title })));
+        setRecentsLoaded(true);
+      })
+      .catch(() => {
+        setRecentsLoaded(true);
+      });
   }, [user]);
 
   useEffect(() => {
@@ -492,6 +497,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         recoverChat,
         loadConversation,
         recentChats,
+        recentsLoaded,
         refreshRecents,
         setMessages,
       }}

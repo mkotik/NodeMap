@@ -26,6 +26,7 @@ export default function Sidebar() {
     completingChatIds,
     loadConversation,
     recentChats,
+    recentsLoaded,
     refreshRecents,
     switchBranch,
   } = useChatContext();
@@ -153,235 +154,6 @@ export default function Sidebar() {
           New Chat
         </button>
 
-        {/* Recent chats */}
-        {(recentChats.length > 0 || showPendingEntry) && (
-          <div className="sidebar__recents">
-            <span className="sidebar__recents-label">Recent</span>
-            <div className="sidebar__recents-list">
-              {showPendingEntry && (
-                <div className="sidebar__recent-wrapper">
-                  <div className="sidebar__recent-row">
-                    <button
-                      type="button"
-                      className="sidebar__recent sidebar__recent--active"
-                      disabled
-                    >
-                      <span className="sidebar__recent-indicator">
-                        <span className="sidebar__recent-dot" />
-                      </span>
-                      <span className="sidebar__recent-title">
-                        {namingConversation ? (
-                          <BeatLoader color="#69f6b8" size={3} />
-                        ) : (
-                          conversationTitle
-                        )}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              )}
-              {recentChats.map((c) => {
-                const isActive = c.id === conversationId && pathname === "/";
-                const menuOpen =
-                  menu.type !== "closed" &&
-                  "chatId" in menu &&
-                  menu.chatId === c.id;
-                const displayTitle =
-                  c.id === conversationId ? conversationTitle : c.title;
-
-                return (
-                  <div
-                    key={c.id}
-                    className="sidebar__recent-wrapper"
-                    ref={menuOpen ? menuRef : undefined}
-                  >
-                    {/* Rename mode */}
-                    {menu.type === "rename" && menu.chatId === c.id ? (
-                      <div className="sidebar__rename">
-                        <input
-                          ref={renameInputRef}
-                          className="sidebar__rename-input"
-                          type="text"
-                          value={menu.value}
-                          maxLength={80}
-                          onChange={(e) =>
-                            setMenu({ ...menu, value: e.target.value })
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter")
-                              handleRename(c.id, menu.value);
-                            if (e.key === "Escape") setMenu({ type: "closed" });
-                          }}
-                          disabled={actionLoading}
-                        />
-                        <button
-                          type="button"
-                          className="sidebar__rename-save"
-                          onClick={() => handleRename(c.id, menu.value)}
-                          disabled={actionLoading}
-                        >
-                          {actionLoading ? (
-                            <BeatLoader color="#69f6b8" size={3} />
-                          ) : (
-                            "Save"
-                          )}
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="sidebar__recent-row">
-                        <button
-                          type="button"
-                          className={`sidebar__recent ${isActive ? "sidebar__recent--active" : ""}`}
-                          onClick={() => handleLoadChat(c.id)}
-                          disabled={loadingId === c.id}
-                        >
-                          <span className="sidebar__recent-indicator">
-                            {loadingId === c.id ? (
-                              <BeatLoader color="#69f6b8" size={3} />
-                            ) : (
-                              <span className="sidebar__recent-dot" />
-                            )}
-                          </span>
-                          <span className="sidebar__recent-title">
-                            {(isActive && namingConversation) ||
-                            completingChatIds.has(c.id) ? (
-                              <BeatLoader color="#69f6b8" size={3} />
-                            ) : (
-                              displayTitle
-                            )}
-                          </span>
-                        </button>
-
-                        {/* 3-dot menu trigger */}
-                        <button
-                          type="button"
-                          className="sidebar__recent-menu-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setMenu(
-                              menuOpen
-                                ? { type: "closed" }
-                                : { type: "menu", chatId: c.id },
-                            );
-                          }}
-                          aria-label="Chat options"
-                        >
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <circle cx="12" cy="5" r="2" />
-                            <circle cx="12" cy="12" r="2" />
-                            <circle cx="12" cy="19" r="2" />
-                          </svg>
-                        </button>
-
-                        {/* Dropdown menu */}
-                        {menu.type === "menu" && menu.chatId === c.id && (
-                          <div className="sidebar__recent-dropdown">
-                            <button
-                              type="button"
-                              className="sidebar__recent-dropdown-item"
-                              onClick={() =>
-                                setMenu({
-                                  type: "rename",
-                                  chatId: c.id,
-                                  value: displayTitle,
-                                })
-                              }
-                            >
-                              Rename
-                            </button>
-                            <button
-                              type="button"
-                              className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
-                              onClick={() =>
-                                setMenu({ type: "confirmDelete", chatId: c.id })
-                              }
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-
-                        {/* Delete confirmation */}
-                        {menu.type === "confirmDelete" &&
-                          menu.chatId === c.id && (
-                            <div className="sidebar__recent-dropdown">
-                              <span className="sidebar__recent-dropdown-label">
-                                Delete this chat?
-                              </span>
-                              <button
-                                type="button"
-                                className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
-                                onClick={() => handleDelete(c.id)}
-                                disabled={actionLoading}
-                              >
-                                {actionLoading ? (
-                                  <BeatLoader color="#ff716c" size={3} />
-                                ) : (
-                                  "Yes, delete"
-                                )}
-                              </button>
-                              <button
-                                type="button"
-                                className="sidebar__recent-dropdown-item"
-                                onClick={() => setMenu({ type: "closed" })}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          )}
-                      </div>
-                    )}
-
-                    {/* Branches for active conversation */}
-                    {isActive &&
-                      branches.length > 0 &&
-                      menu.type !== "rename" && (
-                        <div className="sidebar__branches">
-                          {branches.map((b) => (
-                            <button
-                              key={b.id}
-                              type="button"
-                              className={`sidebar__branch sidebar__branch--${b.color}`}
-                              onClick={() => handleSwitchBranch(b.id)}
-                              disabled={loadingId === b.id}
-                            >
-                              <span className="sidebar__branch-indicator">
-                                {loadingId === b.id ? (
-                                  <BeatLoader
-                                    color={
-                                      b.color === "primary"
-                                        ? "#69f6b8"
-                                        : b.color === "secondary"
-                                          ? "#699cff"
-                                          : "#ac8aff"
-                                    }
-                                    size={2}
-                                  />
-                                ) : (
-                                  <span
-                                    className={`sidebar__branch-dot sidebar__branch-dot--${b.color}`}
-                                  />
-                                )}
-                              </span>
-                              <span className="sidebar__branch-title">
-                                {b.label}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         <nav className="sidebar__nav">
           <Link href="/history" className="sidebar__nav-item">
             <svg
@@ -416,6 +188,244 @@ export default function Sidebar() {
             Settings
           </a>
         </nav>
+
+        {/* Recents divider + section */}
+        {user && (
+          <>
+            <div className="sidebar__divider" />
+            <div className="sidebar__recents">
+              <span className="sidebar__recents-label">Recent</span>
+              {!recentsLoaded && !showPendingEntry ? (
+                <div className="sidebar__recents-loading">
+                  <BeatLoader color="#6d758c" size={4} />
+                </div>
+              ) : (
+                <div className="sidebar__recents-list">
+                  {showPendingEntry && (
+                    <div className="sidebar__recent-wrapper">
+                      <div className="sidebar__recent-row">
+                        <button
+                          type="button"
+                          className="sidebar__recent sidebar__recent--active"
+                          disabled
+                        >
+                          <span className="sidebar__recent-indicator">
+                            <span className="sidebar__recent-dot" />
+                          </span>
+                          <span className="sidebar__recent-title">
+                            {namingConversation ? (
+                              <BeatLoader color="#69f6b8" size={3} />
+                            ) : (
+                              conversationTitle
+                            )}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {recentChats.map((c) => {
+                    const isActive = c.id === conversationId && pathname === "/";
+                    const menuOpen =
+                      menu.type !== "closed" &&
+                      "chatId" in menu &&
+                      menu.chatId === c.id;
+                    const displayTitle =
+                      c.id === conversationId ? conversationTitle : c.title;
+
+                    return (
+                      <div
+                        key={c.id}
+                        className="sidebar__recent-wrapper"
+                        ref={menuOpen ? menuRef : undefined}
+                      >
+                        {/* Rename mode */}
+                        {menu.type === "rename" && menu.chatId === c.id ? (
+                          <div className="sidebar__rename">
+                            <input
+                              ref={renameInputRef}
+                              className="sidebar__rename-input"
+                              type="text"
+                              value={menu.value}
+                              maxLength={80}
+                              onChange={(e) =>
+                                setMenu({ ...menu, value: e.target.value })
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter")
+                                  handleRename(c.id, menu.value);
+                                if (e.key === "Escape") setMenu({ type: "closed" });
+                              }}
+                              disabled={actionLoading}
+                            />
+                            <button
+                              type="button"
+                              className="sidebar__rename-save"
+                              onClick={() => handleRename(c.id, menu.value)}
+                              disabled={actionLoading}
+                            >
+                              {actionLoading ? (
+                                <BeatLoader color="#69f6b8" size={3} />
+                              ) : (
+                                "Save"
+                              )}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="sidebar__recent-row">
+                            <button
+                              type="button"
+                              className={`sidebar__recent ${isActive ? "sidebar__recent--active" : ""}`}
+                              onClick={() => handleLoadChat(c.id)}
+                              disabled={loadingId === c.id}
+                            >
+                              <span className="sidebar__recent-indicator">
+                                {loadingId === c.id ? (
+                                  <BeatLoader color="#69f6b8" size={3} />
+                                ) : (
+                                  <span className="sidebar__recent-dot" />
+                                )}
+                              </span>
+                              <span className="sidebar__recent-title">
+                                {(isActive && namingConversation) ||
+                                completingChatIds.has(c.id) ? (
+                                  <BeatLoader color="#69f6b8" size={3} />
+                                ) : (
+                                  displayTitle
+                                )}
+                              </span>
+                            </button>
+
+                            {/* 3-dot menu trigger */}
+                            <button
+                              type="button"
+                              className="sidebar__recent-menu-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setMenu(
+                                  menuOpen
+                                    ? { type: "closed" }
+                                    : { type: "menu", chatId: c.id },
+                                );
+                              }}
+                              aria-label="Chat options"
+                            >
+                              <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <circle cx="12" cy="5" r="2" />
+                                <circle cx="12" cy="12" r="2" />
+                                <circle cx="12" cy="19" r="2" />
+                              </svg>
+                            </button>
+
+                            {/* Dropdown menu */}
+                            {menu.type === "menu" && menu.chatId === c.id && (
+                              <div className="sidebar__recent-dropdown">
+                                <button
+                                  type="button"
+                                  className="sidebar__recent-dropdown-item"
+                                  onClick={() =>
+                                    setMenu({
+                                      type: "rename",
+                                      chatId: c.id,
+                                      value: displayTitle,
+                                    })
+                                  }
+                                >
+                                  Rename
+                                </button>
+                                <button
+                                  type="button"
+                                  className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
+                                  onClick={() =>
+                                    setMenu({ type: "confirmDelete", chatId: c.id })
+                                  }
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Delete confirmation */}
+                            {menu.type === "confirmDelete" &&
+                              menu.chatId === c.id && (
+                                <div className="sidebar__recent-dropdown">
+                                  <span className="sidebar__recent-dropdown-label">
+                                    Delete this chat?
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="sidebar__recent-dropdown-item sidebar__recent-dropdown-item--danger"
+                                    onClick={() => handleDelete(c.id)}
+                                    disabled={actionLoading}
+                                  >
+                                    {actionLoading ? (
+                                      <BeatLoader color="#ff716c" size={3} />
+                                    ) : (
+                                      "Yes, delete"
+                                    )}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="sidebar__recent-dropdown-item"
+                                    onClick={() => setMenu({ type: "closed" })}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              )}
+                          </div>
+                        )}
+
+                        {/* Branches for active conversation */}
+                        {isActive &&
+                          branches.length > 0 &&
+                          menu.type !== "rename" && (
+                            <div className="sidebar__branches">
+                              {branches.map((b) => (
+                                <button
+                                  key={b.id}
+                                  type="button"
+                                  className={`sidebar__branch sidebar__branch--${b.color}`}
+                                  onClick={() => handleSwitchBranch(b.id)}
+                                  disabled={loadingId === b.id}
+                                >
+                                  <span className="sidebar__branch-indicator">
+                                    {loadingId === b.id ? (
+                                      <BeatLoader
+                                        color={
+                                          b.color === "primary"
+                                            ? "#69f6b8"
+                                            : b.color === "secondary"
+                                              ? "#699cff"
+                                              : "#ac8aff"
+                                        }
+                                        size={2}
+                                      />
+                                    ) : (
+                                      <span
+                                        className={`sidebar__branch-dot sidebar__branch-dot--${b.color}`}
+                                      />
+                                    )}
+                                  </span>
+                                  <span className="sidebar__branch-title">
+                                    {b.label}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="sidebar__bottom">

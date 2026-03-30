@@ -64,9 +64,23 @@
     }
   }
 
+  &__divider {
+    height: 1px;
+    margin: $space-4 0;
+    background: rgba($outline-variant, 0.15);
+  }
+
   // Recent chats section
   &__recents {
-    margin-bottom: $space-6;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  &__recents-loading {
+    display: flex;
+    justify-content: center;
+    padding: $space-4 0;
   }
 
   &__recents-label {

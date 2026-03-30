@@ -44,7 +44,9 @@ export default function HistoryPage() {
   // Pagination: cursor stack for prev/next
   const [cursorStack, setCursorStack] = useState<string[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
   const page = cursorStack.length + 1;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasNext = nextCursor !== null;
   const hasPrev = cursorStack.length > 0;
 
@@ -59,7 +61,7 @@ export default function HistoryPage() {
         createdAt: new Date(c.createdAt),
         updatedAt: new Date(c.updatedAt),
       }));
-      return { items, nextCursor: data.nextCursor };
+      return { items, nextCursor: data.nextCursor, total: data.total };
     },
     [],
   );
@@ -69,9 +71,10 @@ export default function HistoryPage() {
     async (cursor?: string | null) => {
       setNavigating(true);
       try {
-        const { items, nextCursor: nc } = await fetchPage(cursor);
+        const { items, nextCursor: nc, total: t } = await fetchPage(cursor);
         setConversations(items);
         setNextCursor(nc);
+        setTotal(t);
       } catch {
         /* ignore */
       } finally {
@@ -163,7 +166,10 @@ export default function HistoryPage() {
 
   return (
     <div className="history">
-      <h1 className="history__title">Logic Threads</h1>
+      <div className="history__header">
+        <h1 className="history__title">Logic Threads</h1>
+        {total > 0 && <span className="history__count">{total} threads</span>}
+      </div>
 
       <div className="history__search">
         <svg
@@ -279,7 +285,7 @@ export default function HistoryPage() {
                 Prev
               </button>
               <span className="history__page-indicator">
-                {navigating ? <span className="history__spinner" /> : `Page ${page}`}
+                {navigating ? <span className="history__spinner" /> : `Page ${page} of ${totalPages}`}
               </span>
               <button
                 type="button"

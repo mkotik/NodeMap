@@ -32,18 +32,21 @@ export const conversationRouter = router({
     .query(async ({ ctx, input }) => {
       const { cursor, limit } = input;
 
-      const conversations = await prisma.conversation.findMany({
-        where: { userId: ctx.user.userId },
-        orderBy: { updatedAt: "desc" },
-        take: limit + 1,
-        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-        include: {
-          branches: {
-            select: { id: true, isMain: true, label: true },
+      const [conversations, total] = await Promise.all([
+        prisma.conversation.findMany({
+          where: { userId: ctx.user.userId },
+          orderBy: { updatedAt: "desc" },
+          take: limit + 1,
+          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+          include: {
+            branches: {
+              select: { id: true, isMain: true, label: true },
+            },
+            _count: { select: { branches: true } },
           },
-          _count: { select: { branches: true } },
-        },
-      });
+        }),
+        prisma.conversation.count({ where: { userId: ctx.user.userId } }),
+      ]);
 
       let nextCursor: string | null = null;
       if (conversations.length > limit) {
@@ -75,7 +78,7 @@ export const conversationRouter = router({
         }),
       );
 
-      return { items, nextCursor };
+      return { items, nextCursor, total };
     }),
 
   // ----- get a full conversation (branches + messages) -----

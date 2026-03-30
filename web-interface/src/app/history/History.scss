@@ -23,12 +23,24 @@
     color: $on-surface-variant;
   }
 
+  &__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: $space-6;
+  }
+
   &__title {
     font-family: $font-display;
     font-size: $headline-sm;
     font-weight: $weight-bold;
     color: $on-surface;
-    margin-bottom: $space-6;
+  }
+
+  &__count {
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $outline;
   }
 
   &__search {

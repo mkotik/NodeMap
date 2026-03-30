@@ -41,7 +41,7 @@ export default function Sidebar() {
         </button>
 
         <nav className="sidebar__nav">
-          <a href="#" className="sidebar__nav-item sidebar__nav-item--active">
+          <a href="#" className="sidebar__nav-item">
             <svg
               width="18"
               height="18"

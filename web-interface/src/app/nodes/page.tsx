@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useChatContext } from "@/context/ChatContext";
 import { useAuth } from "@/context/AuthContext";
 import NodeCanvas from "./_components/NodeCanvas/NodeCanvas";
 
 export default function NodesPage() {
+  return (
+    <Suspense>
+      <NodesContent />
+    </Suspense>
+  );
+}
+
+function NodesContent() {
   const { tree, createBranch, switchBranch, loadConversation } =
     useChatContext();
   const { isLoading: authLoading } = useAuth();

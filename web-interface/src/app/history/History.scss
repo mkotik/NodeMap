@@ -360,7 +360,7 @@
     justify-content: center;
     gap: $space-4;
     position: fixed;
-    bottom: $space-6;
+    bottom: $space-10;
     // Center within the content area (right of sidebar)
     // The sidebar is a flex item; .app-main takes the rest.
     // This anchors to .app-main's horizontal center.

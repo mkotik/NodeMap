@@ -264,22 +264,24 @@ export default function Sidebar() {
         </button>
         <div className="sidebar__divider" />
 
-        <nav className="sidebar__nav">
-          <Link
-            href="/history"
-            className={`sidebar__nav-item${pathname === "/history" ? " sidebar__nav-item--active" : ""}`}
-          >
-            <Clock size={18} />
-            History
-          </Link>
-          <Link
-            href="/settings"
-            className={`sidebar__nav-item${pathname === "/settings" ? " sidebar__nav-item--active" : ""}`}
-          >
-            <Settings size={18} />
-            Settings
-          </Link>
-        </nav>
+        {user && (
+          <nav className="sidebar__nav">
+            <Link
+              href="/history"
+              className={`sidebar__nav-item${pathname === "/history" ? " sidebar__nav-item--active" : ""}`}
+            >
+              <Clock size={18} />
+              History
+            </Link>
+            <Link
+              href="/settings"
+              className={`sidebar__nav-item${pathname === "/settings" ? " sidebar__nav-item--active" : ""}`}
+            >
+              <Settings size={18} />
+              Settings
+            </Link>
+          </nav>
+        )}
 
         {/* Recents divider + section */}
         {user && onChatPage && (

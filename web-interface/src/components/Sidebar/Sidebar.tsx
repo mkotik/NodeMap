@@ -705,7 +705,16 @@ export default function Sidebar() {
         {user ? (
           <div className="sidebar__user">
             <div className="sidebar__avatar">
-              {user.firstName.charAt(0).toUpperCase()}
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.firstName}
+                  className="sidebar__avatar-img"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                user.firstName.charAt(0).toUpperCase()
+              )}
             </div>
             <div className="sidebar__user-info">
               <span className="sidebar__user-name">

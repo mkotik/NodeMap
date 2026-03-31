@@ -20,7 +20,18 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "NodeMap",
-  description: "AI Chat with Branching Conversations",
+  description: "Let's go down the rabbit hole",
+  openGraph: {
+    title: "NodeMap",
+    description: "Let's go down the rabbit hole",
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NodeMap",
+    description: "Let's go down the rabbit hole",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({

@@ -4,6 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import TopNav from "@/components/TopNav/TopNav";
+import VerifyBanner from "@/app/_components/VerifyBanner/VerifyBanner";
 import "./globals.scss";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -35,6 +36,7 @@ export default function RootLayout({
             <div className="app-layout">
               <Sidebar />
               <div className="app-main">
+                <VerifyBanner />
                 <TopNav />
                 <main className="app-content">{children}</main>
                 <footer className="app-footer">

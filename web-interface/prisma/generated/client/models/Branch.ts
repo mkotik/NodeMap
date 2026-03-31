@@ -437,10 +437,6 @@ export type BranchUncheckedUpdateManyWithoutConversationNestedInput = {
   deleteMany?: Prisma.BranchScalarWhereInput | Prisma.BranchScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type BranchCreateNestedOneWithoutMessagesInput = {
   create?: Prisma.XOR<Prisma.BranchCreateWithoutMessagesInput, Prisma.BranchUncheckedCreateWithoutMessagesInput>
   connectOrCreate?: Prisma.BranchCreateOrConnectWithoutMessagesInput

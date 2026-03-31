@@ -18,6 +18,7 @@ export interface User {
   email: string;
   role: string;
   avatarUrl: string | null;
+  emailVerified: boolean;
 }
 
 interface AuthContextValue {
@@ -33,6 +34,8 @@ interface AuthContextValue {
   ) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
+  resendVerification: () => Promise<void>;
+  markEmailVerified: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -102,6 +105,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(null);
   }, [setAccessToken]);
 
+  const resendVerification = useCallback(async () => {
+    await trpc.auth.resendVerification.mutate();
+  }, []);
+
+  const markEmailVerified = useCallback(() => {
+    setUser((prev) => (prev ? { ...prev, emailVerified: true } : prev));
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -112,6 +123,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         loginWithGoogle,
         logout,
+        resendVerification,
+        markEmailVerified,
       }}
     >
       {children}

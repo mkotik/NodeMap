@@ -98,7 +98,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       body: () => ({ model: selectedModelRef.current }),
     }),
     onError: (err) => {
-      if (err.message?.includes("NO_API_KEY")) {
+      if (err.message?.includes("EMAIL_NOT_VERIFIED")) {
+        setApiKeyMissing(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `verify-error-${Date.now()}`,
+            role: "assistant",
+            parts: [
+              {
+                type: "text",
+                text: "Please verify your email address before chatting. Check your inbox for a verification link, or use the banner at the top of the page to resend it.",
+              },
+            ],
+            createdAt: new Date(),
+          } as UIMessage,
+        ]);
+      } else if (err.message?.includes("NO_API_KEY")) {
         setApiKeyMissing(true);
         const text = userRef.current
           ? "You haven't added an API key yet. Go to [Settings](/settings) to add your OpenRouter API key, then try again."

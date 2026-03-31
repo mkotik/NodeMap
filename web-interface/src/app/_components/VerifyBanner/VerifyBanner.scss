@@ -1,0 +1,49 @@
+@use "../../../styles/tokens" as *;
+
+.verify-banner {
+  flex-shrink: 0;
+  background: $primary-container;
+  padding: $space-2 $space-4;
+
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  &__icon {
+    color: $primary;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    font-size: $body-md;
+    color: $on-primary-container;
+    flex: 1;
+  }
+
+  &__btn {
+    flex-shrink: 0;
+    background: none;
+    border: 1px solid rgba($primary, 0.3);
+    color: $primary;
+    font-family: $font-body;
+    font-size: $label-md;
+    font-weight: $weight-medium;
+    padding: $space-1 $space-3;
+    border-radius: $radius-md;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      background: rgba($primary, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}

@@ -2,6 +2,7 @@ import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { z } from "zod";
 import { verifyAccessToken } from "@/server/lib/jwt";
 import { getOpenRouter } from "@/server/lib/openrouter";
+import { prisma } from "@/server/lib/prisma";
 
 const ChatRequestSchema = z.object({
   messages: z.array(
@@ -39,6 +40,21 @@ export async function POST(req: Request) {
         error: "NO_API_KEY",
         message:
           "Sign in and add your OpenRouter API key in Settings to start chatting.",
+      },
+      { status: 403 },
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { emailVerified: true },
+  });
+  if (user && !user.emailVerified) {
+    return Response.json(
+      {
+        error: "EMAIL_NOT_VERIFIED",
+        message:
+          "Please verify your email address before chatting. Check your inbox for a verification link.",
       },
       { status: 403 },
     );

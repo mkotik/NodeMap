@@ -10,6 +10,7 @@ import {
   verifyRefreshToken,
 } from "@/server/lib/jwt";
 import { verifyGoogleToken } from "@/server/lib/google";
+import { sendVerificationEmail } from "@/server/lib/brevo";
 
 const REFRESH_MAX_AGE = 7 * 24 * 60 * 60;
 
@@ -61,6 +62,7 @@ function pick(user: {
   email: string;
   role: string;
   avatarUrl: string | null;
+  emailVerified: boolean;
 }) {
   return {
     id: user.id,
@@ -69,6 +71,7 @@ function pick(user: {
     email: user.email,
     role: user.role,
     avatarUrl: user.avatarUrl,
+    emailVerified: user.emailVerified,
   };
 }
 
@@ -94,14 +97,22 @@ export const authRouter = router({
       }
 
       const passwordHash = await hashPassword(input.password);
+      const emailVerificationToken = crypto.randomUUID();
       const user = await prisma.user.create({
         data: {
           firstName: input.firstName,
           lastName: input.lastName,
           email: input.email,
           passwordHash,
+          emailVerificationToken,
         },
       });
+
+      sendVerificationEmail(
+        user.email,
+        user.firstName,
+        emailVerificationToken,
+      ).catch(console.error);
 
       const accessToken = await issueTokens(
         user.id,
@@ -164,6 +175,8 @@ export const authRouter = router({
             data: {
               googleId: googleUser.googleId,
               avatarUrl: googleUser.avatarUrl,
+              emailVerified: true,
+              emailVerificationToken: null,
             },
           });
         } else {
@@ -174,6 +187,7 @@ export const authRouter = router({
               lastName: googleUser.lastName,
               googleId: googleUser.googleId,
               avatarUrl: googleUser.avatarUrl,
+              emailVerified: true,
             },
           });
         }
@@ -250,6 +264,48 @@ export const authRouter = router({
       await prisma.refreshToken.deleteMany({ where: { token } });
     }
     ctx.cookies.delete("refreshToken");
+    return { success: true };
+  }),
+
+  verifyEmail: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .mutation(async ({ input }) => {
+      const user = await prisma.user.findUnique({
+        where: { emailVerificationToken: input.token },
+      });
+      if (!user) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid or expired verification link",
+        });
+      }
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, emailVerificationToken: null },
+      });
+
+      return { success: true };
+    }),
+
+  resendVerification: protectedProcedure.mutation(async ({ ctx }) => {
+    const user = await prisma.user.findUnique({
+      where: { id: ctx.user.userId },
+    });
+    if (!user) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+    }
+    if (user.emailVerified) {
+      return { success: true };
+    }
+
+    const token = crypto.randomUUID();
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerificationToken: token },
+    });
+
+    await sendVerificationEmail(user.email, user.firstName, token);
     return { success: true };
   }),
 });

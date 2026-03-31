@@ -33,6 +33,8 @@ export type UserMinAggregateOutputType = {
   googleId: string | null
   avatarUrl: string | null
   role: string | null
+  emailVerified: boolean | null
+  emailVerificationToken: string | null
   openRouterKeyEncrypted: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -47,6 +49,8 @@ export type UserMaxAggregateOutputType = {
   googleId: string | null
   avatarUrl: string | null
   role: string | null
+  emailVerified: boolean | null
+  emailVerificationToken: string | null
   openRouterKeyEncrypted: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -61,6 +65,8 @@ export type UserCountAggregateOutputType = {
   googleId: number
   avatarUrl: number
   role: number
+  emailVerified: number
+  emailVerificationToken: number
   openRouterKeyEncrypted: number
   createdAt: number
   updatedAt: number
@@ -77,6 +83,8 @@ export type UserMinAggregateInputType = {
   googleId?: true
   avatarUrl?: true
   role?: true
+  emailVerified?: true
+  emailVerificationToken?: true
   openRouterKeyEncrypted?: true
   createdAt?: true
   updatedAt?: true
@@ -91,6 +99,8 @@ export type UserMaxAggregateInputType = {
   googleId?: true
   avatarUrl?: true
   role?: true
+  emailVerified?: true
+  emailVerificationToken?: true
   openRouterKeyEncrypted?: true
   createdAt?: true
   updatedAt?: true
@@ -105,6 +115,8 @@ export type UserCountAggregateInputType = {
   googleId?: true
   avatarUrl?: true
   role?: true
+  emailVerified?: true
+  emailVerificationToken?: true
   openRouterKeyEncrypted?: true
   createdAt?: true
   updatedAt?: true
@@ -192,6 +204,8 @@ export type UserGroupByOutputType = {
   googleId: string | null
   avatarUrl: string | null
   role: string
+  emailVerified: boolean
+  emailVerificationToken: string | null
   openRouterKeyEncrypted: string | null
   createdAt: Date
   updatedAt: Date
@@ -227,6 +241,8 @@ export type UserWhereInput = {
   googleId?: Prisma.StringNullableFilter<"User"> | string | null
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.StringFilter<"User"> | string
+  emailVerified?: Prisma.BoolFilter<"User"> | boolean
+  emailVerificationToken?: Prisma.StringNullableFilter<"User"> | string | null
   openRouterKeyEncrypted?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -243,6 +259,8 @@ export type UserOrderByWithRelationInput = {
   googleId?: Prisma.SortOrderInput | Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
+  emailVerified?: Prisma.SortOrder
+  emailVerificationToken?: Prisma.SortOrderInput | Prisma.SortOrder
   openRouterKeyEncrypted?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -254,6 +272,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
   googleId?: string
+  emailVerificationToken?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
@@ -262,12 +281,13 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.StringFilter<"User"> | string
+  emailVerified?: Prisma.BoolFilter<"User"> | boolean
   openRouterKeyEncrypted?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
-}, "id" | "email" | "googleId">
+}, "id" | "email" | "googleId" | "emailVerificationToken">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -278,6 +298,8 @@ export type UserOrderByWithAggregationInput = {
   googleId?: Prisma.SortOrderInput | Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
+  emailVerified?: Prisma.SortOrder
+  emailVerificationToken?: Prisma.SortOrderInput | Prisma.SortOrder
   openRouterKeyEncrypted?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -298,6 +320,8 @@ export type UserScalarWhereWithAggregatesInput = {
   googleId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.StringWithAggregatesFilter<"User"> | string
+  emailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  emailVerificationToken?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   openRouterKeyEncrypted?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -312,6 +336,8 @@ export type UserCreateInput = {
   googleId?: string | null
   avatarUrl?: string | null
   role?: string
+  emailVerified?: boolean
+  emailVerificationToken?: string | null
   openRouterKeyEncrypted?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -328,6 +354,8 @@ export type UserUncheckedCreateInput = {
   googleId?: string | null
   avatarUrl?: string | null
   role?: string
+  emailVerified?: boolean
+  emailVerificationToken?: string | null
   openRouterKeyEncrypted?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -344,6 +372,8 @@ export type UserUpdateInput = {
   googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openRouterKeyEncrypted?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -360,6 +390,8 @@ export type UserUncheckedUpdateInput = {
   googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openRouterKeyEncrypted?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -376,6 +408,8 @@ export type UserCreateManyInput = {
   googleId?: string | null
   avatarUrl?: string | null
   role?: string
+  emailVerified?: boolean
+  emailVerificationToken?: string | null
   openRouterKeyEncrypted?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -390,6 +424,8 @@ export type UserUpdateManyMutationInput = {
   googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openRouterKeyEncrypted?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -404,6 +440,8 @@ export type UserUncheckedUpdateManyInput = {
   googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openRouterKeyEncrypted?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -418,6 +456,8 @@ export type UserCountOrderByAggregateInput = {
   googleId?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  emailVerified?: Prisma.SortOrder
+  emailVerificationToken?: Prisma.SortOrder
   openRouterKeyEncrypted?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -432,6 +472,8 @@ export type UserMaxOrderByAggregateInput = {
   googleId?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  emailVerified?: Prisma.SortOrder
+  emailVerificationToken?: Prisma.SortOrder
   openRouterKeyEncrypted?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -446,6 +488,8 @@ export type UserMinOrderByAggregateInput = {
   googleId?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  emailVerified?: Prisma.SortOrder
+  emailVerificationToken?: Prisma.SortOrder
   openRouterKeyEncrypted?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -462,6 +506,10 @@ export type StringFieldUpdateOperationsInput = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -505,6 +553,8 @@ export type UserCreateWithoutRefreshTokensInput = {
   googleId?: string | null
   avatarUrl?: string | null
   role?: string
+  emailVerified?: boolean
+  emailVerificationToken?: string | null
   openRouterKeyEncrypted?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -520,6 +570,8 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   googleId?: string | null
   avatarUrl?: string | null
   role?: string
+  emailVerified?: boolean
+  emailVerificationToken?: string | null
   openRouterKeyEncrypted?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -551,6 +603,8 @@ export type UserUpdateWithoutRefreshTokensInput = {
   googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openRouterKeyEncrypted?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -566,6 +620,8 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openRouterKeyEncrypted?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -581,6 +637,8 @@ export type UserCreateWithoutConversationsInput = {
   googleId?: string | null
   avatarUrl?: string | null
   role?: string
+  emailVerified?: boolean
+  emailVerificationToken?: string | null
   openRouterKeyEncrypted?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -596,6 +654,8 @@ export type UserUncheckedCreateWithoutConversationsInput = {
   googleId?: string | null
   avatarUrl?: string | null
   role?: string
+  emailVerified?: boolean
+  emailVerificationToken?: string | null
   openRouterKeyEncrypted?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -627,6 +687,8 @@ export type UserUpdateWithoutConversationsInput = {
   googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openRouterKeyEncrypted?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -642,6 +704,8 @@ export type UserUncheckedUpdateWithoutConversationsInput = {
   googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openRouterKeyEncrypted?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -697,6 +761,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   googleId?: boolean
   avatarUrl?: boolean
   role?: boolean
+  emailVerified?: boolean
+  emailVerificationToken?: boolean
   openRouterKeyEncrypted?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -714,6 +780,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   googleId?: boolean
   avatarUrl?: boolean
   role?: boolean
+  emailVerified?: boolean
+  emailVerificationToken?: boolean
   openRouterKeyEncrypted?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -728,6 +796,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   googleId?: boolean
   avatarUrl?: boolean
   role?: boolean
+  emailVerified?: boolean
+  emailVerificationToken?: boolean
   openRouterKeyEncrypted?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -742,12 +812,14 @@ export type UserSelectScalar = {
   googleId?: boolean
   avatarUrl?: boolean
   role?: boolean
+  emailVerified?: boolean
+  emailVerificationToken?: boolean
   openRouterKeyEncrypted?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "firstName" | "lastName" | "passwordHash" | "googleId" | "avatarUrl" | "role" | "openRouterKeyEncrypted" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "firstName" | "lastName" | "passwordHash" | "googleId" | "avatarUrl" | "role" | "emailVerified" | "emailVerificationToken" | "openRouterKeyEncrypted" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
@@ -771,6 +843,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     googleId: string | null
     avatarUrl: string | null
     role: string
+    emailVerified: boolean
+    emailVerificationToken: string | null
     openRouterKeyEncrypted: string | null
     createdAt: Date
     updatedAt: Date
@@ -1207,6 +1281,8 @@ export interface UserFieldRefs {
   readonly googleId: Prisma.FieldRef<"User", 'String'>
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'String'>
+  readonly emailVerified: Prisma.FieldRef<"User", 'Boolean'>
+  readonly emailVerificationToken: Prisma.FieldRef<"User", 'String'>
   readonly openRouterKeyEncrypted: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>

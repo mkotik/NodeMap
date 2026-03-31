@@ -9,15 +9,59 @@
   background: $surface;
   @include ghost-border(bottom);
 
+  @include mobile {
+    padding: $space-3 $space-4;
+    display: grid;
+    grid-template-columns: 36px 1fr 36px;
+    align-items: center;
+  }
+
   &--empty {
     border: none;
     visibility: hidden;
+
+    @include mobile {
+      visibility: visible;
+      border: none;
+      padding: $space-3 $space-4;
+    }
+  }
+
+  &__hamburger {
+    display: none;
+
+    @include mobile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: $radius-md;
+      background: transparent;
+      color: $on-surface-variant;
+      cursor: pointer;
+      @include surface-transition;
+
+      &:hover {
+        background: $surface-container-low;
+        color: $on-surface;
+      }
+    }
   }
 
   &__left {
     display: flex;
     align-items: center;
     gap: $space-4;
+
+    @include mobile {
+      justify-content: center;
+
+      .topnav__node-link {
+        display: none;
+      }
+    }
   }
 
   &__node-link {
@@ -166,9 +210,14 @@
   }
 
   &__right {
-    display: flex;
+    display: none;
     align-items: center;
     gap: $space-1;
+
+    @include mobile {
+      display: flex;
+      justify-content: flex-end;
+    }
   }
 
   &__icon-btn {

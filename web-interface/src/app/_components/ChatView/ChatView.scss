@@ -12,6 +12,10 @@
   margin: 0 auto;
   width: 100%;
 
+  @include mobile {
+    padding: 0 $space-4;
+  }
+
   &__hero {
     display: flex;
     flex-direction: column;
@@ -29,11 +33,21 @@
     align-items: center;
     justify-content: center;
     margin-bottom: $space-6;
+
+    @include mobile {
+      width: 60px;
+      height: 60px;
+      margin-bottom: $space-4;
+    }
   }
 
   &__title {
     @include type-display($display-sm);
     margin-bottom: $space-3;
+
+    @include mobile {
+      font-size: $headline-lg;
+    }
   }
 
   &__subtitle {
@@ -202,6 +216,11 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $space-4;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+      gap: $space-3;
+    }
   }
 
   &__suggestion-card {
@@ -218,6 +237,12 @@
 
     &:hover {
       background: $surface-container;
+    }
+
+    @include mobile {
+      &:nth-child(n + 3) {
+        display: none;
+      }
     }
   }
 
@@ -309,6 +334,10 @@
     flex: 1;
     overflow-y: auto;
     padding: $space-8 $space-8 $space-4;
+
+    @include mobile {
+      padding: $space-4 $space-4 $space-4;
+    }
   }
 
   &__messages-inner {
@@ -373,6 +402,10 @@
     border-radius: $radius-md;
     padding: $space-5 $space-6;
 
+    @include mobile {
+      padding: $space-4 $space-4;
+    }
+
     &--user {
       background: $surface-container-low;
     }
@@ -393,6 +426,10 @@
     flex-direction: column;
     align-items: center;
     gap: $space-2;
+
+    @include mobile {
+      padding: $space-3 $space-4;
+    }
   }
 
   &__input-container {

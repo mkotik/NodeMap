@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
 import BeatLoader from "react-spinners/BeatLoader";
 import { Tooltip } from "@/components";
-import { Waypoints, ChevronRight } from "lucide-react";
+import { Waypoints, ChevronRight, Menu } from "lucide-react";
 import "./TopNav.scss";
 
 export default function TopNav() {
@@ -31,10 +31,31 @@ export default function TopNav() {
   const isPrivacy = pathname === "/privacy";
   const hideNav = isAuth || isHistory || isSettings || isTerms || isPrivacy;
 
-  if (!mounted || hideNav || isEmpty) return <div className="topnav topnav--empty" />;
+  if (!mounted || hideNav || isEmpty) {
+    return (
+      <div className="topnav topnav--empty">
+        <button
+          type="button"
+          className="topnav__hamburger"
+          onClick={() => window.dispatchEvent(new Event("toggle-sidebar"))}
+          aria-label="Open menu"
+        >
+          <Menu size={20} />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <header className="topnav">
+      <button
+        type="button"
+        className="topnav__hamburger"
+        onClick={() => window.dispatchEvent(new Event("toggle-sidebar"))}
+        aria-label="Open menu"
+      >
+        <Menu size={20} />
+      </button>
       <div className="topnav__left">
         <Tooltip text="Node View" position="bottom">
           <Link
@@ -91,6 +112,17 @@ export default function TopNav() {
             Main Thread
           </span>
         )}
+      </div>
+      <div className="topnav__right">
+        <Tooltip text="Node View" position="bottom">
+          <Link
+            href="/nodes"
+            className="topnav__node-link"
+            aria-label="Node View"
+          >
+            <Waypoints size={16} />
+          </Link>
+        </Tooltip>
       </div>
     </header>
   );

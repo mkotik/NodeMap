@@ -15,6 +15,10 @@
   padding-right: 0px;
   min-height: 100%i;
   position: relative;
+
+  @include mobile {
+    padding: $space-4 $space-4 $space-4 !important;
+  }
   &--empty {
     display: flex;
     align-items: center;
@@ -204,6 +208,10 @@
       content: "—";
       margin-right: $space-1;
     }
+
+    @include mobile {
+      display: none;
+    }
   }
 
   &__card-time {
@@ -364,6 +372,13 @@
     background: $surface-container;
     border-radius: $radius-md;
     z-index: 10;
+
+    @include mobile {
+      left: 0;
+      bottom: $space-12;
+      padding: $space-3 $space-4;
+      gap: $space-3;
+    }
   }
 
   &__page-btn {

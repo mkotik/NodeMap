@@ -42,6 +42,22 @@ export default function Sidebar() {
   const pathname = usePathname();
   const onChatPage = pathname === "/" || pathname === "/nodes";
 
+  // Mobile sidebar toggle
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    function handleToggle() {
+      setMobileOpen((prev) => !prev);
+    }
+    window.addEventListener("toggle-sidebar", handleToggle);
+    return () => window.removeEventListener("toggle-sidebar", handleToggle);
+  }, []);
+
+  // Close sidebar on navigation (mobile)
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   useEffect(() => {
     if (onChatPage) refreshRecents();
   }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -114,6 +130,7 @@ export default function Sidebar() {
   function handleLoadChat(id: string) {
     setLoadingId(id);
     setMenu({ type: "closed" });
+    setMobileOpen(false);
     loadConversation(id)
       .then(() => router.push("/"))
       .finally(() => setLoadingId(null));
@@ -122,6 +139,7 @@ export default function Sidebar() {
   function handleSwitchBranch(branchId: string) {
     setLoadingId(branchId);
     switchBranch(branchId);
+    setMobileOpen(false);
     router.push("/");
     setTimeout(() => setLoadingId(null), 300);
   }
@@ -215,7 +233,12 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="sidebar">
+    <>
+      <div
+        className={`sidebar-backdrop${mobileOpen ? " sidebar-backdrop--open" : ""}`}
+        onClick={() => setMobileOpen(false)}
+      />
+      <aside className={`sidebar${mobileOpen ? " sidebar--open" : ""}`}>
       <div className="sidebar__top">
         <button
           type="button"
@@ -706,5 +729,6 @@ export default function Sidebar() {
         )}
       </div>
     </aside>
+    </>
   );
 }

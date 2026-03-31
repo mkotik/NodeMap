@@ -14,6 +14,19 @@
   z-index: 10;
   @include glass-panel;
 
+  @include mobile {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    transition: transform $transition-default;
+    z-index: 20;
+
+    &--open {
+      transform: translateX(0);
+    }
+  }
+
   &__brand {
     display: flex;
     flex-direction: column;

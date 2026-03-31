@@ -58,7 +58,7 @@ async function chat(page: Page, text: string) {
 async function createChat(page: Page, message: string) {
   await page.locator(".sidebar__new-chat").click();
   await expect(page.locator(".chat-view__title")).toHaveText(
-    "Initiate Thought",
+    "Start a conversation",
   );
   await chat(page, message);
   // Wait for auto-save to complete: the pending (disabled) sidebar entry
@@ -87,7 +87,7 @@ test.describe("History", () => {
     await login(page);
     await page.click(".sidebar__nav-item >> text=History");
     await expect(page).toHaveURL("/history");
-    await expect(page.locator(".history__title")).toHaveText("Logic Threads");
+    await expect(page.locator(".history__title")).toHaveText("Chat History");
     // Should see chat cards
     const cards = page.locator(".history__card");
     await expect(cards.first()).toBeVisible({ timeout: 10000 });
@@ -102,7 +102,7 @@ test.describe("History", () => {
     await expect(page.locator(".history__count")).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.locator(".history__count")).toContainText("threads");
+    await expect(page.locator(".history__count")).toContainText("chats");
   });
 
   test("history cards show title and preview", async ({ page }) => {
@@ -160,7 +160,7 @@ test.describe("History", () => {
     await page.waitForTimeout(1000);
 
     await expect(page.locator(".history__empty-text")).toContainText(
-      "No threads match your search",
+      "No chats match your search",
     );
   });
 

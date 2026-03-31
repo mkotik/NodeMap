@@ -36,9 +36,9 @@ test.describe("Chat and Branching", () => {
     await page.goto("/");
   });
 
-  test("initial page shows Initiate Thought", async ({ page }) => {
+  test("initial page shows Start a conversation", async ({ page }) => {
     await expect(page.locator(".chat-view__title")).toHaveText(
-      "Initiate Thought",
+      "Start a conversation",
     );
   });
 
@@ -169,7 +169,7 @@ test.describe("Chat and Branching", () => {
 
     // Should be back to initial state
     await expect(page.locator(".chat-view__title")).toHaveText(
-      "Initiate Thought",
+      "Start a conversation",
     );
 
     // Node view link should be hidden

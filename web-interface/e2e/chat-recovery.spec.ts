@@ -61,7 +61,7 @@ test.describe("Chat recovery on navigate-away", () => {
 
     // We should be back on a fresh chat view
     await expect(page.locator(".chat-view__title")).toHaveText(
-      "Initiate Thought",
+      "Start a conversation",
     );
 
     // The sidebar recents should show the abandoned chat.

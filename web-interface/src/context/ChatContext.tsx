@@ -156,6 +156,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const isSwitchingRef = useRef(false);
   const sessionRef = useRef(0);
+  const saveNowRef = useRef<(() => void) | null>(null);
   const [completingChatIds, setCompletingChatIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -211,14 +212,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       prevStatusRef.current !== "ready" && status === "ready";
     prevStatusRef.current = status;
 
-    let changed = false;
+    let hasNewUserMsg = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- valid sync from useChat (external system)
     setTree((prev) => {
+      let changed = false;
       const next = structuredClone(prev);
       for (const msg of messages) {
         if (!next.nodes[msg.id]) {
           addNodeToBranch(next, msg, next.activeBranchId);
           changed = true;
+          if (msg.role === "user") hasNewUserMsg = true;
         } else if (justFinished) {
           // Update node with final message content after stream completes
           next.nodes[msg.id].message = msg;
@@ -227,6 +230,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       }
       return changed ? next : prev;
     });
+
+    // Save immediately when a user message lands or when streaming finishes
+    if (hasNewUserMsg || justFinished) {
+      saveNowRef.current?.();
+    }
   }, [messages, status]);
 
   // --- Auto-naming (branches + conversation title) ---
@@ -330,9 +338,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // --- Auto-save (debounced persistence to DB) ---
   const skipNextSaveRef = useRef(false);
-  const isStreaming = status === "streaming" || status === "submitted";
-
-  const { pendingSaveRef } = useAutoSave({
+  const { pendingSaveRef, saveNow } = useAutoSave({
     tree,
     treeRef,
     user,
@@ -342,8 +348,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     onSaveComplete: refreshRecents,
     skipNextSaveRef,
     sessionRef,
-    disabled: apiKeyMissing || isStreaming,
+    disabled: apiKeyMissing,
+    status,
   });
+  saveNowRef.current = saveNow;
 
   // --- Branch operations (create, switch, return, cleanup) ---
   const {

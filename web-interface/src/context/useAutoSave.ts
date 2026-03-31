@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, type MutableRefObject } from "react";
 import type { ConversationTree } from "@/types/branch";
+import type { ChatStatus } from "ai";
 import { getMessageText } from "@/lib/messages";
 import { trpc } from "@/lib/trpc";
 import type { User } from "@/context/AuthContext";
@@ -17,10 +18,12 @@ interface UseAutoSaveArgs {
   skipNextSaveRef: MutableRefObject<boolean>;
   sessionRef: MutableRefObject<number>;
   disabled?: boolean;
+  status: ChatStatus;
 }
 
 export interface UseAutoSaveReturn {
   pendingSaveRef: MutableRefObject<Promise<string | null> | null>;
+  saveNow: () => void;
 }
 
 export function useAutoSave({
@@ -34,6 +37,7 @@ export function useAutoSave({
   skipNextSaveRef,
   sessionRef,
   disabled,
+  status,
 }: UseAutoSaveArgs): UseAutoSaveReturn {
   const onSaveCompleteRef = useRef(onSaveComplete);
   useEffect(() => {
@@ -116,7 +120,10 @@ export function useAutoSave({
   // Fingerprint: only save when actual content changes (not just activeBranchId)
   function treeFingerprint(t: ConversationTree): string {
     const nodeCount = Object.keys(t.nodes).length;
+    // Only include branches with messages — creating an empty branch
+    // (before the user sends a message) should not trigger a save.
     const branchSig = Object.values(t.branches)
+      .filter((b) => b.nodeIds.length > 0)
       .map((b) => `${b.id}:${b.nodeIds.length}:${b.label}`)
       .sort()
       .join("|");
@@ -124,7 +131,10 @@ export function useAutoSave({
   }
 
   const lastFingerprintRef = useRef("");
+  const prevStatusRef = useRef(status);
 
+  // Save on tree changes (user messages, branch label changes, etc.)
+  // but NOT mid-stream — the assistant message content is incomplete.
   useEffect(() => {
     if (!user || disabled) return;
     const hasMessages = Object.keys(tree.nodes).length > 0;
@@ -137,19 +147,44 @@ export function useAutoSave({
       return;
     }
 
+    const isStreaming = status === "streaming" || status === "submitted";
+
+    // Skip mid-stream — content is still changing
+    if (isStreaming) return;
+
     // Skip if nothing meaningful changed (e.g. only activeBranchId switched)
     const fp = treeFingerprint(tree);
     if (fp === lastFingerprintRef.current && convIdRef.current) return;
     lastFingerprintRef.current = fp;
 
-    // Debounce all saves (2s) to allow error states like apiKeyMissing to settle
+    // Debounce saves (2s) to allow error states like apiKeyMissing to settle
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(saveNow, 2000);
 
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [tree, user, conversationTitle, saveNow, skipNextSaveRef, disabled]);
+  }, [tree, user, conversationTitle, saveNow, skipNextSaveRef, disabled, status]);
 
-  return { pendingSaveRef };
+  // Save immediately when streaming finishes — the assistant response is
+  // now complete and the tree nodes have been updated with final content.
+  useEffect(() => {
+    const wasStreaming =
+      prevStatusRef.current === "streaming" ||
+      prevStatusRef.current === "submitted";
+    prevStatusRef.current = status;
+
+    if (wasStreaming && status === "ready" && user && !disabled) {
+      const hasMessages = Object.keys(tree.nodes).length > 0;
+      if (!hasMessages) return;
+      // Short delay to let the tree sync effect update node content first
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        lastFingerprintRef.current = treeFingerprint(treeRef.current);
+        saveNow();
+      }, 500);
+    }
+  }, [status, user, disabled, tree, treeRef, saveNow]);
+
+  return { pendingSaveRef, saveNow };
 }

@@ -165,7 +165,9 @@ export default function ChatView({
                 type="button"
                 onClick={() => setModelOpen((o) => !o)}
               >
-                <span className="chat-view__model-label">{activeModel.label}</span>
+                <span className="chat-view__model-label">
+                  {activeModel.label}
+                </span>
                 <ChevronDown size={14} />
               </button>
               {modelOpen && (
@@ -180,8 +182,12 @@ export default function ChatView({
                         setModelOpen(false);
                       }}
                     >
-                      <span className="chat-view__model-option-label">{m.label}</span>
-                      <span className="chat-view__model-option-provider">{m.provider}</span>
+                      <span className="chat-view__model-option-label">
+                        {m.label}
+                      </span>
+                      <span className="chat-view__model-option-provider">
+                        {m.provider}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -249,6 +255,17 @@ export default function ChatView({
                     >
                       {getLabel(msg.role, i)}
                     </span>
+                    {isAi && !isStreaming && (
+                      <Tooltip text="Branch from here">
+                        <button
+                          className="chat-view-thread__branch-action"
+                          type="button"
+                          onClick={() => onCreateBranch(msg.id)}
+                        >
+                          <GitBranch size={14} />
+                        </button>
+                      </Tooltip>
+                    )}
                   </div>
                   <div
                     className={`chat-view-thread__bubble chat-view-thread__bubble--${isAi ? "ai" : "user"}`}
@@ -307,13 +324,18 @@ export default function ChatView({
           </button>
         </div>
         <div className="chat-view-thread__hint-row">
-          <div className="chat-view__model-selector chat-view__model-selector--compact" ref={modelRef}>
+          <div
+            className="chat-view__model-selector chat-view__model-selector--compact"
+            ref={modelRef}
+          >
             <button
               className="chat-view__model-trigger"
               type="button"
               onClick={() => setModelOpen((o) => !o)}
             >
-              <span className="chat-view__model-label">{activeModel.label}</span>
+              <span className="chat-view__model-label">
+                {activeModel.label}
+              </span>
               <ChevronDown size={14} />
             </button>
             {modelOpen && (
@@ -328,8 +350,12 @@ export default function ChatView({
                       setModelOpen(false);
                     }}
                   >
-                    <span className="chat-view__model-option-label">{m.label}</span>
-                    <span className="chat-view__model-option-provider">{m.provider}</span>
+                    <span className="chat-view__model-option-label">
+                      {m.label}
+                    </span>
+                    <span className="chat-view__model-option-provider">
+                      {m.provider}
+                    </span>
                   </button>
                 ))}
               </div>

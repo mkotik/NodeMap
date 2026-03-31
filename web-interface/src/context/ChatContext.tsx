@@ -128,6 +128,25 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             createdAt: new Date(),
           } as UIMessage,
         ]);
+      } else {
+        // Surface any other provider error (credit limits, rate limits, etc.)
+        let text = "Something went wrong. Please try again.";
+        try {
+          const parsed = JSON.parse(err.message || "");
+          if (parsed.errorText) text = parsed.errorText;
+          else if (parsed.error?.message) text = parsed.error.message;
+        } catch {
+          if (err.message) text = err.message;
+        }
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `error-${Date.now()}`,
+            role: "assistant",
+            parts: [{ type: "text", text }],
+            createdAt: new Date(),
+          } as UIMessage,
+        ]);
       }
     },
   });

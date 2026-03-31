@@ -249,17 +249,6 @@ export default function ChatView({
                     >
                       {getLabel(msg.role, i)}
                     </span>
-                    {isAi && !isStreaming && (
-                      <Tooltip text="Branch from here">
-                        <button
-                          className="chat-view-thread__branch-action"
-                          type="button"
-                          onClick={() => onCreateBranch(msg.id)}
-                        >
-                          <GitBranch size={14} />
-                        </button>
-                      </Tooltip>
-                    )}
                   </div>
                   <div
                     className={`chat-view-thread__bubble chat-view-thread__bubble--${isAi ? "ai" : "user"}`}
@@ -276,6 +265,17 @@ export default function ChatView({
                       <p className="chat-view-thread__typing">Thinking...</p>
                     ) : null}
                   </div>
+                  {isAi && !isStreaming && (
+                    <Tooltip text="Branch from here">
+                      <button
+                        className="chat-view-thread__branch-action"
+                        type="button"
+                        onClick={() => onCreateBranch(msg.id)}
+                      >
+                        <GitBranch size={14} />
+                      </button>
+                    </Tooltip>
+                  )}
                 </div>
               </div>
             );

@@ -33,10 +33,15 @@ function HomeContent() {
 
   // Recover conversation if state was lost during production navigation
   useEffect(() => {
-    if (hasMessages || authLoading || !convId) return;
+    if (!convId) return;
+    if (hasMessages) {
+      // Conversation already loaded (e.g. navigated from history); just clean the URL
+      window.history.replaceState(null, "", "/");
+      return;
+    }
+    if (authLoading) return;
     loadConversation(convId)
       .then(() => {
-        // Clean the ?c= param from the URL without triggering navigation
         window.history.replaceState(null, "", "/");
       })
       .catch(() => {

@@ -7,6 +7,7 @@ import { useChatContext } from "@/context/ChatContext";
 import { useAuth } from "@/context/AuthContext";
 import { trpc } from "@/lib/trpc";
 import BeatLoader from "react-spinners/BeatLoader";
+import { Plus, Clock, Settings, EllipsisVertical, LogOut, User, ChevronRight } from "lucide-react";
 import "./Sidebar.scss";
 
 type MenuState =
@@ -234,17 +235,7 @@ export default function Sidebar() {
             router.push("/");
           }}
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
+          <Plus size={14} strokeWidth={3} />
           New Chat
         </button>
         <div className="sidebar__divider" />
@@ -254,38 +245,14 @@ export default function Sidebar() {
             href="/history"
             className={`sidebar__nav-item${pathname === "/history" ? " sidebar__nav-item--active" : ""}`}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
+            <Clock size={18} />
             History
           </Link>
           <Link
             href="/settings"
             className={`sidebar__nav-item${pathname === "/settings" ? " sidebar__nav-item--active" : ""}`}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
+            <Settings size={18} />
             Settings
           </Link>
         </nav>
@@ -411,16 +378,7 @@ export default function Sidebar() {
                               }}
                               aria-label="Chat options"
                             >
-                              <svg
-                                width="12"
-                                height="12"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                              >
-                                <circle cx="12" cy="5" r="2" />
-                                <circle cx="12" cy="12" r="2" />
-                                <circle cx="12" cy="19" r="2" />
-                              </svg>
+                              <EllipsisVertical size={12} />
                             </button>
 
                             {/* Dropdown menu */}
@@ -728,51 +686,14 @@ export default function Sidebar() {
               onClick={() => logout()}
               aria-label="Sign out"
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
+              <LogOut size={16} />
             </button>
           </div>
         ) : (
           <a href="/auth/login" className="sidebar__sign-in">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
+            <User size={18} />
             Sign In
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="sidebar__sign-in-arrow"
-            >
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <ChevronRight size={14} strokeWidth={2.5} className="sidebar__sign-in-arrow" />
           </a>
         )}
       </div>

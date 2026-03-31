@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useChatContext } from "@/context/ChatContext";
 import BeatLoader from "react-spinners/BeatLoader";
+import { Tooltip } from "@/components";
+import { Waypoints, ChevronRight } from "lucide-react";
 import "./TopNav.scss";
 
 export default function TopNav() {
@@ -35,26 +37,15 @@ export default function TopNav() {
         {mounted && !hideNav && (
           <>
             {!isEmpty && (
-              <Link
-                href="/nodes"
-                className="topnav__node-link"
-                aria-label="Node View"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
+              <Tooltip text="Node View" position="bottom">
+                <Link
+                  href="/nodes"
+                  className="topnav__node-link"
+                  aria-label="Node View"
                 >
-                  <rect x="3" y="3" width="7" height="7" rx="1" />
-                  <rect x="14" y="3" width="7" height="7" rx="1" />
-                  <rect x="3" y="14" width="7" height="7" rx="1" />
-                  <rect x="14" y="14" width="7" height="7" rx="1" />
-                </svg>
-              </Link>
+                  <Waypoints size={16} />
+                </Link>
+              </Tooltip>
             )}
             {onBranch ? (
               <nav className="topnav__breadcrumbs">
@@ -96,18 +87,7 @@ export default function TopNav() {
                   }}
                 >
                   Main Thread
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
+                  <ChevronRight size={14} strokeWidth={2.5} />
                 </button>
               ) : (
                 <span className="topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--primary">

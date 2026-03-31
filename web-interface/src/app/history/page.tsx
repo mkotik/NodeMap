@@ -7,6 +7,7 @@ import { useChatContext } from "@/context/ChatContext";
 import { trpc } from "@/lib/trpc";
 import BeatLoader from "react-spinners/BeatLoader";
 import ClipLoader from "react-spinners/ClipLoader";
+import { Search, EllipsisVertical, ChevronLeft, ChevronRight } from "lucide-react";
 import "./History.scss";
 
 interface ConversationItem {
@@ -285,20 +286,7 @@ export default function HistoryPage() {
       </div>
 
       <div className="history__search">
-        <svg
-          className="history__search-icon"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.3-4.3" />
-        </svg>
+        <Search className="history__search-icon" size={16} />
         <input
           className="history__search-input"
           type="text"
@@ -427,16 +415,7 @@ export default function HistoryPage() {
                                   }}
                                   aria-label="Chat options"
                                 >
-                                  <svg
-                                    width="12"
-                                    height="12"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                  >
-                                    <circle cx="12" cy="5" r="2" />
-                                    <circle cx="12" cy="12" r="2" />
-                                    <circle cx="12" cy="19" r="2" />
-                                  </svg>
+                                  <EllipsisVertical size={12} />
                                 </button>
 
                                 {menu.type === "menu" &&
@@ -529,18 +508,7 @@ export default function HistoryPage() {
                   onClick={handlePrev}
                   disabled={!hasPrev || navigating}
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M15 18l-6-6 6-6" />
-                  </svg>
+                  <ChevronLeft size={16} strokeWidth={2.5} />
                   Prev
                 </button>
                 <span className="history__page-indicator">
@@ -557,18 +525,7 @@ export default function HistoryPage() {
                   disabled={!hasNext || navigating}
                 >
                   Next
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
+                  <ChevronRight size={16} strokeWidth={2.5} />
                 </button>
               </div>
             </div>

@@ -1,0 +1,27 @@
+@use "@/styles/tokens" as *;
+
+.tooltip-trigger {
+  display: inline-flex;
+}
+
+.tooltip {
+  z-index: 9999;
+  padding: $space-1 $space-2;
+  border-radius: $radius-sm;
+  background: $surface-container-highest;
+  color: $on-surface;
+  font-family: $font-body;
+  font-size: $label-sm;
+  font-weight: $weight-medium;
+  letter-spacing: $tracking-wide;
+  line-height: $leading-normal;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity $transition-fast;
+  box-shadow: 0 0 24px rgba($on-surface, 0.06);
+
+  &--visible {
+    opacity: 1;
+  }
+}

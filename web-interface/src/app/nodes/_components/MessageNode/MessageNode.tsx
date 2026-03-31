@@ -3,6 +3,8 @@
 import { Handle, Position } from "@xyflow/react";
 import type { BranchColor } from "@/types/branch";
 import Markdown from "react-markdown";
+import { Tooltip } from "@/components";
+import { GitBranch } from "lucide-react";
 import "./MessageNode.scss";
 
 interface ForkBranch {
@@ -48,31 +50,18 @@ export default function MessageNode({ data }: { data: MessageNodeData }) {
         >
           {data.label}
         </span>
-        <button
-          className="msg-node__branch-btn"
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            data.onCreateBranch();
-          }}
-          title="Create branch from here"
-        >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <Tooltip text="Create branch from here" position="top">
+          <button
+            className="msg-node__branch-btn"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              data.onCreateBranch();
+            }}
           >
-            <line x1="6" y1="3" x2="6" y2="15" />
-            <circle cx="18" cy="6" r="3" />
-            <circle cx="6" cy="18" r="3" />
-            <path d="M18 9a9 9 0 0 1-9 9" />
-          </svg>
-        </button>
+            <GitBranch size={12} />
+          </button>
+        </Tooltip>
       </div>
 
       <div className="msg-node__content">
@@ -86,20 +75,21 @@ export default function MessageNode({ data }: { data: MessageNodeData }) {
       {data.forkBranches.length > 0 && (
         <div className="msg-node__forks">
           {data.forkBranches.map((branch) => (
-            <button
-              key={branch.id}
-              className={`msg-node__fork-chip msg-node__fork-chip--${branch.color}`}
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                data.onSwitchBranch(branch.id);
-              }}
-            >
-              <span
-                className={`msg-node__fork-dot msg-node__fork-dot--${branch.color}`}
-              />
-              {branch.label}
-            </button>
+            <Tooltip key={branch.id} text={`Switch to ${branch.label}`} position="bottom">
+              <button
+                className={`msg-node__fork-chip msg-node__fork-chip--${branch.color}`}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  data.onSwitchBranch(branch.id);
+                }}
+              >
+                <span
+                  className={`msg-node__fork-dot msg-node__fork-dot--${branch.color}`}
+                />
+                {branch.label}
+              </button>
+            </Tooltip>
           ))}
         </div>
       )}

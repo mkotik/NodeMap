@@ -5,3 +5,4 @@ export { default as InputField } from "./InputField/InputField";
 export { default as NodePoint } from "./NodePoint/NodePoint";
 export { default as Sidebar } from "./Sidebar/Sidebar";
 export { default as TopNav } from "./TopNav/TopNav";
+export { default as Tooltip } from "./Tooltip/Tooltip";

@@ -35,6 +35,7 @@ export default function Sidebar() {
     switchBranch,
     deleteBranchById,
     renameBranchById,
+    namingBranches,
   } = useChatContext();
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -528,7 +529,14 @@ export default function Sidebar() {
                                             )}
                                           </span>
                                           <span className="sidebar__branch-title">
-                                            {b.label}
+                                            {namingBranches.has(b.id) ? (
+                                              <BeatLoader
+                                                color={branchColor}
+                                                size={3}
+                                              />
+                                            ) : (
+                                              b.label
+                                            )}
                                           </span>
                                         </button>
 

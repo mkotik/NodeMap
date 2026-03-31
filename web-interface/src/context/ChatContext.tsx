@@ -199,25 +199,35 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // -------------------------------------------------------------------
   // Sync: any time useChat messages change, add missing ones to the tree.
+  // When streaming finishes, update existing nodes with final content.
   // This is a valid sync from an external system (useChat), so we suppress
   // the set-state-in-effect lint rule here.
   // -------------------------------------------------------------------
+  const prevStatusRef = useRef(status);
   useEffect(() => {
     if (isSwitchingRef.current) return;
 
-    let hasNew = false;
+    const justFinished =
+      prevStatusRef.current !== "ready" && status === "ready";
+    prevStatusRef.current = status;
+
+    let changed = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- valid sync from useChat (external system)
     setTree((prev) => {
       const next = structuredClone(prev);
       for (const msg of messages) {
         if (!next.nodes[msg.id]) {
           addNodeToBranch(next, msg, next.activeBranchId);
-          hasNew = true;
+          changed = true;
+        } else if (justFinished) {
+          // Update node with final message content after stream completes
+          next.nodes[msg.id].message = msg;
+          changed = true;
         }
       }
-      return hasNew ? next : prev;
+      return changed ? next : prev;
     });
-  }, [messages]);
+  }, [messages, status]);
 
   // --- Auto-naming (branches + conversation title) ---
   const {
@@ -320,6 +330,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // --- Auto-save (debounced persistence to DB) ---
   const skipNextSaveRef = useRef(false);
+  const isStreaming = status === "streaming" || status === "submitted";
+
   const { pendingSaveRef } = useAutoSave({
     tree,
     treeRef,
@@ -330,7 +342,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     onSaveComplete: refreshRecents,
     skipNextSaveRef,
     sessionRef,
-    disabled: apiKeyMissing,
+    disabled: apiKeyMissing || isStreaming,
   });
 
   // --- Branch operations (create, switch, return, cleanup) ---

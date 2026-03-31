@@ -665,6 +665,27 @@ export default function ChatView({
               </div>
             );
           })}
+          {isStreaming && messages.length > 0 && messages[messages.length - 1].role === "user" && (
+            <div className="chat-view-thread__message chat-view-thread__message--ai">
+              <div className="chat-view-thread__node">
+                <div className="chat-view-thread__node-dot chat-view-thread__node-dot--primary" />
+              </div>
+              <div className="chat-view-thread__message-body">
+                <div className="chat-view-thread__label-row">
+                  <span className="chat-view-thread__label chat-view-thread__label--ai">
+                    Assistant
+                  </span>
+                </div>
+                <div className="chat-view-thread__bubble chat-view-thread__bubble--ai">
+                  <div className="chat-view-thread__thinking-dots">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
       </div>

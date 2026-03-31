@@ -224,7 +224,6 @@ export default function Sidebar() {
           }}
         >
           <span className="sidebar__logo">NodeMap.io</span>
-          <span className="sidebar__tagline">AI Chat</span>
         </button>
 
         <button
@@ -248,6 +247,7 @@ export default function Sidebar() {
           </svg>
           New Chat
         </button>
+        <div className="sidebar__divider" />
 
         <nav className="sidebar__nav">
           <Link

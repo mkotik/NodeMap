@@ -1,11 +1,15 @@
 @use "../../styles/tokens" as *;
 @use "../../styles/mixins" as *;
 
+.history--page {
+  background-color: red !important;
+}
 .history {
   // margin-bottom: 70px !important;
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
+  padding-left: 0px !important;
   padding: 0px $space-8;
   padding-top: $space-6;
   padding-right: 0px;

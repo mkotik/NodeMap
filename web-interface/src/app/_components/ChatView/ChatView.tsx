@@ -125,9 +125,7 @@ export default function ChatView({
             </svg>
           </div>
           <h1 className="chat-view__title">Start a conversation</h1>
-          <p className="chat-view__subtitle">
-            Ask anything to get started.
-          </p>
+          <p className="chat-view__subtitle">Ask anything to get started.</p>
         </div>
 
         <div className="chat-view__input-container">
@@ -141,7 +139,7 @@ export default function ChatView({
             onKeyDown={handleTextareaKeyDown}
           />
           <div className="chat-view__input-toolbar">
-            <div className="chat-view__toolbar-actions">
+            {/* <div className="chat-view__toolbar-actions">
               <button
                 className="chat-view__toolbar-btn"
                 type="button"
@@ -199,7 +197,7 @@ export default function ChatView({
                   <polyline points="8 6 2 12 8 18" />
                 </svg>
               </button>
-            </div>
+            </div> */}
             <button
               className="chat-view__branch-btn"
               type="button"
@@ -354,9 +352,7 @@ export default function ChatView({
             </svg>
           </button>
         </div>
-        <span className="chat-view-thread__hint">
-          Press Enter to send
-        </span>
+        <span className="chat-view-thread__hint">Press Enter to send</span>
       </div>
     </div>
   );

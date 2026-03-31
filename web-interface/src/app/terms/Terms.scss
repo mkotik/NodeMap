@@ -1,0 +1,71 @@
+@use "../../styles/tokens" as *;
+
+.terms {
+  width: 100%;
+  max-width: 720px;
+
+  margin: 0 auto;
+  padding: $space-6 0 $space-12;
+
+  &__header {
+    margin-bottom: $space-8;
+  }
+
+  &__title {
+    font-family: $font-display;
+    font-size: $headline-sm;
+    font-weight: $weight-bold;
+    color: $on-surface;
+    margin-bottom: $space-2;
+  }
+
+  &__updated {
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $outline;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+  }
+
+  &__section {
+    h2 {
+      font-family: $font-body;
+      font-size: $body-lg;
+      font-weight: $weight-semibold;
+      color: $on-surface;
+      margin-bottom: $space-2;
+    }
+
+    p {
+      font-family: $font-body;
+      font-size: $body-md;
+      color: $on-surface-variant;
+      line-height: $leading-relaxed;
+    }
+
+    ul {
+      padding-left: $space-6;
+      margin-top: $space-2;
+
+      li {
+        font-family: $font-body;
+        font-size: $body-md;
+        color: $on-surface-variant;
+        line-height: $leading-relaxed;
+        margin-bottom: $space-1;
+      }
+    }
+
+    a {
+      color: $primary;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

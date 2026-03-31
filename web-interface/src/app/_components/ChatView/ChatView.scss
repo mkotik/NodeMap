@@ -7,8 +7,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: $space-8;
-  max-width: 640px;
+  padding: 0px;
+  max-width: 720px;
   margin: 0 auto;
   width: 100%;
 
@@ -68,7 +68,7 @@
   &__input-toolbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-top: $space-4;
   }
 

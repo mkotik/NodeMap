@@ -55,7 +55,7 @@
     font-size: $body-md;
     font-weight: $weight-semibold;
     cursor: pointer;
-    margin-bottom: $space-8;
+    margin-bottom: $space-4;
     @include surface-transition;
 
     &:hover {

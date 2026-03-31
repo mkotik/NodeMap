@@ -36,6 +36,10 @@ export default function RootLayout({
               <div className="app-main">
                 <TopNav />
                 <main className="app-content">{children}</main>
+                <footer className="app-footer">
+                  <a href="/terms">Terms of Service</a>
+                  <a href="/privacy">Privacy Policy</a>
+                </footer>
               </div>
             </div>
           </ChatProvider>

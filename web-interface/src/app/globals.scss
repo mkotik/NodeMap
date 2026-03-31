@@ -96,3 +96,24 @@ textarea {
   flex-direction: column;
   min-height: 0;
 }
+
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-6;
+  padding: $space-3 $space-4;
+  font-size: $label-sm;
+  color: $outline;
+  background: $surface;
+  flex-shrink: 0;
+
+  a {
+    color: $outline;
+    transition: color $transition-default;
+
+    &:hover {
+      color: $on-surface-variant;
+    }
+  }
+}

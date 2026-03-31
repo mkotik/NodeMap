@@ -62,6 +62,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, [setAccessToken]);
 
+  // Silently refresh the access token every 10 minutes (expires at 15m)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      trpc.auth.refresh
+        .mutate()
+        .then((res) => {
+          setUser(res.user);
+          setAccessToken(res.accessToken);
+        })
+        .catch(() => {});
+    }, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [setAccessToken]);
+
   const login = useCallback(
     async (email: string, password: string) => {
       const res = await trpc.auth.login.mutate({ email, password });

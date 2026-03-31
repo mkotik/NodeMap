@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useChatContext } from "@/context/ChatContext";
 import NodeCanvas from "./_components/NodeCanvas/NodeCanvas";
@@ -9,9 +9,14 @@ export default function NodesPage() {
   const { tree, createBranch, switchBranch } = useChatContext();
   const router = useRouter();
   const hasNodes = Object.keys(tree.nodes).length > 0;
+  const everHadNodes = useRef(hasNodes);
+  if (hasNodes) everHadNodes.current = true;
 
   useEffect(() => {
-    if (!hasNodes) router.replace("/");
+    // Only redirect if we never had nodes (direct navigation to /nodes
+    // without a loaded conversation). Skip if nodes existed but tree was
+    // temporarily empty during a page transition.
+    if (!hasNodes && !everHadNodes.current) router.replace("/");
   }, [hasNodes, router]);
 
   function handleCreateBranch(nodeId: string) {

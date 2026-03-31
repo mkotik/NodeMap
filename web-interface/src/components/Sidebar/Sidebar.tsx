@@ -132,7 +132,10 @@ export default function Sidebar() {
     setMenu({ type: "closed" });
     setMobileOpen(false);
     loadConversation(id)
-      .then(() => router.push("/"))
+      .then(() => {
+        if (pathname !== "/") router.push("/");
+      })
+      .catch(console.error)
       .finally(() => setLoadingId(null));
   }
 
@@ -140,7 +143,7 @@ export default function Sidebar() {
     setLoadingId(branchId);
     switchBranch(branchId);
     setMobileOpen(false);
-    router.push("/");
+    if (pathname !== "/") router.push("/");
     setTimeout(() => setLoadingId(null), 300);
   }
 

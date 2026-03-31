@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const selectedModel = input.model || "google/gemini-2.0-flash-001";
+  const selectedModel = input.model || "google/gemini-3-flash-preview";
 
   // Generate LLM response (non-streaming)
   const { text: assistantText } = await generateText({

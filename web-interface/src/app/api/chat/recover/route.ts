@@ -67,7 +67,7 @@ export async function POST(req: Request) {
   // Generate LLM response if missing
   if (needsResponse) {
     const { text: assistantText } = await generateText({
-      model: openrouter("google/gemini-2.0-flash-001"),
+      model: openrouter("google/gemini-3-flash-preview"),
       system:
         "You are a helpful AI assistant. Be concise and insightful.",
       messages: chatMessages,

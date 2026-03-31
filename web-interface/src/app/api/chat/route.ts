@@ -77,7 +77,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const selectedModel = parsed.data.model || "google/gemini-2.0-flash-001";
+  const selectedModel = parsed.data.model || "google/gemini-3-flash-preview";
 
   const modelMessages = await convertToModelMessages(
     parsed.data.messages as unknown as UIMessage[],

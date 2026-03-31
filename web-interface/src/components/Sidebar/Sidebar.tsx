@@ -133,7 +133,7 @@ export default function Sidebar() {
     setMobileOpen(false);
     loadConversation(id)
       .then(() => {
-        if (pathname !== "/") router.push("/");
+        if (pathname !== "/") router.push(`/?c=${id}`);
       })
       .catch(console.error)
       .finally(() => setLoadingId(null));

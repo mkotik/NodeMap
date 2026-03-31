@@ -204,7 +204,7 @@ export default function HistoryPage() {
 
   async function handleOpen(id: string) {
     await loadConversation(id);
-    router.push("/");
+    router.push(`/?c=${id}`);
   }
 
   async function handleDelete(id: string) {

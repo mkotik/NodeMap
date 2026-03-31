@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     const { text: assistantText } = await generateText({
       model: openrouter("google/gemini-2.0-flash-001"),
       system:
-        "You are Neural Logic, an AI assistant that helps with non-linear thinking and complex problem solving. Be concise and insightful.",
+        "You are a helpful AI assistant. Be concise and insightful.",
       messages: chatMessages,
     });
 

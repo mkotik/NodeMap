@@ -89,8 +89,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       if (err.message?.includes("NO_API_KEY")) {
         setApiKeyMissing(true);
         const text = userRef.current
-          ? "It looks like you haven't added an API key yet. Head over to [Settings](/settings) to add your OpenRouter API key, then try again."
-          : "You need to sign in before you can chat. Head over to [Sign In](/auth/login) to get started.";
+          ? "You haven't added an API key yet. Go to [Settings](/settings) to add your OpenRouter API key, then try again."
+          : "You need to sign in before you can chat. Go to [Sign In](/auth/login) to get started.";
         setMessages((prev) => [
           ...prev,
           {

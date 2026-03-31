@@ -10,23 +10,23 @@ import "./ChatView.scss";
 const suggestions = [
   {
     color: "primary" as const,
-    title: "Explore quantum entanglement",
-    description: "Map visual nodes for subatomic structures",
+    title: "Help me brainstorm ideas",
+    description: "Explore a topic from multiple angles",
   },
   {
     color: "secondary" as const,
-    title: "Analyze logic nodes",
-    description: "Audit recursive functions in neural trees",
+    title: "Explain a concept",
+    description: "Break down something complex step by step",
   },
   {
     color: "tertiary" as const,
-    title: "Review archive logs",
-    description: "Synthesize conclusions from past threads",
+    title: "Help me write something",
+    description: "Draft an email, essay, or message",
   },
   {
     color: "primary" as const,
-    title: "Global thought network",
-    description: "Connect with external data streams",
+    title: "Analyze a problem",
+    description: "Work through a challenge together",
   },
 ];
 
@@ -124,9 +124,9 @@ export default function ChatView({
               />
             </svg>
           </div>
-          <h1 className="chat-view__title">Initiate Thought</h1>
+          <h1 className="chat-view__title">Start a conversation</h1>
           <p className="chat-view__subtitle">
-            The system is ready to synthesize your inputs.
+            Ask anything to get started.
           </p>
         </div>
 
@@ -134,7 +134,7 @@ export default function ChatView({
           <textarea
             ref={textareaRef}
             className="chat-view__textarea"
-            placeholder="Inject a new thought branch..."
+            placeholder="Type your message..."
             rows={3}
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -278,7 +278,7 @@ export default function ChatView({
                         className="chat-view-thread__branch-action"
                         type="button"
                         onClick={() => onCreateBranch(msg.id)}
-                        title="Create branch from this point"
+                        title="Branch from here"
                       >
                         <svg
                           width="14"
@@ -328,7 +328,7 @@ export default function ChatView({
             ref={inputRef}
             className="chat-view-thread__input"
             type="text"
-            placeholder="Inject a new thought branch..."
+            placeholder="Type your message..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleInputKeyDown}
@@ -355,7 +355,7 @@ export default function ChatView({
           </button>
         </div>
         <span className="chat-view-thread__hint">
-          Press Cmd + Enter to expand branch
+          Press Enter to send
         </span>
       </div>
     </div>

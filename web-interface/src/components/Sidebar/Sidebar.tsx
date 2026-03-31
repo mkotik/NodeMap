@@ -224,7 +224,7 @@ export default function Sidebar() {
           }}
         >
           <span className="sidebar__logo">NodeMap.io</span>
-          <span className="sidebar__tagline">Digital Nervous System</span>
+          <span className="sidebar__tagline">AI Chat</span>
         </button>
 
         <button

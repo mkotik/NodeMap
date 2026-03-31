@@ -280,8 +280,8 @@ export default function HistoryPage() {
   return (
     <div className="history">
       <div className="history__header">
-        <h1 className="history__title">Logic Threads</h1>
-        {total > 0 && <span className="history__count">{total} threads</span>}
+        <h1 className="history__title">Chat History</h1>
+        {total > 0 && <span className="history__count">{total} chats</span>}
       </div>
 
       <div className="history__search">
@@ -302,7 +302,7 @@ export default function HistoryPage() {
         <input
           className="history__search-input"
           type="text"
-          placeholder="Search your logic tree..."
+          placeholder="Search your chats..."
           value={search}
           maxLength={100}
           onChange={(e) => setSearch(e.target.value)}
@@ -322,8 +322,8 @@ export default function HistoryPage() {
         <div className="history--empty">
           <p className="history__empty-text">
             {search
-              ? "No threads match your search."
-              : "No conversation threads yet."}
+              ? "No chats match your search."
+              : "No chats yet."}
           </p>
         </div>
       ) : (

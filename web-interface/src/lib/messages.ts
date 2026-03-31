@@ -20,6 +20,6 @@ export function getMessageText(
  * Return a display label for a message based on its role and position.
  */
 export function getLabel(role: string, index: number): string {
-  if (role === "assistant") return "Neural Logic";
-  return index === 0 ? "User Request" : "Follow Up";
+  if (role === "assistant") return "Assistant";
+  return "You";
 }

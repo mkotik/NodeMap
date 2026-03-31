@@ -18,7 +18,7 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "NodeMap",
-  description: "Node Based AI Chat",
+  description: "AI Chat with Branching Conversations",
 };
 
 export default function RootLayout({

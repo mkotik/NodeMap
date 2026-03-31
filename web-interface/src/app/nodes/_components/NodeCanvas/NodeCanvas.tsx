@@ -316,7 +316,7 @@ export default function NodeCanvas({
     return (
       <div className="node-canvas node-canvas--empty">
         <div className="node-canvas__empty-state">
-          <p>No nodes yet. Start a conversation to see your thought map.</p>
+          <p>No nodes yet. Start a conversation to see your map.</p>
         </div>
       </div>
     );

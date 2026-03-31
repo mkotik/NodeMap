@@ -12,6 +12,6 @@ describe("Home", () => {
         </ChatProvider>
       </AuthProvider>,
     );
-    expect(screen.getByText("Initiate Thought")).toBeInTheDocument();
+    expect(screen.getByText("Start a conversation")).toBeInTheDocument();
   });
 });

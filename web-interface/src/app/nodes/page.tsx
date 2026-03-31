@@ -40,12 +40,12 @@ function NodesContent() {
 
   function handleCreateBranch(nodeId: string) {
     createBranch(nodeId);
-    router.push("/");
+    router.back();
   }
 
   function handleSwitchBranch(branchId: string) {
     switchBranch(branchId);
-    router.push("/");
+    router.back();
   }
 
   if (!hasNodes) return null;

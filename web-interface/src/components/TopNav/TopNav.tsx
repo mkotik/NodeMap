@@ -101,7 +101,7 @@ export default function TopNav() {
             className="topnav__breadcrumb topnav__breadcrumb--primary"
             onClick={() => {
               returnToMain();
-              router.push("/");
+              router.back();
             }}
           >
             Main Thread

@@ -19,7 +19,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "NodeMap",
+  title: "NodeMap - Let's go down the rabbit hole",
   description: "Let's go down the rabbit hole",
   openGraph: {
     title: "NodeMap",
@@ -40,7 +40,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${ibmPlexSans.variable} ${spaceGrotesk.variable}`}>
+    <html
+      lang="en"
+      className={`${ibmPlexSans.variable} ${spaceGrotesk.variable}`}
+    >
       <body>
         <AuthProvider>
           <ChatProvider>

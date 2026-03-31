@@ -143,7 +143,9 @@ export default function Sidebar() {
     setLoadingId(branchId);
     switchBranch(branchId);
     setMobileOpen(false);
-    if (pathname !== "/") router.push("/");
+    if (pathname !== "/") {
+      router.push(conversationId ? `/?c=${conversationId}` : "/");
+    }
     setTimeout(() => setLoadingId(null), 300);
   }
 

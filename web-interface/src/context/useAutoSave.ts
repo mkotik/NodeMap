@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback, type MutableRefObject } from "react";
 import type { ConversationTree } from "@/types/branch";
 import type { ChatStatus } from "ai";
-import { getMessageText } from "@/lib/messages";
+import { getMessageText, getMessageAttachments, type Attachment } from "@/lib/messages";
 import { trpc } from "@/lib/trpc";
 import type { User } from "@/context/AuthContext";
 
@@ -71,6 +71,7 @@ export function useAutoSave({
       parentMessageId: string | null;
       role: string;
       content: string;
+      attachments?: Attachment[];
       orderIndex: number;
     }> = [];
 
@@ -78,12 +79,14 @@ export function useAutoSave({
       branch.nodeIds.forEach((nodeId, idx) => {
         const node = t.nodes[nodeId];
         if (!node) return;
+        const attachments = getMessageAttachments(node.message);
         msgs.push({
           id: node.message.id,
           branchId: branch.id,
           parentMessageId: node.parentId,
           role: node.message.role,
           content: getMessageText(node.message),
+          ...(attachments.length > 0 ? { attachments } : {}),
           orderIndex: idx,
         });
       });

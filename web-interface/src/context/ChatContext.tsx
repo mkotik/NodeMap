@@ -22,9 +22,9 @@ import {
   addNodeToBranch,
   getBranchMessageChain,
 } from "@/lib/tree";
-import { getMessageText } from "@/lib/messages";
+import { getMessageText, isNativeFileType, type Attachment } from "@/lib/messages";
 import { getAccessToken } from "@/lib/auth-token";
-import { DEFAULT_MODEL_ID } from "@/lib/models";
+import { DEFAULT_MODEL_ID, modelSupportsVision } from "@/lib/models";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/context/AuthContext";
 import { useAutoName } from "@/context/useAutoName";
@@ -35,7 +35,10 @@ interface ChatContextValue {
   // Active branch chat
   messages: UIMessage[];
   status: ChatStatus;
-  sendMessage: (opts: { text: string }) => void;
+  sendMessage: (opts: {
+    text: string;
+    attachments?: Array<Attachment & { extractedText?: string }>;
+  }) => void;
 
   // Tree state
   tree: ConversationTree;
@@ -88,7 +91,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [selectedModel]);
 
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
-  const { messages, sendMessage, status, setMessages, stop } = useChat({
+  const {
+    messages,
+    sendMessage: rawSendMessage,
+    status,
+    setMessages,
+    stop,
+  } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
       headers: (): Record<string, string> => {
@@ -150,6 +159,55 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       }
     },
   });
+
+  // Wrap sendMessage to handle file attachments
+  const sendMessage = useCallback(
+    (opts: {
+      text: string;
+      attachments?: Array<Attachment & { extractedText?: string }>;
+    }) => {
+      const { text, attachments } = opts;
+
+      if (!attachments || attachments.length === 0) {
+        rawSendMessage({ text });
+        return;
+      }
+
+      const hasVision = modelSupportsVision(selectedModelRef.current);
+
+      // Build text from extracted content (only for non-native types like txt, csv)
+      const extraTextParts: string[] = [];
+      for (const att of attachments) {
+        if (!isNativeFileType(att.mediaType) && att.extractedText) {
+          extraTextParts.push(`[File: ${att.filename}]\n${att.extractedText}`);
+        } else if (isNativeFileType(att.mediaType) && !hasVision) {
+          extraTextParts.push(`[File attached: ${att.filename} — skipped, model does not support file inputs]`);
+        }
+      }
+
+      const fullText = extraTextParts.length > 0
+        ? `${text}\n\n${extraTextParts.join("\n\n")}`
+        : text;
+
+      // Collect native file parts (images + PDFs) for capable models
+      const fileParts = attachments
+        .filter((att) => isNativeFileType(att.mediaType) && hasVision)
+        .map((att) => ({
+          type: "file" as const,
+          url: att.url,
+          mediaType: att.mediaType,
+          filename: att.filename,
+        }));
+
+      if (fileParts.length > 0) {
+        rawSendMessage({ text: fullText, files: fileParts });
+      } else {
+        rawSendMessage({ text: fullText });
+      }
+    },
+    [rawSendMessage],
+  );
+
   const [tree, setTree] = useState<ConversationTree>(createEmptyTree);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversationTitle, setConversationTitle] = useState("Untitled");
@@ -575,11 +633,27 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       // Rebuild nodes
       for (const b of data.branches) {
         for (const m of b.messages) {
+          const parts: UIMessage["parts"] = [
+            { type: "text" as const, text: m.content },
+          ];
+          // Restore file parts from persisted attachments
+          const attachments = (m as Record<string, unknown>).attachments;
+          if (Array.isArray(attachments)) {
+            for (const att of attachments) {
+              const a = att as { url: string; filename: string; mediaType: string };
+              parts.push({
+                type: "file" as const,
+                url: a.url,
+                mediaType: a.mediaType,
+                filename: a.filename,
+              });
+            }
+          }
           newTree.nodes[m.id] = {
             message: {
               id: m.id,
               role: m.role as "user" | "assistant",
-              parts: [{ type: "text" as const, text: m.content }],
+              parts,
             } as UIMessage,
             parentId: m.parentMessageId,
             branchId: b.id,

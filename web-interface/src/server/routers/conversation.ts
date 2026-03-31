@@ -14,12 +14,20 @@ const branchSchema = z.object({
   isMain: z.boolean(),
 });
 
+const attachmentSchema = z.object({
+  url: z.string(),
+  filename: z.string(),
+  mediaType: z.string(),
+  size: z.number(),
+});
+
 const messageSchema = z.object({
   id: z.string(),
   branchId: z.string(),
   parentMessageId: z.string().nullable(),
   role: z.string(),
   content: z.string(),
+  attachments: z.array(attachmentSchema).optional(),
   orderIndex: z.number(),
 });
 
@@ -193,6 +201,7 @@ export const conversationRouter = router({
             parentMessageId: m.parentMessageId,
             role: m.role,
             content: m.content,
+            attachments: m.attachments && m.attachments.length > 0 ? m.attachments : undefined,
             orderIndex: m.orderIndex,
           })),
         });

@@ -60,6 +60,7 @@ export type MessageCountAggregateOutputType = {
   parentMessageId: number
   role: number
   content: number
+  attachments: number
   orderIndex: number
   createdAt: number
   _all: number
@@ -100,6 +101,7 @@ export type MessageCountAggregateInputType = {
   parentMessageId?: true
   role?: true
   content?: true
+  attachments?: true
   orderIndex?: true
   createdAt?: true
   _all?: true
@@ -197,6 +199,7 @@ export type MessageGroupByOutputType = {
   parentMessageId: string | null
   role: string
   content: string
+  attachments: runtime.JsonValue | null
   orderIndex: number
   createdAt: Date
   _count: MessageCountAggregateOutputType | null
@@ -230,6 +233,7 @@ export type MessageWhereInput = {
   parentMessageId?: Prisma.StringNullableFilter<"Message"> | string | null
   role?: Prisma.StringFilter<"Message"> | string
   content?: Prisma.StringFilter<"Message"> | string
+  attachments?: Prisma.JsonNullableFilter<"Message">
   orderIndex?: Prisma.IntFilter<"Message"> | number
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   branch?: Prisma.XOR<Prisma.BranchScalarRelationFilter, Prisma.BranchWhereInput>
@@ -241,6 +245,7 @@ export type MessageOrderByWithRelationInput = {
   parentMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  attachments?: Prisma.SortOrderInput | Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   branch?: Prisma.BranchOrderByWithRelationInput
@@ -255,6 +260,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   parentMessageId?: Prisma.StringNullableFilter<"Message"> | string | null
   role?: Prisma.StringFilter<"Message"> | string
   content?: Prisma.StringFilter<"Message"> | string
+  attachments?: Prisma.JsonNullableFilter<"Message">
   orderIndex?: Prisma.IntFilter<"Message"> | number
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   branch?: Prisma.XOR<Prisma.BranchScalarRelationFilter, Prisma.BranchWhereInput>
@@ -266,6 +272,7 @@ export type MessageOrderByWithAggregationInput = {
   parentMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  attachments?: Prisma.SortOrderInput | Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
@@ -284,6 +291,7 @@ export type MessageScalarWhereWithAggregatesInput = {
   parentMessageId?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
   role?: Prisma.StringWithAggregatesFilter<"Message"> | string
   content?: Prisma.StringWithAggregatesFilter<"Message"> | string
+  attachments?: Prisma.JsonNullableWithAggregatesFilter<"Message">
   orderIndex?: Prisma.IntWithAggregatesFilter<"Message"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
 }
@@ -293,6 +301,7 @@ export type MessageCreateInput = {
   parentMessageId?: string | null
   role: string
   content: string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex: number
   createdAt?: Date | string
   branch: Prisma.BranchCreateNestedOneWithoutMessagesInput
@@ -304,6 +313,7 @@ export type MessageUncheckedCreateInput = {
   parentMessageId?: string | null
   role: string
   content: string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex: number
   createdAt?: Date | string
 }
@@ -313,6 +323,7 @@ export type MessageUpdateInput = {
   parentMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   branch?: Prisma.BranchUpdateOneRequiredWithoutMessagesNestedInput
@@ -324,6 +335,7 @@ export type MessageUncheckedUpdateInput = {
   parentMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -334,6 +346,7 @@ export type MessageCreateManyInput = {
   parentMessageId?: string | null
   role: string
   content: string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex: number
   createdAt?: Date | string
 }
@@ -343,6 +356,7 @@ export type MessageUpdateManyMutationInput = {
   parentMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -353,6 +367,7 @@ export type MessageUncheckedUpdateManyInput = {
   parentMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -373,6 +388,7 @@ export type MessageCountOrderByAggregateInput = {
   parentMessageId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  attachments?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -460,6 +476,7 @@ export type MessageCreateWithoutBranchInput = {
   parentMessageId?: string | null
   role: string
   content: string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex: number
   createdAt?: Date | string
 }
@@ -469,6 +486,7 @@ export type MessageUncheckedCreateWithoutBranchInput = {
   parentMessageId?: string | null
   role: string
   content: string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex: number
   createdAt?: Date | string
 }
@@ -508,6 +526,7 @@ export type MessageScalarWhereInput = {
   parentMessageId?: Prisma.StringNullableFilter<"Message"> | string | null
   role?: Prisma.StringFilter<"Message"> | string
   content?: Prisma.StringFilter<"Message"> | string
+  attachments?: Prisma.JsonNullableFilter<"Message">
   orderIndex?: Prisma.IntFilter<"Message"> | number
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
 }
@@ -517,6 +536,7 @@ export type MessageCreateManyBranchInput = {
   parentMessageId?: string | null
   role: string
   content: string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex: number
   createdAt?: Date | string
 }
@@ -526,6 +546,7 @@ export type MessageUpdateWithoutBranchInput = {
   parentMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -535,6 +556,7 @@ export type MessageUncheckedUpdateWithoutBranchInput = {
   parentMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -544,6 +566,7 @@ export type MessageUncheckedUpdateManyWithoutBranchInput = {
   parentMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  attachments?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -556,6 +579,7 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   parentMessageId?: boolean
   role?: boolean
   content?: boolean
+  attachments?: boolean
   orderIndex?: boolean
   createdAt?: boolean
   branch?: boolean | Prisma.BranchDefaultArgs<ExtArgs>
@@ -567,6 +591,7 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   parentMessageId?: boolean
   role?: boolean
   content?: boolean
+  attachments?: boolean
   orderIndex?: boolean
   createdAt?: boolean
   branch?: boolean | Prisma.BranchDefaultArgs<ExtArgs>
@@ -578,6 +603,7 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   parentMessageId?: boolean
   role?: boolean
   content?: boolean
+  attachments?: boolean
   orderIndex?: boolean
   createdAt?: boolean
   branch?: boolean | Prisma.BranchDefaultArgs<ExtArgs>
@@ -589,11 +615,12 @@ export type MessageSelectScalar = {
   parentMessageId?: boolean
   role?: boolean
   content?: boolean
+  attachments?: boolean
   orderIndex?: boolean
   createdAt?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "branchId" | "parentMessageId" | "role" | "content" | "orderIndex" | "createdAt", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "branchId" | "parentMessageId" | "role" | "content" | "attachments" | "orderIndex" | "createdAt", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   branch?: boolean | Prisma.BranchDefaultArgs<ExtArgs>
 }
@@ -615,6 +642,7 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     parentMessageId: string | null
     role: string
     content: string
+    attachments: runtime.JsonValue | null
     orderIndex: number
     createdAt: Date
   }, ExtArgs["result"]["message"]>
@@ -1046,6 +1074,7 @@ export interface MessageFieldRefs {
   readonly parentMessageId: Prisma.FieldRef<"Message", 'String'>
   readonly role: Prisma.FieldRef<"Message", 'String'>
   readonly content: Prisma.FieldRef<"Message", 'String'>
+  readonly attachments: Prisma.FieldRef<"Message", 'Json'>
   readonly orderIndex: Prisma.FieldRef<"Message", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
 }

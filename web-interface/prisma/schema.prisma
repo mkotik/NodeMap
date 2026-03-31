@@ -70,6 +70,7 @@ model Message {
   parentMessageId String?
   role            String
   content         String
+  attachments     Json?
   orderIndex      Int
   createdAt       DateTime @default(now())
 

@@ -1,13 +1,37 @@
 "use client";
 
-import { useState, useRef, useEffect, type KeyboardEvent } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  type KeyboardEvent,
+  type DragEvent,
+  type ChangeEvent,
+} from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import type { Branch } from "@/types/branch";
-import { getMessageText, getLabel } from "@/lib/messages";
-import { models, type Model } from "@/lib/models";
+import {
+  getMessageText,
+  getMessageAttachments,
+  getLabel,
+  isImageType,
+  isNativeFileType,
+  type Attachment,
+} from "@/lib/messages";
+import { models } from "@/lib/models";
+import { getAccessToken } from "@/lib/auth-token";
 import Markdown from "react-markdown";
 import { Tooltip } from "@/components";
-import { ArrowRight, GitBranch, ChevronDown } from "lucide-react";
+import {
+  ArrowRight,
+  GitBranch,
+  ChevronDown,
+  Paperclip,
+  X,
+  FileText,
+  Loader2,
+} from "lucide-react";
 import "./ChatView.scss";
 
 const suggestions = [
@@ -33,10 +57,47 @@ const suggestions = [
   },
 ];
 
+const ALLOWED_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+  "application/pdf",
+  "text/plain",
+  "text/csv",
+  "text/markdown",
+  "application/json",
+  "application/xml",
+  "text/xml",
+];
+
+const ACCEPT_STRING = ALLOWED_TYPES.join(",");
+const MAX_FILES = 4;
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const MAX_DOC_SIZE = 20 * 1024 * 1024;
+
+interface PendingAttachment {
+  id: string;
+  file: File;
+  url?: string;
+  uploading: boolean;
+  extractedText?: string;
+  error?: string;
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 interface ChatViewProps {
   messages: UIMessage[];
   status: ChatStatus;
-  onSend: (text: string) => void;
+  onSend: (
+    text: string,
+    attachments?: Array<Attachment & { extractedText?: string }>,
+  ) => void;
   activeBranch: Branch;
   onCreateBranch: (fromMessageId: string) => void;
   selectedModel: string;
@@ -54,7 +115,11 @@ export default function ChatView({
 }: ChatViewProps) {
   const [input, setInput] = useState("");
   const [modelOpen, setModelOpen] = useState(false);
+  const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
+  const [attachmentWarning, setAttachmentWarning] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const modelRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const activeModel = models.find((m) => m.id === selectedModel) ?? models[0];
 
   useEffect(() => {
@@ -71,6 +136,7 @@ export default function ChatView({
   const inputRef = useRef<HTMLInputElement>(null);
   const isStreaming = status === "submitted" || status === "streaming";
   const isEmpty = messages.length === 0;
+  const hasUploading = attachments.some((a) => a.uploading);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -84,11 +150,201 @@ export default function ChatView({
     }
   }, [isEmpty, messages.length, activeBranch.id]);
 
+  // --- File upload logic ---
+  const getAuthHeaders = useCallback((): Record<string, string> => {
+    const token = getAccessToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, []);
+
+  const uploadFile = useCallback(
+    async (pending: PendingAttachment) => {
+      try {
+        // 1. Get presigned URL
+        const presignRes = await fetch("/api/upload/presign", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
+          body: JSON.stringify({
+            filename: pending.file.name,
+            contentType: pending.file.type,
+            size: pending.file.size,
+          }),
+        });
+
+        if (!presignRes.ok) {
+          const err = await presignRes.json().catch(() => ({}));
+          throw new Error(err.message || "Failed to get upload URL");
+        }
+
+        const { uploadUrl, readUrl } = await presignRes.json();
+
+        // 2. Upload to E2
+        const uploadRes = await fetch(uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": pending.file.type },
+          body: pending.file,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error("Upload to storage failed");
+        }
+
+        // 3. Extract text only for non-native types (txt, csv, etc.)
+        //    Images and PDFs are sent directly as file parts to the model.
+        let extractedText: string | undefined;
+        if (!isNativeFileType(pending.file.type)) {
+          const extractRes = await fetch("/api/upload/extract", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...getAuthHeaders(),
+            },
+            body: JSON.stringify({
+              url: readUrl,
+              mediaType: pending.file.type,
+            }),
+          });
+          if (extractRes.ok) {
+            const data = await extractRes.json();
+            if (data.text) extractedText = data.text;
+          }
+        }
+
+        // 4. Update state
+        setAttachments((prev) =>
+          prev.map((a) =>
+            a.id === pending.id
+              ? { ...a, url: readUrl, uploading: false, extractedText }
+              : a,
+          ),
+        );
+      } catch (err) {
+        setAttachments((prev) =>
+          prev.map((a) =>
+            a.id === pending.id
+              ? {
+                  ...a,
+                  uploading: false,
+                  error:
+                    err instanceof Error ? err.message : "Upload failed",
+                }
+              : a,
+          ),
+        );
+      }
+    },
+    [getAuthHeaders],
+  );
+
+  const addFiles = useCallback(
+    (files: FileList | File[]) => {
+      const fileArray = Array.from(files);
+      const remaining = MAX_FILES - attachments.length;
+
+      if (remaining <= 0) {
+        setAttachmentWarning(`Maximum ${MAX_FILES} files allowed.`);
+        setTimeout(() => setAttachmentWarning(null), 3000);
+        return;
+      }
+
+      if (fileArray.length > remaining) {
+        setAttachmentWarning(`Maximum ${MAX_FILES} files allowed. Only adding ${remaining}.`);
+        setTimeout(() => setAttachmentWarning(null), 3000);
+      }
+
+      const toAdd = fileArray.slice(0, remaining);
+
+      const newAttachments: PendingAttachment[] = [];
+
+      for (const file of toAdd) {
+        // Validate type
+        if (!ALLOWED_TYPES.includes(file.type)) continue;
+
+        // Validate size
+        const maxSize = isImageType(file.type)
+          ? MAX_IMAGE_SIZE
+          : MAX_DOC_SIZE;
+        if (file.size > maxSize) continue;
+
+        const pending: PendingAttachment = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          file,
+          uploading: true,
+        };
+        newAttachments.push(pending);
+      }
+
+      if (newAttachments.length === 0) return;
+
+      setAttachments((prev) => [...prev, ...newAttachments]);
+
+      // Start uploads
+      for (const pending of newAttachments) {
+        uploadFile(pending);
+      }
+    },
+    [attachments.length, uploadFile],
+  );
+
+  const removeAttachment = useCallback((id: string) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  }, []);
+
+  const handleFileChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        addFiles(e.target.files);
+        e.target.value = ""; // Reset so same file can be re-selected
+      }
+    },
+    [addFiles],
+  );
+
+  const handleDragOver = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragging(false);
+      if (e.dataTransfer.files.length > 0) {
+        addFiles(e.dataTransfer.files);
+      }
+    },
+    [addFiles],
+  );
+
   function handleSubmit() {
     const trimmed = input.trim();
-    if (!trimmed || (!isEmpty && isStreaming)) return;
-    onSend(trimmed);
+    if ((!trimmed && attachments.length === 0) || (!isEmpty && isStreaming))
+      return;
+    if (hasUploading) return;
+
+    const readyAttachments = attachments
+      .filter((a) => a.url && !a.error)
+      .map((a) => ({
+        url: a.url!,
+        filename: a.file.name,
+        mediaType: a.file.type,
+        size: a.file.size,
+        extractedText: a.extractedText,
+      }));
+
+    onSend(trimmed, readyAttachments.length > 0 ? readyAttachments : undefined);
     setInput("");
+    setAttachments([]);
   }
 
   function handleTextareaKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -105,9 +361,64 @@ export default function ChatView({
     }
   }
 
+  // Shared attachment strip component
+  const attachmentStrip = attachments.length > 0 && (
+    <div className="chat-view__attachments">
+      {attachments.map((att) => (
+        <div
+          key={att.id}
+          className={`chat-view__attachment-chip${att.error ? " chat-view__attachment-chip--error" : ""}`}
+        >
+          {att.uploading ? (
+            <Loader2 size={14} className="chat-view__attachment-spinner" />
+          ) : isImageType(att.file.type) ? (
+            <img
+              src={att.url || URL.createObjectURL(att.file)}
+              alt={att.file.name}
+              className="chat-view__attachment-thumb"
+            />
+          ) : (
+            <FileText size={14} />
+          )}
+          <span className="chat-view__attachment-name">
+            {att.file.name}
+          </span>
+          <span className="chat-view__attachment-size">
+            {formatFileSize(att.file.size)}
+          </span>
+          <button
+            type="button"
+            className="chat-view__attachment-remove"
+            onClick={() => removeAttachment(att.id)}
+          >
+            <X size={12} />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Hidden file input shared between both views
+  const fileInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      multiple
+      accept={ACCEPT_STRING}
+      onChange={handleFileChange}
+      style={{ display: "none" }}
+    />
+  );
+
   if (isEmpty) {
     return (
-      <div className="chat-view">
+      <div
+        className={`chat-view${dragging ? " chat-view--dragging" : ""}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {fileInput}
         <div className="chat-view__hero">
           <div className="chat-view__icon">
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -159,6 +470,15 @@ export default function ChatView({
             onKeyDown={handleTextareaKeyDown}
           />
           <div className="chat-view__input-toolbar">
+            {attachmentStrip}
+            <button
+              className="chat-view__toolbar-btn"
+              type="button"
+              aria-label="Attach file"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Paperclip size={18} />
+            </button>
             <div className="chat-view__model-selector" ref={modelRef}>
               <button
                 className="chat-view__model-trigger"
@@ -198,10 +518,14 @@ export default function ChatView({
               type="button"
               aria-label="Submit"
               onClick={handleSubmit}
+              disabled={hasUploading}
             >
               <ArrowRight size={18} strokeWidth={2.5} />
             </button>
           </div>
+          {attachmentWarning && (
+            <p className="chat-view__attachment-warning">{attachmentWarning}</p>
+          )}
         </div>
 
         <div className="chat-view__suggestions">
@@ -226,17 +550,31 @@ export default function ChatView({
             </button>
           ))}
         </div>
+
+        {dragging && (
+          <div className="chat-view__drop-overlay">
+            <Paperclip size={32} />
+            <span>Drop files to attach</span>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="chat-view-thread">
+    <div
+      className={`chat-view-thread${dragging ? " chat-view-thread--dragging" : ""}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {fileInput}
       <div className="chat-view-thread__messages">
         <div className="chat-view-thread__messages-inner">
           {messages.map((msg, i) => {
             const isAi = msg.role === "assistant";
             const text = getMessageText(msg);
+            const msgAttachments = getMessageAttachments(msg);
 
             return (
               <div
@@ -270,6 +608,36 @@ export default function ChatView({
                   <div
                     className={`chat-view-thread__bubble chat-view-thread__bubble--${isAi ? "ai" : "user"}`}
                   >
+                    {/* Render inline attachments for user messages */}
+                    {!isAi && msgAttachments.length > 0 && (
+                      <div className="chat-view-thread__msg-attachments">
+                        {msgAttachments.map((att, idx) =>
+                          isImageType(att.mediaType) ? (
+                            <a
+                              key={idx}
+                              href={att.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="chat-view-thread__msg-image-link"
+                            >
+                              <img
+                                src={att.url}
+                                alt={att.filename}
+                                className="chat-view-thread__msg-image"
+                              />
+                            </a>
+                          ) : (
+                            <div
+                              key={idx}
+                              className="chat-view-thread__msg-file-chip"
+                            >
+                              <FileText size={14} />
+                              <span>{att.filename}</span>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    )}
                     {text ? (
                       isAi ? (
                         <div className="chat-view-thread__markdown">
@@ -302,6 +670,7 @@ export default function ChatView({
       </div>
 
       <div className="chat-view-thread__input-bar">
+        {attachmentStrip}
         <div className="chat-view-thread__input-container">
           <div className="chat-view-thread__node-dot chat-view-thread__node-dot--primary" />
           <input
@@ -314,11 +683,19 @@ export default function ChatView({
             onKeyDown={handleInputKeyDown}
           />
           <button
+            className="chat-view__toolbar-btn"
+            type="button"
+            aria-label="Attach file"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Paperclip size={16} />
+          </button>
+          <button
             className="chat-view-thread__submit-btn"
             type="button"
             aria-label="Submit"
             onClick={handleSubmit}
-            disabled={isStreaming}
+            disabled={isStreaming || hasUploading}
           >
             <ArrowRight size={18} strokeWidth={2.5} />
           </button>
@@ -364,6 +741,13 @@ export default function ChatView({
           <span className="chat-view-thread__hint">Press Enter to send</span>
         </div>
       </div>
+
+      {dragging && (
+        <div className="chat-view__drop-overlay">
+          <Paperclip size={32} />
+          <span>Drop files to attach</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -83,7 +83,9 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: $space-2;
     margin-top: $space-4;
+    flex-wrap: wrap;
   }
 
   &__toolbar-actions {
@@ -209,6 +211,112 @@
       background: $primary-dim;
       box-shadow: $shadow-node-glow-primary;
     }
+  }
+
+  &__attachment-warning {
+    margin: $space-2 0 0;
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: #ff716c;
+  }
+
+  // --- Attachment strip (shared between hero and thread) ---
+  &__attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__attachment-chip {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-3;
+    background: $surface-container;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $on-surface-variant;
+    max-width: 220px;
+    @include surface-transition;
+
+    &--error {
+      background: rgba(#ff716c, 0.1);
+      color: #ff716c;
+    }
+  }
+
+  &__attachment-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: $radius-sm;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  &__attachment-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__attachment-size {
+    color: $outline;
+    flex-shrink: 0;
+  }
+
+  &__attachment-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: none;
+    border-radius: $radius-full;
+    background: transparent;
+    color: $outline;
+    cursor: pointer;
+    flex-shrink: 0;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-high;
+      color: $on-surface;
+    }
+  }
+
+  &__attachment-spinner {
+    animation: chat-view-spin 1s linear infinite;
+    flex-shrink: 0;
+  }
+
+  // --- Drag-and-drop overlay ---
+  &__drop-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-3;
+    background: rgba($surface, 0.85);
+    backdrop-filter: blur(12px);
+    border: 2px dashed rgba($primary, 0.4);
+    border-radius: $radius-lg;
+    color: $primary;
+    font-family: $font-body;
+    font-size: $body-md;
+    pointer-events: none;
+  }
+
+  &--dragging {
+    position: relative;
   }
 
   &__suggestions {
@@ -663,6 +771,48 @@
       margin: $space-6 0;
     }
   }
+
+  &--dragging {
+    position: relative;
+  }
+
+  // --- Inline message attachments ---
+  &__msg-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    margin-bottom: $space-3;
+  }
+
+  &__msg-image-link {
+    display: block;
+    border-radius: $radius-md;
+    overflow: hidden;
+    @include surface-transition;
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  &__msg-image {
+    max-width: 240px;
+    max-height: 180px;
+    border-radius: $radius-md;
+    object-fit: cover;
+  }
+
+  &__msg-file-chip {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-3;
+    background: $surface-container-high;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: $label-sm;
+    color: $on-surface-variant;
+  }
 }
 
 @keyframes chat-view-pulse {
@@ -673,5 +823,15 @@
 
   50% {
     opacity: 1;
+  }
+}
+
+@keyframes chat-view-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { verifyAccessToken } from "@/server/lib/jwt";
 import { getOpenRouter } from "@/server/lib/openrouter";
 import { prisma } from "@/server/lib/prisma";
+import { modelSupportsVision } from "@/lib/models";
 
 const ChatRequestSchema = z.object({
   messages: z.array(
@@ -79,9 +80,16 @@ export async function POST(req: Request) {
 
   const selectedModel = parsed.data.model || "google/gemini-3-flash-preview";
 
-  const modelMessages = await convertToModelMessages(
-    parsed.data.messages as unknown as UIMessage[],
-  );
+  // Strip file parts for text-only models
+  let messages = parsed.data.messages as unknown as UIMessage[];
+  if (!modelSupportsVision(selectedModel)) {
+    messages = messages.map((msg) => ({
+      ...msg,
+      parts: msg.parts.filter((p) => p.type !== "file"),
+    }));
+  }
+
+  const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
     model: openrouter(selectedModel),

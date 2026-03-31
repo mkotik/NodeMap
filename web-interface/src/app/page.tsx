@@ -49,8 +49,11 @@ function HomeContent() {
       });
   }, [hasMessages, authLoading, convId, loadConversation]);
 
-  function handleSend(text: string) {
-    sendMessage({ text });
+  function handleSend(
+    text: string,
+    attachments?: Parameters<typeof sendMessage>[0]["attachments"],
+  ) {
+    sendMessage({ text, attachments });
   }
 
   return (

@@ -58,6 +58,22 @@ export function useAutoName({
 
     const userText = getMessageText(firstUserNode.message);
 
+    // Attachment-only message — use a static name, skip the LLM call
+    if (!userText.trim()) {
+      setTree((prev) => {
+        if (!prev.branches[branchId]) return prev;
+        const next = structuredClone(prev);
+        renameBranch(next, branchId, "Attachment");
+        return next;
+      });
+      setNamingBranches((prev) => {
+        const next = new Set(prev);
+        next.delete(branchId);
+        return next;
+      });
+      return;
+    }
+
     const priorMessages: Array<{ role: string; text: string }> = [];
     if (branch.forkPointId) {
       const ancestors = getAncestorChain(currentTree, branch.forkPointId);
@@ -118,6 +134,12 @@ export function useAutoName({
     conversationNamedRef.current = true;
 
     const userText = getMessageText(firstUserNode.message);
+
+    // Attachment-only message — use a static name, skip the LLM call
+    if (!userText.trim()) {
+      queueMicrotask(() => setConversationTitle("Attachment"));
+      return;
+    }
 
     queueMicrotask(() => {
       setNamingConversation(true);

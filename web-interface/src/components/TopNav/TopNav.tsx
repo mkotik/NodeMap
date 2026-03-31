@@ -31,71 +31,65 @@ export default function TopNav() {
   const isPrivacy = pathname === "/privacy";
   const hideNav = isAuth || isHistory || isSettings || isTerms || isPrivacy;
 
+  if (!mounted || hideNav || isEmpty) return <div className="topnav topnav--empty" />;
+
   return (
     <header className="topnav">
       <div className="topnav__left">
-        {mounted && !hideNav && (
-          <>
-            {!isEmpty && (
-              <Tooltip text="Node View" position="bottom">
-                <Link
-                  href="/nodes"
-                  className="topnav__node-link"
-                  aria-label="Node View"
-                >
-                  <Waypoints size={16} />
-                </Link>
-              </Tooltip>
-            )}
-            {onBranch ? (
-              <nav className="topnav__breadcrumbs">
-                <button
-                  className="topnav__breadcrumb"
-                  type="button"
-                  onClick={returnToMain}
-                >
-                  Main Thread
-                </button>
-                <span className="topnav__breadcrumb-sep">/</span>
-                <span
-                  className={`topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--${activeBranch.color}`}
-                >
-                  {isNamingBranch ? (
-                    <BeatLoader
-                      color={
-                        activeBranch.color === "primary"
-                          ? "#69f6b8"
-                          : activeBranch.color === "secondary"
-                            ? "#699cff"
-                            : "#ac8aff"
-                      }
-                      size={6}
-                    />
-                  ) : (
-                    activeBranch.label
-                  )}
-                </span>
-              </nav>
-            ) : !isEmpty ? (
-              isNodes ? (
-                <button
-                  type="button"
-                  className="topnav__breadcrumb topnav__breadcrumb--primary"
-                  onClick={() => {
-                    returnToMain();
-                    router.push("/");
-                  }}
-                >
-                  Main Thread
-                  <ChevronRight size={14} strokeWidth={2.5} />
-                </button>
+        <Tooltip text="Node View" position="bottom">
+          <Link
+            href="/nodes"
+            className="topnav__node-link"
+            aria-label="Node View"
+          >
+            <Waypoints size={16} />
+          </Link>
+        </Tooltip>
+        {onBranch ? (
+          <nav className="topnav__breadcrumbs">
+            <button
+              className="topnav__breadcrumb"
+              type="button"
+              onClick={returnToMain}
+            >
+              Main Thread
+            </button>
+            <span className="topnav__breadcrumb-sep">/</span>
+            <span
+              className={`topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--${activeBranch.color}`}
+            >
+              {isNamingBranch ? (
+                <BeatLoader
+                  color={
+                    activeBranch.color === "primary"
+                      ? "#69f6b8"
+                      : activeBranch.color === "secondary"
+                        ? "#699cff"
+                        : "#ac8aff"
+                  }
+                  size={6}
+                />
               ) : (
-                <span className="topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--primary">
-                  Main Thread
-                </span>
-              )
-            ) : null}
-          </>
+                activeBranch.label
+              )}
+            </span>
+          </nav>
+        ) : isNodes ? (
+          <button
+            type="button"
+            className="topnav__breadcrumb topnav__breadcrumb--primary"
+            onClick={() => {
+              returnToMain();
+              router.push("/");
+            }}
+          >
+            Main Thread
+            <ChevronRight size={14} strokeWidth={2.5} />
+          </button>
+        ) : (
+          <span className="topnav__breadcrumb topnav__breadcrumb--active topnav__breadcrumb--primary">
+            Main Thread
+          </span>
         )}
       </div>
     </header>

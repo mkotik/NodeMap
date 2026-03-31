@@ -9,6 +9,11 @@
   background: $surface;
   @include ghost-border(bottom);
 
+  &--empty {
+    border: none;
+    visibility: hidden;
+  }
+
   &__left {
     display: flex;
     align-items: center;

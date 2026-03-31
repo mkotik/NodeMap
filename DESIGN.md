@@ -26,10 +26,10 @@ The palette is anchored in a "Deep Space" foundation, allowing the vibrant AI "b
 
 ### 3. Typography: Editorial Precision
 
-Our typography scale balances the technical clarity of Inter with the sophisticated, wide-stance authority of Manrope for high-level headlines.
+Our typography scale balances the industrial clarity of IBM Plex Sans with the geometric, hand-crafted character of Space Grotesk for high-level headlines.
 
-- **Display & Headlines (Manrope):** Use `display-lg` through `headline-sm` for thread titles and major "node" headers. The slightly geometric nature of Manrope provides a "tech-premium" feel.
-- **The Body & Interface (Inter):** All chat bubbles, input fields, and labels use Inter.
+- **Display & Headlines (Space Grotesk):** Use `display-lg` through `headline-sm` for thread titles and major "node" headers. The quirky geometric letterforms (open counters, square dots) provide a distinctly editorial, "designed-by-hand" feel.
+- **The Body & Interface (IBM Plex Sans):** All chat bubbles, input fields, and labels use IBM Plex Sans.
 - **Primary AI Response:** `body-lg` (1rem) for high readability.
 - **User Input:** `body-md` (0.875rem) to differentiate from the AI's "authoritative" output.
 - **Intentional Asymmetry:** Align thread titles to the left but allow metadata (labels) to sit in wide, airy margins using `label-sm` and `outline` colors to maintain a clean, "blueprint" aesthetic.

@@ -1,23 +1,34 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useChatContext } from "@/context/ChatContext";
+import { useAuth } from "@/context/AuthContext";
 import NodeCanvas from "./_components/NodeCanvas/NodeCanvas";
 
 export default function NodesPage() {
-  const { tree, createBranch, switchBranch } = useChatContext();
+  const { tree, createBranch, switchBranch, loadConversation } =
+    useChatContext();
+  const { isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const convId = searchParams.get("c");
   const hasNodes = Object.keys(tree.nodes).length > 0;
-  const everHadNodes = useRef(hasNodes);
-  if (hasNodes) everHadNodes.current = true;
+  const [recovering, setRecovering] = useState(false);
 
   useEffect(() => {
-    // Only redirect if we never had nodes (direct navigation to /nodes
-    // without a loaded conversation). Skip if nodes existed but tree was
-    // temporarily empty during a page transition.
-    if (!hasNodes && !everHadNodes.current) router.replace("/");
-  }, [hasNodes, router]);
+    if (hasNodes || authLoading) return;
+    // If we have a conversation ID in the URL, reload it (handles full
+    // page reloads in production where React state is lost).
+    if (convId) {
+      setRecovering(true);
+      loadConversation(convId)
+        .catch(() => router.replace("/"))
+        .finally(() => setRecovering(false));
+    } else {
+      router.replace("/");
+    }
+  }, [hasNodes, authLoading, convId, loadConversation, router]);
 
   function handleCreateBranch(nodeId: string) {
     createBranch(nodeId);

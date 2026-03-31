@@ -12,7 +12,7 @@ import "./TopNav.scss";
 export default function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { activeBranch, isMainBranch, returnToMain, messages, namingBranches } =
+  const { activeBranch, isMainBranch, returnToMain, messages, namingBranches, conversationId } =
     useChatContext();
   const isNamingBranch = namingBranches.has(activeBranch.id);
   const [mounted, setMounted] = useState(false);
@@ -59,7 +59,7 @@ export default function TopNav() {
       <div className="topnav__left">
         <Tooltip text="Node View" position="bottom">
           <Link
-            href="/nodes"
+            href={conversationId ? `/nodes?c=${conversationId}` : "/nodes"}
             className="topnav__node-link"
             aria-label="Node View"
           >
@@ -116,7 +116,7 @@ export default function TopNav() {
       <div className="topnav__right">
         <Tooltip text="Node View" position="bottom">
           <Link
-            href="/nodes"
+            href={conversationId ? `/nodes?c=${conversationId}` : "/nodes"}
             className="topnav__node-link"
             aria-label="Node View"
           >

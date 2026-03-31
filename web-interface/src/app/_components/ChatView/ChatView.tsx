@@ -4,9 +4,10 @@ import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import type { Branch } from "@/types/branch";
 import { getMessageText, getLabel } from "@/lib/messages";
+import { models, type Model } from "@/lib/models";
 import Markdown from "react-markdown";
 import { Tooltip } from "@/components";
-import { ArrowRight, GitBranch } from "lucide-react";
+import { ArrowRight, GitBranch, ChevronDown } from "lucide-react";
 import "./ChatView.scss";
 
 const suggestions = [
@@ -38,6 +39,8 @@ interface ChatViewProps {
   onSend: (text: string) => void;
   activeBranch: Branch;
   onCreateBranch: (fromMessageId: string) => void;
+  selectedModel: string;
+  onModelChange: (model: string) => void;
 }
 
 export default function ChatView({
@@ -46,8 +49,23 @@ export default function ChatView({
   onSend,
   activeBranch,
   onCreateBranch,
+  selectedModel,
+  onModelChange,
 }: ChatViewProps) {
   const [input, setInput] = useState("");
+  const [modelOpen, setModelOpen] = useState(false);
+  const modelRef = useRef<HTMLDivElement>(null);
+  const activeModel = models.find((m) => m.id === selectedModel) ?? models[0];
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (modelRef.current && !modelRef.current.contains(e.target as Node)) {
+        setModelOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -141,65 +159,34 @@ export default function ChatView({
             onKeyDown={handleTextareaKeyDown}
           />
           <div className="chat-view__input-toolbar">
-            {/* <div className="chat-view__toolbar-actions">
+            <div className="chat-view__model-selector" ref={modelRef}>
               <button
-                className="chat-view__toolbar-btn"
+                className="chat-view__model-trigger"
                 type="button"
-                aria-label="Attach file"
+                onClick={() => setModelOpen((o) => !o)}
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-                </svg>
+                <span className="chat-view__model-label">{activeModel.label}</span>
+                <ChevronDown size={14} />
               </button>
-              <button
-                className="chat-view__toolbar-btn"
-                type="button"
-                aria-label="Add image"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <path d="m21 15-5-5L5 21" />
-                </svg>
-              </button>
-              <button
-                className="chat-view__toolbar-btn"
-                type="button"
-                aria-label="Insert code"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="16 18 22 12 16 6" />
-                  <polyline points="8 6 2 12 8 18" />
-                </svg>
-              </button>
-            </div> */}
+              {modelOpen && (
+                <div className="chat-view__model-dropdown">
+                  {models.map((m) => (
+                    <button
+                      key={m.id}
+                      className={`chat-view__model-option${m.id === selectedModel ? " chat-view__model-option--active" : ""}`}
+                      type="button"
+                      onClick={() => {
+                        onModelChange(m.id);
+                        setModelOpen(false);
+                      }}
+                    >
+                      <span className="chat-view__model-option-label">{m.label}</span>
+                      <span className="chat-view__model-option-provider">{m.provider}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               className="chat-view__branch-btn"
               type="button"
@@ -319,7 +306,37 @@ export default function ChatView({
             <ArrowRight size={18} strokeWidth={2.5} />
           </button>
         </div>
-        <span className="chat-view-thread__hint">Press Enter to send</span>
+        <div className="chat-view-thread__hint-row">
+          <div className="chat-view__model-selector chat-view__model-selector--compact" ref={modelRef}>
+            <button
+              className="chat-view__model-trigger"
+              type="button"
+              onClick={() => setModelOpen((o) => !o)}
+            >
+              <span className="chat-view__model-label">{activeModel.label}</span>
+              <ChevronDown size={14} />
+            </button>
+            {modelOpen && (
+              <div className="chat-view__model-dropdown">
+                {models.map((m) => (
+                  <button
+                    key={m.id}
+                    className={`chat-view__model-option${m.id === selectedModel ? " chat-view__model-option--active" : ""}`}
+                    type="button"
+                    onClick={() => {
+                      onModelChange(m.id);
+                      setModelOpen(false);
+                    }}
+                  >
+                    <span className="chat-view__model-option-label">{m.label}</span>
+                    <span className="chat-view__model-option-provider">{m.provider}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <span className="chat-view-thread__hint">Press Enter to send</span>
+        </div>
       </div>
     </div>
   );

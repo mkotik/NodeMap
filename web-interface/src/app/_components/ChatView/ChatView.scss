@@ -97,6 +97,86 @@
     }
   }
 
+  &__model-selector {
+    position: relative;
+
+    &--compact {
+      // thread variant: no changes needed, just a hook for specificity
+    }
+  }
+
+  &__model-trigger {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-1 $space-3;
+    background: transparent;
+    border: 1px solid rgba($outline-variant, 0.15);
+    border-radius: $radius-full;
+    color: $on-surface-variant;
+    font-family: $font-body;
+    font-size: $label-sm;
+    cursor: pointer;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container;
+      color: $on-surface;
+    }
+  }
+
+  &__model-label {
+    white-space: nowrap;
+  }
+
+  &__model-dropdown {
+    position: absolute;
+    bottom: calc(100% + $space-2);
+    left: 0;
+    min-width: 220px;
+    background: $surface-container;
+    backdrop-filter: blur(24px);
+    border-radius: $radius-lg;
+    padding: $space-2;
+    z-index: 100;
+    box-shadow: 0 0 48px rgba($on-surface, 0.06);
+  }
+
+  &__model-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: $space-3 $space-4;
+    background: transparent;
+    border: none;
+    border-radius: $radius-md;
+    color: $on-surface-variant;
+    font-family: $font-body;
+    font-size: $body-sm;
+    cursor: pointer;
+    text-align: left;
+    @include surface-transition;
+
+    &:hover {
+      background: $surface-container-high;
+      color: $on-surface;
+    }
+
+    &--active {
+      color: $primary;
+    }
+  }
+
+  &__model-option-label {
+    font-weight: $weight-medium;
+  }
+
+  &__model-option-provider {
+    @include type-label($label-sm);
+    color: $outline;
+  }
+
   &__branch-btn {
     display: flex;
     align-items: center;
@@ -360,6 +440,14 @@
       background: $primary-dim;
       box-shadow: $shadow-node-glow-primary;
     }
+  }
+
+  &__hint-row {
+    max-width: 720px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   &__hint {

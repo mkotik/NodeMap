@@ -13,6 +13,7 @@ const ChatRequestSchema = z.object({
       })
       .passthrough(),
   ),
+  model: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -60,12 +61,14 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid request body" }, { status: 400 });
   }
 
+  const selectedModel = parsed.data.model || "google/gemini-2.0-flash-001";
+
   const modelMessages = await convertToModelMessages(
     parsed.data.messages as unknown as UIMessage[],
   );
 
   const result = streamText({
-    model: openrouter("google/gemini-2.0-flash-001"),
+    model: openrouter(selectedModel),
     system:
       "You are a helpful AI assistant. Be concise and insightful.",
     messages: modelMessages,

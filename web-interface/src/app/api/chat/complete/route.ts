@@ -35,6 +35,7 @@ const RequestSchema = z.object({
       content: z.string(),
     }),
   ),
+  model: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -69,9 +70,11 @@ export async function POST(req: Request) {
     );
   }
 
+  const selectedModel = input.model || "google/gemini-2.0-flash-001";
+
   // Generate LLM response (non-streaming)
   const { text: assistantText } = await generateText({
-    model: openrouter("google/gemini-2.0-flash-001"),
+    model: openrouter(selectedModel),
     system:
       "You are a helpful AI assistant. Be concise and insightful.",
     messages: input.chatMessages.map((m) => ({

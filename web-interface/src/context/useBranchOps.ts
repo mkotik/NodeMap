@@ -24,6 +24,8 @@ interface UseBranchOpsReturn {
   renameBranchById: (branchId: BranchId, label: string) => void;
 }
 
+const BRANCH_LIMIT = Number(process.env.NEXT_PUBLIC_BRANCHES_PER_CHAT_LIMIT) || 10;
+
 export function useBranchOps({
   treeRef,
   statusRef,
@@ -57,6 +59,11 @@ export function useBranchOps({
         return;
 
       const prev = treeRef.current;
+      const nonMainBranches = Object.keys(prev.branches).filter(
+        (id) => id !== prev.mainBranchId,
+      ).length;
+      if (nonMainBranches >= BRANCH_LIMIT) return;
+
       const next = structuredClone(prev);
 
       // Auto-delete the branch we're leaving if it's empty

@@ -4,8 +4,15 @@ import { useChatContext } from "@/context/ChatContext";
 import ChatView from "./_components/ChatView/ChatView";
 
 export default function Home() {
-  const { messages, sendMessage, status, activeBranch, createBranch } =
-    useChatContext();
+  const {
+    messages,
+    sendMessage,
+    status,
+    activeBranch,
+    createBranch,
+    selectedModel,
+    setSelectedModel,
+  } = useChatContext();
 
   function handleSend(text: string) {
     sendMessage({ text });
@@ -18,6 +25,8 @@ export default function Home() {
       onSend={handleSend}
       activeBranch={activeBranch}
       onCreateBranch={createBranch}
+      selectedModel={selectedModel}
+      onModelChange={setSelectedModel}
     />
   );
 }

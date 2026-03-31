@@ -24,6 +24,7 @@ import {
 } from "@/lib/tree";
 import { getMessageText } from "@/lib/messages";
 import { getAccessToken } from "@/lib/auth-token";
+import { DEFAULT_MODEL_ID } from "@/lib/models";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/context/AuthContext";
 import { useAutoName } from "@/context/useAutoName";
@@ -51,6 +52,10 @@ interface ChatContextValue {
   renameBranchById: (branchId: BranchId, label: string) => void;
   namingBranches: Set<BranchId>;
 
+  // Model selection
+  selectedModel: string;
+  setSelectedModel: (model: string) => void;
+
   // Persistence
   conversationId: string | null;
   conversationTitle: string;
@@ -76,6 +81,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     userRef.current = user;
   }, [user]);
 
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL_ID);
+  const selectedModelRef = useRef(selectedModel);
+  useEffect(() => {
+    selectedModelRef.current = selectedModel;
+  }, [selectedModel]);
+
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const { messages, sendMessage, status, setMessages, stop } = useChat({
     transport: new DefaultChatTransport({
@@ -84,6 +95,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         const token = getAccessToken();
         return token ? { Authorization: `Bearer ${token}` } : {};
       },
+      body: () => ({ model: selectedModelRef.current }),
     }),
     onError: (err) => {
       if (err.message?.includes("NO_API_KEY")) {
@@ -310,6 +322,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const capturedConvId = conversationIdRef.current;
     const capturedTitle = conversationTitleRef.current;
     const capturedPendingSave = pendingSaveRef.current;
+    const capturedModel = selectedModelRef.current;
 
     // Build branches payload
     const branches = Object.values(t.branches).map((b) => ({
@@ -397,6 +410,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           branches,
           messages: msgs,
           chatMessages,
+          model: capturedModel,
         }),
       })
         .then((res) => {
@@ -553,6 +567,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         messages,
         status,
         sendMessage,
+        selectedModel,
+        setSelectedModel,
         tree,
         activeBranch,
         isMainBranch,

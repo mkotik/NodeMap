@@ -1,6 +1,9 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
 import { prisma } from "../lib/prisma";
+
+const BRANCH_LIMIT = Number(process.env.NEXT_PUBLIC_BRANCHES_PER_CHAT_LIMIT) || 10;
 
 const branchSchema = z.object({
   id: z.string(),
@@ -139,6 +142,14 @@ export const conversationRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user.userId;
+
+      const nonMainBranches = input.branches.filter((b) => !b.isMain).length;
+      if (nonMainBranches > BRANCH_LIMIT) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Branch limit of ${BRANCH_LIMIT} exceeded`,
+        });
+      }
 
       // Upsert conversation
       const conversation = input.id

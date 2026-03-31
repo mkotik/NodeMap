@@ -68,18 +68,18 @@ test.describe("Chat and Branching", () => {
 
   test("node view icon appears after conversation starts", async ({ page }) => {
     // Should not be visible initially
-    await expect(page.locator(".topnav__node-link")).not.toBeVisible();
+    await expect(page.locator(".topnav__node-link").first()).not.toBeVisible();
 
     await chat(page, "say hi in one word");
 
     // Should now be visible
-    await expect(page.locator(".topnav__node-link")).toBeVisible();
+    await expect(page.locator(".topnav__node-link").first()).toBeVisible();
   });
 
   test("can navigate to node view and see nodes", async ({ page }) => {
     await chat(page, "say hi in one word");
 
-    await page.locator(".topnav__node-link").click();
+    await page.locator(".topnav__node-link").first().click();
     await expect(page).toHaveURL("/nodes");
 
     await expect(page.locator(".msg-node").first()).toBeVisible({
@@ -153,7 +153,7 @@ test.describe("Chat and Branching", () => {
   test("node view shows continue nodes", async ({ page }) => {
     await chat(page, "say hi in one word");
 
-    await page.locator(".topnav__node-link").click();
+    await page.locator(".topnav__node-link").first().click();
     await expect(page).toHaveURL("/nodes");
 
     await expect(page.locator(".continue-node").first()).toBeVisible({

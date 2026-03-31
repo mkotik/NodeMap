@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { verifyTestUser } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -41,6 +42,7 @@ async function sendMessage(page: Page, text: string) {
 test.describe("Chat recovery on navigate-away", () => {
   test("register test user", async ({ page }) => {
     await register(page);
+    await verifyTestUser(TEST_USER.email);
   });
 
   test("navigating away mid-stream produces one chat with a name and full response", async ({

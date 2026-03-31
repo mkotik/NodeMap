@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { verifyTestUser } from "./helpers";
 
 // Run serially — tests build on each other (register, create chats, then test history)
 test.describe.configure({ mode: "serial" });
@@ -71,6 +72,7 @@ async function createChat(page: Page, message: string) {
 test.describe("History", () => {
   test("register test user", async ({ page }) => {
     await register(page);
+    await verifyTestUser(TEST_USER.email);
   });
 
   test("create test chats", async ({ page }) => {

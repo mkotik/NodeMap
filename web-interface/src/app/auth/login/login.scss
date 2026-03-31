@@ -167,6 +167,13 @@
     width: 100%;
     display: flex;
     justify-content: center;
+    border-radius: $radius-md;
+    overflow: hidden;
+
+    iframe {
+      border-radius: $radius-md;
+      color-scheme: auto;
+    }
   }
 
   &__toggle {

@@ -1,4 +1,5 @@
 @use "../../../styles/tokens" as *;
+@use "../../../styles/mixins" as *;
 
 .auth-login {
   display: flex;
@@ -10,10 +11,15 @@
 
   &__card {
     width: 100%;
-    max-width: 400px;
+    max-width: 450px;
     padding: $space-10;
-    background: $surface-container-low;
-    border-radius: $radius-lg;
+    background: $surface-container;
+    border-radius: $radius-xl;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.4);
+
+    @include mobile {
+      padding: $space-8 $space-6;
+    }
   }
 
   &__header {
@@ -27,14 +33,14 @@
     font-weight: $weight-bold;
     color: $primary;
     letter-spacing: $tracking-tight;
-    margin: 0 0 $space-3;
+    margin: 0 0 $space-2;
   }
 
   &__title {
-    font-family: $font-display;
-    font-size: $body-lg;
-    font-weight: $weight-medium;
-    color: $on-surface-variant;
+    font-family: $font-body;
+    font-size: $body-md;
+    font-weight: $weight-regular;
+    color: $outline;
     margin: 0;
   }
 
@@ -47,6 +53,11 @@
   &__name-row {
     display: flex;
     gap: $space-4;
+
+    @include mobile {
+      flex-direction: column;
+      gap: $space-5;
+    }
   }
 
   &__field {
@@ -54,26 +65,26 @@
     flex-direction: column;
     flex: 1;
     min-width: 0;
-    gap: $space-1;
+    gap: $space-2;
   }
 
   &__label {
     font-family: $font-body;
-    font-size: $label-md;
+    font-size: $label-sm;
     font-weight: $weight-medium;
-    color: $on-surface-variant;
-    letter-spacing: $tracking-wide;
+    color: $outline;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
   &__input {
     width: 100%;
-    background: $surface-container;
-    border: 1px solid rgba($outline-variant, 0.15);
+    background: $surface-container-low;
+    border: 1px solid rgba($outline-variant, 0.12);
     border-radius: $radius-md;
     padding: $space-3 $space-4;
     font-family: $font-body;
-    font-size: $body-lg;
+    font-size: $body-md;
     color: $on-surface;
     outline: none;
     transition:
@@ -81,10 +92,14 @@
       box-shadow $transition-default,
       background $transition-default;
 
+    &::placeholder {
+      color: $outline;
+    }
+
     &:focus {
-      border-color: $primary;
-      box-shadow: 0 0 0 1px $primary;
-      background: $surface-container-high;
+      border-color: rgba($primary, 0.5);
+      box-shadow: 0 0 0 3px rgba($primary, 0.1);
+      background: $surface-container-low;
     }
   }
 
@@ -101,11 +116,11 @@
   &__submit {
     width: 100%;
     padding: $space-3 $space-4;
-    margin-top: $space-2;
-    background: $primary-container;
-    color: $on-primary-container;
+    margin-top: $space-1;
+    background: $primary;
+    color: $surface;
     border: none;
-    border-radius: $radius-lg;
+    border-radius: $radius-md;
     font-family: $font-body;
     font-size: $body-md;
     font-weight: $weight-semibold;
@@ -129,7 +144,7 @@
     display: flex;
     align-items: center;
     gap: $space-4;
-    margin: $space-6 0;
+    margin: $space-5 0;
 
     &::before,
     &::after {
@@ -159,7 +174,7 @@
     margin-top: $space-6;
     font-family: $font-body;
     font-size: $body-sm;
-    color: $on-surface-variant;
+    color: $outline;
   }
 
   &__toggle-btn {

@@ -41,11 +41,9 @@
   }
 
   &__logo {
-    font-family: $font-display;
-    font-size: $headline-sm;
-    font-weight: $weight-bold;
-    color: $primary;
-    letter-spacing: $tracking-tight;
+    width: 100%;
+    height: auto;
+    display: block;
   }
 
   &__tagline {

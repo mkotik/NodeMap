@@ -248,7 +248,7 @@ export default function Sidebar() {
             router.push("/");
           }}
         >
-          <span className="sidebar__logo">NodeMap.io</span>
+          <img src="/logowtext2.png" alt="NodeMap.io" className="sidebar__logo" />
         </button>
 
         <button

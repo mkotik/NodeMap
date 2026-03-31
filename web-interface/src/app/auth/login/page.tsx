@@ -120,7 +120,7 @@ export default function LoginPage() {
     <div className="auth-login">
       <div className="auth-login__card">
         <div className="auth-login__header">
-          <h1 className="auth-login__logo">NodeMap.io</h1>
+          <img src="/logowtext2.png" alt="NodeMap.io" className="auth-login__logo" />
           <h2 className="auth-login__title">
             {isRegister ? "Create your account" : "Sign in to NodeMap.io"}
           </h2>
